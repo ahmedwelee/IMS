@@ -1,0 +1,43 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cv_application
+    username: username
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  mail:
+    host: localhost
+    port: 1025
+    username: username
+    password: password
+    properties:
+      mail:
+        smtp:
+          trust: '*'
+        auth: true
+        starttls:
+          enable: true
+        connectiontimeout: 5000
+        timeout: 3000
+        writetimeout: 5000
+application:
+  security:
+    jwt:
+      secret-key: 0cb02367a107d87656177e97e82ca9d90a18d5cf0c4bc589cd871ba16a54f810
+      expiration: 86400000
+  mailing:
+    frontend:
+      activation-url: http://localhost:4200/activate-account
+  file:
+    uploads:
+      photos-output-path: ./uploads
+server:
+  port: 8088
