@@ -26,4 +26,9 @@ public class Employee extends User {
     private Jop jop;
     @OneToMany(mappedBy = "employee")
     private List<Client> clients;
+    @ManyToOne
+    @JoinColumn(name = "client_id")
+    private Client client;
+    @OneToMany(mappedBy = "employee")
+    private List<Jop> jops;
 }

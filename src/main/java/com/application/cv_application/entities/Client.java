@@ -29,4 +29,7 @@ public class Client {
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
+
+    @OneToMany(mappedBy = "client")
+    private List<Employee> employees;
 }

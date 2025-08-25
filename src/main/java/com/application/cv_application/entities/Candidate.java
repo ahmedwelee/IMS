@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
@@ -27,7 +28,6 @@ public class Candidate {
     private LocalDate dateOfBirth;
     private String cvPath;
 
-    @ManyToOne
-    @JoinColumn(name = "application_id")
-    private Application application;
+    @OneToMany(mappedBy = "candidate")
+    private List<Application> applications;
 }

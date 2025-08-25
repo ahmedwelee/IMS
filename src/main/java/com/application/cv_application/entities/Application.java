@@ -1,16 +1,11 @@
 package com.application.cv_application.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @Builder
@@ -27,8 +22,11 @@ public class Application {
     private LocalDate updatedDate;
     private String status;
 
-    @OneToMany(mappedBy = "application")
-    private List<Candidate> candidates;
-    @OneToMany(mappedBy = "application")
-    private List<Jop> jops;
+    @ManyToOne
+    @JoinColumn(name = "candidate_id")
+    private Candidate candidate;
+    @ManyToOne
+    @JoinColumn(name = "jop_id")
+    private Jop jop;
+
 }

@@ -23,12 +23,15 @@ public class Jop {
 
     @OneToMany(mappedBy = "jop")
     private List<Employee> employees;
-    @ManyToOne
-    @JoinColumn(name = "application_id")
-    private Application application;
+    @OneToMany(mappedBy = "jop")
+    private List<Application> applications;
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;
+
+    @ManyToOne
+    @JoinColumn(name = "employee_id")
+    private Employee employee;
 
 
 }
