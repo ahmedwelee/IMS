@@ -29,6 +29,10 @@ public class Employee extends User {
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;
-    @OneToMany(mappedBy = "employee")
+    @OneToMany(mappedBy = "manager")
     private List<Jop> jops;
+
+    public String getFullName() {
+        return getFirstName() + " " + getLastName();
+    }
 }

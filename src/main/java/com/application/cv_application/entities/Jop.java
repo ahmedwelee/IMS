@@ -28,10 +28,9 @@ public class Jop {
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;
-
     @ManyToOne
-    @JoinColumn(name = "employee_id")
-    private Employee employee;
+    @JoinColumn(name = "Manager_id")
+    private Employee manager;
 
 
 }

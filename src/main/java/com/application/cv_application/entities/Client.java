@@ -32,4 +32,8 @@ public class Client {
 
     @OneToMany(mappedBy = "client")
     private List<Employee> employees;
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 }
