@@ -19,7 +19,9 @@ public class JopController {
 
 
     @PostMapping
-    public ResponseEntity<JopResponse> create(@RequestBody JopRequest request) {
+    public ResponseEntity<JopResponse> create(
+            @RequestBody JopRequest request
+    ) {
         return ResponseEntity.ok(service.saveJop(request));
     }
 
@@ -29,17 +31,24 @@ public class JopController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<JopResponse> getById(@PathVariable Integer id) {
+    public ResponseEntity<JopResponse> getById(
+            @PathVariable Integer id
+    ) {
         return ResponseEntity.ok(service.getJopById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<JopResponse> update(@PathVariable Integer id, @RequestBody JopRequest request) {
+    public ResponseEntity<JopResponse> update(
+            @PathVariable Integer id,
+            @RequestBody JopRequest request
+    ) {
         return ResponseEntity.ok(service.updateJop(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+    public ResponseEntity<Void> delete(
+            @PathVariable Integer id
+    ) {
         service.deleteJop(id);
         return ResponseEntity.noContent().build();
     }

@@ -17,6 +17,7 @@ public class ApplicationController {
 
     @GetMapping
     public List<ApplicationResponse> getAll() {
+
         return service.getAllApplications();
     }
 

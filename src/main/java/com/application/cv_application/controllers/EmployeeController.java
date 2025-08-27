@@ -17,27 +17,36 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     @PostMapping
-    public ResponseEntity<EmployeeResponse> save(@RequestBody EmployeeRequest request) {
+    public ResponseEntity<EmployeeResponse> save(
+            @RequestBody EmployeeRequest request
+    ) {
         return ResponseEntity.ok(employeeService.createEmployee(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<EmployeeResponse>> getAll() {
+    public ResponseEntity<List<EmployeeResponse>> getAll()
+    {
         return ResponseEntity.ok(employeeService.getAllEmployees());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeResponse> getById(@PathVariable Integer id) {
+    public ResponseEntity<EmployeeResponse> getById(
+            @PathVariable Integer id
+    ) {
         return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EmployeeResponse> update(@PathVariable Integer id, @RequestBody EmployeeRequest request) {
+    public ResponseEntity<EmployeeResponse> update(
+            @PathVariable Integer id, @RequestBody EmployeeRequest request
+    ) {
         return ResponseEntity.ok(employeeService.updateEmployee(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+    public ResponseEntity<Void> delete(
+            @PathVariable Integer id
+    ) {
         employeeService.deleteEmployee(id);
         return ResponseEntity.noContent().build();
     }
