@@ -1,4 +1,4 @@
-package com.application.cv_application.config;
+package com.application.cv_application.config;/*
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,4 +20,4 @@ public class ApplicationAuditAware implements AuditorAware<String> {
 
         return Optional.ofNullable(authentication.getName());
     }
-}
+}*/

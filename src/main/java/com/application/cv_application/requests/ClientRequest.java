@@ -1,4 +1,4 @@
-package com.application.cv_application.requsets;
+package com.application.cv_application.requests;
 
 public record ClientRequest(
         String firstName,

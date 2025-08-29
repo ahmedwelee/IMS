@@ -5,7 +5,7 @@ import com.application.cv_application.entities.Employee;
 import com.application.cv_application.mappers.ClientMapper;
 import com.application.cv_application.repositories.ClientRepository;
 import com.application.cv_application.repositories.EmployeeRepository;
-import com.application.cv_application.requsets.ClientRequest;
+import com.application.cv_application.requests.ClientRequest;
 import com.application.cv_application.response.ClientResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

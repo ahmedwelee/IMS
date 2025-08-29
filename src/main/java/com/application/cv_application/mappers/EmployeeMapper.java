@@ -23,7 +23,7 @@ public class EmployeeMapper {
                 .build();
     }
 
-    public Employee toEmployyee( EmployeeRequest request, Jop jop, Client client) {
+    public Employee toEmployee(EmployeeRequest request, Jop jop, Client client) {
         return Employee.builder()
                 .email(request.email())
                 .firstName(request.firstName())
@@ -31,9 +31,10 @@ public class EmployeeMapper {
                 .dateOfBirth(request.dateOfBirth())
                 .startDate(request.startDate())
                 .position(request.position())
-                .jop(jop)
-                .client(client)
+                .jop(jop != null ? jop : null)
+                .client(client != null ? client : null)
                 .build();
     }
+
 }
 

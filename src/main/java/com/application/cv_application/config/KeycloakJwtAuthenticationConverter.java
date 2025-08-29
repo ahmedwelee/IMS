@@ -1,5 +1,5 @@
 package com.application.cv_application.config;
-
+/*
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -38,4 +38,4 @@ public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Abstra
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.replace("-", "_")))
                 .collect(toSet());
     }
-}
+}*/

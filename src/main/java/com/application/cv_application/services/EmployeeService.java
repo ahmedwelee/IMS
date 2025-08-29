@@ -22,16 +22,23 @@ public class EmployeeService {
     private final JopRepository jopRepository;
     private final ClientRepository clientRepository;
     private final EmployeeMapper employeeMapper;
+    private final JopRepository jopRepo;
+    private final ClientRepository clientRepo;
 
     public EmployeeResponse createEmployee(EmployeeRequest request) {
-        Jop jop = jopRepository.findById(request.jopId())
-                .orElseThrow(() -> new RuntimeException("Jop not found"));
-        Client client = clientRepository.findById(request.clientId())
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+        Jop jop = request.jopId() != null
+                ? jopRepo.findById(request.jopId()).orElse(null)
+                : null;
 
-        Employee employee = employeeMapper.toEmployyee(request, jop, client);
-        return employeeMapper.toResponse(employeeRepository.save(employee));
+        Client client = request.clientId() != null
+                ? clientRepo.findById(request.clientId()).orElse(null)
+                : null;
+
+        Employee employee = employeeMapper.toEmployee(request, jop, client);
+        Employee saved = employeeRepository.save(employee);
+        return employeeMapper.toResponse(saved);
     }
+
 
     public List<EmployeeResponse> getAllEmployees() {
         return employeeRepository.findAll().stream()

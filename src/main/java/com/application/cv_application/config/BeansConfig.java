@@ -1,5 +1,5 @@
 package com.application.cv_application.config;
-
+/*
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,4 +44,4 @@ public class BeansConfig {
         return new CorsFilter(source);
 
     }
-}
+}*/

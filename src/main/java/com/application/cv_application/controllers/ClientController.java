@@ -1,6 +1,6 @@
 package com.application.cv_application.controllers;
 
-import com.application.cv_application.requsets.ClientRequest;
+import com.application.cv_application.requests.ClientRequest;
 import com.application.cv_application.response.ClientResponse;
 import com.application.cv_application.services.ClientService;
 import lombok.RequiredArgsConstructor;

@@ -2,7 +2,7 @@ package com.application.cv_application.mappers;
 
 import com.application.cv_application.entities.Client;
 import com.application.cv_application.entities.Employee;
-import com.application.cv_application.requsets.ClientRequest;
+import com.application.cv_application.requests.ClientRequest;
 import com.application.cv_application.response.ClientResponse;
 import org.springframework.stereotype.Component;
 
