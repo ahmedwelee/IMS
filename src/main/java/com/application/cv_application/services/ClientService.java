@@ -8,6 +8,7 @@ import com.application.cv_application.repositories.EmployeeRepository;
 import com.application.cv_application.requests.ClientRequest;
 import com.application.cv_application.response.ClientResponse;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,50 +16,63 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@Transactional
 public class ClientService {
 
     private final ClientRepository clientRepository;
     private final EmployeeRepository employeeRepository;
     private final ClientMapper clientMapper;
 
-    public List<ClientResponse> getAllClients() {
+    public ClientService(ClientRepository clientRepository, EmployeeRepository employeeRepository, ClientMapper clientMapper) {
+        this.clientRepository = clientRepository;
+        this.employeeRepository = employeeRepository;
+        this.clientMapper = clientMapper;
+    }
+
+    public ClientResponse create(ClientRequest request) {
+        Employee employee = null;
+        if (request.employeeId() != null) {
+            employee = employeeRepository.findById(request.employeeId())
+                    .orElseThrow(() -> new RuntimeException("Employee not found with id " + request.employeeId()));
+        }
+
+        Client client = clientMapper.toEntity(request, employee);
+        Client saved = clientRepository.save(client);
+        return clientMapper.toResponse(saved);
+    }
+
+    public List<ClientResponse> getAll() {
         return clientRepository.findAll()
                 .stream()
                 .map(clientMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    public ClientResponse getClientById(Integer id) {
-        return clientRepository.findById(id)
-                .map(clientMapper::toResponse)
-                .orElseThrow(() -> new EntityNotFoundException("Client not found"));
-    }
-
-    public ClientResponse createClient(ClientRequest request) {
-        Employee employee = fetchEmployee(request.employeeId());
-        Client client = clientMapper.toEntity(request, employee);
-        return clientMapper.toResponse(clientRepository.save(client));
-    }
-
-    public ClientResponse updateClient(Integer id, ClientRequest request) {
+    public ClientResponse getById(Integer id) {
         Client client = clientRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Client not found"));
-        Employee employee = fetchEmployee(request.employeeId());
-        clientMapper.updateEntity(client, request, employee);
-        return clientMapper.toResponse(clientRepository.save(client));
+                .orElseThrow(() -> new RuntimeException("Client not found with id " + id));
+        return clientMapper.toResponse(client);
     }
 
-    public void deleteClient(Integer id) {
+    public ClientResponse update(Integer id, ClientRequest request) {
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Client not found with id " + id));
+
+        Employee employee = null;
+        if (request.employeeId() != null) {
+            employee = employeeRepository.findById(request.employeeId())
+                    .orElseThrow(() -> new RuntimeException("Employee not found with id " + request.employeeId()));
+        }
+
+        clientMapper.updateEntity(client, request, employee);
+        Client updated = clientRepository.save(client);
+        return clientMapper.toResponse(updated);
+    }
+
+    public void delete(Integer id) {
         if (!clientRepository.existsById(id)) {
-            throw new EntityNotFoundException("Client not found");
+            throw new RuntimeException("Client not found with id " + id);
         }
         clientRepository.deleteById(id);
-    }
-
-    private Employee fetchEmployee(Integer employeeId) {
-        if (employeeId == null) return null;
-        return employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
     }
 }

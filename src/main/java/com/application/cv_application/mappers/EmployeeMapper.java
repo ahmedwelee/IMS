@@ -3,9 +3,13 @@ package com.application.cv_application.mappers;
 import com.application.cv_application.entities.Client;
 import com.application.cv_application.entities.Employee;
 import com.application.cv_application.entities.Jop;
+import com.application.cv_application.requests.ClientRequest;
 import com.application.cv_application.requests.EmployeeRequest;
+import com.application.cv_application.response.ClientResponse;
 import com.application.cv_application.response.EmployeeResponse;
 import org.springframework.stereotype.Component;
+
+import java.util.stream.Collectors;
 
 @Component
 public class EmployeeMapper {
@@ -19,7 +23,7 @@ public class EmployeeMapper {
                 .startDate(employee.getStartDate())
                 .position(employee.getPosition())
                 .jopName(employee.getJop() != null ? employee.getJop().getJopName() : null)
-                .clientName(employee.getClient() != null ? employee.getClient().getFullName() : null)
+                .clientName(employee.getClient() != null ? employee.getClient().getName() : null)
                 .build();
     }
 

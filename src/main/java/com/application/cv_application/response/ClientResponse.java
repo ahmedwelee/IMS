@@ -5,17 +5,23 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClientResponse {
     private Integer id;
-    private String firstName;
-    private String lastName;
-    private String fullName;
+    private String name;
+    private String type;
     private String phoneNumber;
-    private String nationality;
-    private String gender;
+    private String address;
+    private String email;
+    private LocalDate createdAt;
+    private LocalDate updatedAt;
     private Integer employeeId;
+    private String employeeName;
+    private List<String> jopNames;
 }

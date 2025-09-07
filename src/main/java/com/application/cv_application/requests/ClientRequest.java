@@ -1,10 +1,11 @@
 package com.application.cv_application.requests;
 
 public record ClientRequest(
-        String firstName,
-        String lastName,
+        String name,
+        String type,
         String phoneNumber,
-        String nationality,
-        String gender,
+        String address,
+        String email,
         Integer employeeId
 ) {}
+

@@ -1,5 +1,5 @@
 package com.application.cv_application.config;
-/*
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,17 +16,17 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class BeansConfig {
 
-    @Bean
-    public AuditorAware<String> auditorAware() {
-        return new ApplicationAuditAware();
-    }
+//    @Bean
+//    public AuditorAware<String> auditorAware() {
+//        return new ApplicationAuditAware();
+//    }
 
     @Bean
     public CorsFilter corsFilter() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         final CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
+        config.setAllowedOrigins(Collections.singletonList("http://localhost:52708"));
         config.setAllowedHeaders(Arrays.asList(
                 HttpHeaders.ORIGIN,
                 HttpHeaders.CONTENT_TYPE,
@@ -44,4 +44,4 @@ public class BeansConfig {
         return new CorsFilter(source);
 
     }
-}*/
+}

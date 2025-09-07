@@ -12,45 +12,37 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/clients")
-@RequiredArgsConstructor
 public class ClientController {
 
     private final ClientService clientService;
 
-    @GetMapping
-    public ResponseEntity<List<ClientResponse>> getAllClients() {
-        List<ClientResponse> clients = clientService.getAllClients();
-        return ResponseEntity.ok(clients);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ClientResponse> getClientById(
-            @PathVariable Integer id
-    ) {
-        ClientResponse client = clientService.getClientById(id);
-        return ResponseEntity.ok(client);
+    public ClientController(ClientService clientService) {
+        this.clientService = clientService;
     }
 
     @PostMapping
-    public ResponseEntity<ClientResponse> createClient(
-            @RequestBody ClientRequest request
-    ) {
-        ClientResponse createdClient = clientService.createClient(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdClient);
+    public ResponseEntity<ClientResponse> create(@RequestBody ClientRequest request) {
+        return ResponseEntity.ok(clientService.create(request));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ClientResponse>> getAll() {
+        return ResponseEntity.ok(clientService.getAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ClientResponse> getById(@PathVariable Integer id) {
+        return ResponseEntity.ok(clientService.getById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ClientResponse> updateClient(
-            @PathVariable Integer id,
-            @RequestBody ClientRequest request
-    ) {
-        ClientResponse updatedClient = clientService.updateClient(id, request);
-        return ResponseEntity.ok(updatedClient);
+    public ResponseEntity<ClientResponse> update(@PathVariable Integer id, @RequestBody ClientRequest request) {
+        return ResponseEntity.ok(clientService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteClient(@PathVariable Integer id) {
-        clientService.deleteClient(id);
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        clientService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

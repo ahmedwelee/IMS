@@ -19,7 +19,10 @@ import java.util.List;
 public class Employee extends User {
 
     private LocalDate startDate;
+    // position to be used as enum: DIRECTOR, MANAGER, ADMINISTRATION, CONSULTANT
     private String position;
+
+    // title: to have the employee title: Java developer, Business manager, ...
 
     @ManyToOne
     @JoinColumn(name = "jop_id")

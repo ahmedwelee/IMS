@@ -5,7 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -18,11 +21,17 @@ public class Client {
     @Id
     @GeneratedValue
     private Integer id;
-    private String firstName;
-    private String lastName;
+    private String name;
+    private String type;
     private String phoneNumber;
-    private String nationality;
-    private String gender;
+    private String address;
+    @Column(unique = true)
+    private String email;
+    @CreatedDate
+    private LocalDate createdAt;
+    @LastModifiedDate
+    @Column(insertable = false)
+    private LocalDate updatedAt;
 
     @OneToMany(mappedBy = "client")
     private List<Jop> jops;
@@ -33,7 +42,4 @@ public class Client {
     @OneToMany(mappedBy = "client")
     private List<Employee> employees;
 
-    public String getFullName() {
-        return firstName + " " + lastName;
-    }
 }

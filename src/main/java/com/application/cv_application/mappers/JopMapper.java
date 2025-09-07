@@ -15,7 +15,7 @@ public class JopMapper {
                 .id(jop.getId())
                 .jopName(jop.getJopName())
                 .description(jop.getDescription())
-                .clientName(jop.getClient() != null ? jop.getClient().getFullName() : null)
+                .clientName(jop.getClient() != null ? jop.getClient().getName() : null)
                 .managerName(jop.getManager() != null ? jop.getManager().getFullName() : null)
                 .build();
     }
