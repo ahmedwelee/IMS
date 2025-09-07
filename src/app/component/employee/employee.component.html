@@ -1,0 +1,208 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h4 class="card-title">Employees Management</h4>
+            <h5 class="card-subtitle text-muted">Overview of all employees</h5>
+          </div>
+          <button class="btn btn-primary" (click)="openCreateModal()">
+            <i class="fas fa-plus me-2"></i>Add New Employee
+          </button>
+        </div>
+
+        <!-- Employees Table -->
+        <div class="table-responsive">
+          <table class="table align-middle text-nowrap">
+            <thead>
+            <tr>
+              <th class="text-dark font-medium fs-4">Employee</th>
+              <th class="text-dark font-medium fs-4">Position</th>
+              <th class="text-dark font-medium fs-4">Job</th>
+              <th class="text-dark font-medium fs-4">Client</th>
+              <th class="text-dark font-medium fs-4">Age</th>
+              <th class="text-dark font-medium fs-4">Tenure</th>
+              <th class="text-dark font-medium fs-4">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let emp of employees">
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                       style="width: 40px; height: 40px;">
+                    <span class="text-white fw-bold">{{emp.fullName?.charAt(0) | uppercase}}</span>
+                  </div>
+                  <div class="ms-3">
+                    <h6 class="mb-0 font-medium">{{emp.fullName}}</h6>
+                    <small class="text-muted">{{emp.email}}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge bg-info">{{emp.position}}</span>
+              </td>
+              <td>
+                <span class="text-muted">{{emp.jopName}}</span>
+              </td>
+              <td>
+                <span class="badge bg-secondary">{{emp.clientName}}</span>
+              </td>
+              <td>
+                <span class="text-muted">{{calculateAge(emp.dateOfBirth)}} years</span>
+              </td>
+              <td>
+                <span class="text-muted">{{calculateTenure(emp.startDate)}}</span>
+              </td>
+              <td>
+                <div class="btn-group" role="group">
+                  <button type="button" class="btn btn-outline-primary btn-sm"
+                          (click)="loadEmployee(emp.id)">
+                    <i class="fas fa-eye"></i> View
+                  </button>
+                  <button type="button" class="btn btn-outline-warning btn-sm ms-1"
+                          (click)="openEditModal(emp)">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+                  <button type="button" class="btn btn-outline-danger btn-sm ms-1"
+                          (click)="deleteEmployee(emp.id)">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="employees.length === 0">
+              <td colspan="7" class="text-center py-4">
+                <div class="text-muted">
+                  <i class="fas fa-users fa-2x mb-3"></i>
+                  <p>No employees found. Click "Add New Employee" to create one.</p>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Selected Employee Details -->
+        <div class="card mt-4" *ngIf="selectedEmployee">
+          <div class="card-header">
+            <h5 class="card-title mb-0">Employee Details</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <h6>Personal Information</h6>
+                <p><strong>Full Name:</strong> {{selectedEmployee?.fullName}}</p>
+                <p><strong>Email:</strong> {{selectedEmployee?.email}}</p>
+                <p><strong>Date of Birth:</strong> {{selectedEmployee?.dateOfBirth | date:'longDate'}}</p>
+                <p><strong>Age:</strong> {{calculateAge(selectedEmployee?.dateOfBirth)}} years</p>
+              </div>
+              <div class="col-md-6">
+                <h6>Employment Information</h6>
+                <p><strong>Start Date:</strong> {{selectedEmployee?.startDate | date:'longDate'}}</p>
+                <p><strong>Tenure:</strong> {{calculateTenure(selectedEmployee?.startDate)}}</p>
+                <p><strong>Position:</strong> <span class="badge bg-info">{{selectedEmployee?.position}}</span></p>
+                <p><strong>Job Name:</strong> {{selectedEmployee?.jopName}}</p>
+                <p><strong>Client:</strong> <span class="badge bg-secondary">{{selectedEmployee?.clientName}}</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'"
+     *ngIf="showModal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{isEditMode ? 'Edit Employee' : 'Create New Employee'}}</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form #employeeForm="ngForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="firstName" class="form-label">First Name *</label>
+              <input type="text" class="form-control" id="firstName"
+                     [ngModel]="currentEmployee.firstName"
+                     (ngModelChange)="currentEmployee.firstName = $event"
+                     name="firstName" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="lastName" class="form-label">Last Name *</label>
+              <input type="text" class="form-control" id="lastName"
+                     [ngModel]="currentEmployee.lastName"
+                     (ngModelChange)="currentEmployee.lastName = $event"
+                     name="lastName" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="email" class="form-label">Email Address *</label>
+              <input type="email" class="form-control" id="email"
+                     [ngModel]="currentEmployee.email"
+                     (ngModelChange)="currentEmployee.email = $event"
+                     name="email" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="position" class="form-label">Position *</label>
+              <input type="text" class="form-control" id="position"
+                     [ngModel]="currentEmployee.position"
+                     (ngModelChange)="currentEmployee.position = $event"
+                     name="position" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="dateOfBirth" class="form-label">Date of Birth *</label>
+              <input type="date" class="form-control" id="dateOfBirth"
+                     [ngModel]="currentEmployee.dateOfBirth"
+                     (ngModelChange)="currentEmployee.dateOfBirth = $event"
+                     name="dateOfBirth" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="startDate" class="form-label">Start Date *</label>
+              <input type="date" class="form-control" id="startDate"
+                     [ngModel]="currentEmployee.startDate"
+                     (ngModelChange)="currentEmployee.startDate = $event"
+                     name="startDate" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="jopId" class="form-label">Job ID *</label>
+              <input type="number" class="form-control" id="jopId"
+                     [ngModel]="currentEmployee.jopId"
+                     (ngModelChange)="currentEmployee.jopId = $event"
+                     name="jopId" min="1" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="clientId" class="form-label">Client ID *</label>
+              <input type="number" class="form-control" id="clientId"
+                     [ngModel]="currentEmployee.clientId"
+                     (ngModelChange)="currentEmployee.clientId = $event"
+                     name="clientId" min="1" required>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary"
+                (click)="isEditMode ? updateExistingEmployee() : createNewEmployee()"
+                [disabled]="!employeeForm.form.valid">
+          {{isEditMode ? 'Update Employee' : 'Create Employee'}}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" [class.d-block]="showModal" *ngIf="showModal"></div>

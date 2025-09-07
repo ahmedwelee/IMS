@@ -1,0 +1,235 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h4 class="card-title">Clients Management</h4>
+            <h5 class="card-subtitle text-muted">Overview of all clients</h5>
+          </div>
+          <button class="btn btn-primary" (click)="openCreateModal()">
+            <i class="fas fa-plus me-2"></i>Add New Client
+          </button>
+        </div>
+
+        <!-- Clients Table -->
+        <div class="table-responsive">
+          <table class="table align-middle text-nowrap">
+            <thead>
+            <tr>
+              <th class="text-dark font-medium fs-4">Client Name</th>
+              <th class="text-dark font-medium fs-4">Type</th>
+              <th class="text-dark font-medium fs-4">Contact Info</th>
+              <th class="text-dark font-medium fs-4">Assigned Employee</th>
+              <th class="text-dark font-medium fs-4">Jobs</th>
+              <th class="text-dark font-medium fs-4">Created Date</th>
+              <th class="text-dark font-medium fs-4">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let client of clients">
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                       style="width: 40px; height: 40px;">
+                    <span class="text-white fw-bold">{{client.name?.charAt(0) | uppercase}}</span>
+                  </div>
+                  <div class="ms-3">
+                    <h6 class="mb-0 font-medium">{{client.name}}</h6>
+                    <small class="text-muted">{{client.email}}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                  <span class="badge" [class]="getTypeBadgeClass(client.type)">
+                    {{client.type}}
+                  </span>
+              </td>
+              <td>
+                <div>
+                  <div><i class="fas fa-phone me-2 text-muted"></i>{{client.phoneNumber}}</div>
+                  <div><i class="fas fa-map-marker-alt me-2 text-muted"></i>{{client.address || 'No address'}}</div>
+                </div>
+              </td>
+              <td>
+                <span class="badge bg-info">{{getEmployeeName(client.employeeId)}}</span>
+              </td>
+              <td>
+                <div *ngIf="hasJobs(client.jopNames); else noJobs">
+                    <span class="badge bg-secondary me-1" *ngFor="let job of client.jopNames">
+                      {{job}}
+                    </span>
+                </div>
+                <ng-template #noJobs>
+                  <span class="text-muted">No jobs assigned</span>
+                </ng-template>
+              </td>
+              <td>
+                <small class="text-muted">{{client.createdAt | date:'shortDate'}}</small>
+              </td>
+              <td>
+                <div class="btn-group" role="group">
+                  <button type="button" class="btn btn-outline-primary btn-sm"
+                          (click)="loadClient(client.id)">
+                    <i class="fas fa-eye"></i> View
+                  </button>
+                  <button type="button" class="btn btn-outline-warning btn-sm ms-1"
+                          (click)="openEditModal(client)">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+                  <button type="button" class="btn btn-outline-danger btn-sm ms-1"
+                          (click)="deleteClient(client.id)">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="clients.length === 0">
+              <td colspan="7" class="text-center py-4">
+                <div class="text-muted">
+                  <i class="fas fa-users fa-2x mb-3"></i>
+                  <p>No clients found. Click "Add New Client" to create one.</p>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Selected Client Details -->
+        <div class="card mt-4" *ngIf="selectedClient">
+          <div class="card-header">
+            <h5 class="card-title mb-0">Client Details</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <h6>Basic Information</h6>
+                <p><strong>Name:</strong> {{selectedClient?.name}}</p>
+                <p><strong>Type:</strong>
+                  <span class="badge" [class]="getTypeBadgeClass(selectedClient?.type)">
+                    {{selectedClient?.type}}
+                  </span>
+                </p>
+                <p><strong>Email:</strong> {{selectedClient?.email}}</p>
+                <p><strong>Phone:</strong> {{selectedClient?.phoneNumber}}</p>
+                <p><strong>Address:</strong> {{selectedClient?.address || 'Not provided'}}</p>
+              </div>
+              <div class="col-md-6">
+                <h6>Assignment Information</h6>
+                <p><strong>Assigned Employee:</strong> {{getEmployeeName(selectedClient?.employeeId)}}</p>
+                <p><strong>Employee Name:</strong> {{selectedClient?.employeeName || 'Not assigned'}}</p>
+                <p><strong>Jobs:</strong>
+                  <span *ngIf="hasJobs(selectedClient?.jopNames); else noJobsDetail">
+                    <span class="badge bg-secondary me-1" *ngFor="let job of selectedClient?.jopNames">
+                      {{job}}
+                    </span>
+                  </span>
+                  <ng-template #noJobsDetail>
+                    <span class="text-muted">No jobs assigned</span>
+                  </ng-template>
+                </p>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-md-6">
+                <h6>Timestamps</h6>
+                <p><strong>Created:</strong> {{selectedClient?.createdAt | date:'medium'}}</p>
+                <p><strong>Last Updated:</strong> {{selectedClient?.updatedAt | date:'medium'}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'"
+     *ngIf="showModal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{isEditMode ? 'Edit Client' : 'Create New Client'}}</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form #clientForm="ngForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="name" class="form-label">Client Name *</label>
+              <input type="text" class="form-control" id="name"
+                     [ngModel]="currentClient.name"
+                     (ngModelChange)="currentClient.name = $event"
+                     name="name" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="type" class="form-label">Client Type *</label>
+              <select class="form-select" id="type"
+                      [ngModel]="currentClient.type"
+                      (ngModelChange)="currentClient.type = $event"
+                      name="type" required>
+                <option value="INDIVIDUAL">Individual</option>
+                <option value="COMPANY">Company</option>
+                <option value="ORGANIZATION">Organization</option>
+                <option value="GOVERNMENT">Government</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="email" class="form-label">Email Address *</label>
+              <input type="email" class="form-control" id="email"
+                     [ngModel]="currentClient.email"
+                     (ngModelChange)="currentClient.email = $event"
+                     name="email" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="phoneNumber" class="form-label">Phone Number *</label>
+              <input type="tel" class="form-control" id="phoneNumber"
+                     [ngModel]="currentClient.phoneNumber"
+                     (ngModelChange)="currentClient.phoneNumber = $event"
+                     name="phoneNumber" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12 mb-3">
+              <label for="address" class="form-label">Address</label>
+              <textarea class="form-control" id="address"
+                        [ngModel]="currentClient.address"
+                        (ngModelChange)="currentClient.address = $event"
+                        name="address" rows="3"></textarea>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="employeeId" class="form-label">Assign to Employee</label>
+              <select class="form-select" id="employeeId"
+                      [ngModel]="currentClient.employeeId"
+                      (ngModelChange)="currentClient.employeeId = $event ? +$event : null"
+                      name="employeeId">
+                <option [value]="null">-- Select an Employee (Optional) --</option>
+                <option *ngFor="let employee of employees" [value]="employee.id">
+                  {{employee.fullName}} ({{employee.position}})
+                </option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary"
+                (click)="isEditMode ? updateExistingClient() : createNewClient()"
+                [disabled]="!clientForm.form.valid">
+          {{isEditMode ? 'Update Client' : 'Create Client'}}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" [class.d-block]="showModal" *ngIf="showModal"></div>
