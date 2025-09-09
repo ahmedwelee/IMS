@@ -4,6 +4,7 @@ import { EmployeeRequest } from '../../service/employee-request';
 import { EmployeeResponse } from '../../service/employee-response';
 import {DatePipe, NgForOf, NgIf, UpperCasePipe} from "@angular/common";
 import {FormsModule} from "@angular/forms";
+import {Position} from "../../service/position-enum";
 
 @Component({
   selector: 'app-employees',
@@ -28,22 +29,20 @@ export class EmployeesComponent implements OnInit {
     lastName: '',
     dateOfBirth: '',
     startDate: '',
-    position: '',
-    jopId: 0,
-    clientId: 0
+    title: '',
+    position: Position.CONSULTANT,
+    salary: 0
+    // jopId and clientId are optional, so we don't need to initialize them
   };
 
-  // These would typically come from other services
-  jobs: any[] = []; // You'll need to fetch this from a JobService
-  clients: any[] = []; // You'll need to fetch this from a ClientService
+  positionOptions = Object.values(Position);
+  emailError: string = '';
 
-  constructor(private employeeService: EmployeesService) {}
+  constructor(private employeeService: EmployeesService) {
+  }
 
   ngOnInit(): void {
     this.loadEmployees();
-    // You'll need to load jobs and clients here
-    // this.loadJobs();
-    // this.loadClients();
   }
 
   // Load all employees
@@ -79,41 +78,72 @@ export class EmployeesComponent implements OnInit {
       lastName: '',
       dateOfBirth: '',
       startDate: '',
-      position: '',
-      jopId: 0,
-      clientId: 0
+      title: '',
+      position: Position.CONSULTANT,
+      salary: 0
     };
+    this.emailError = '';
     this.showModal = true;
   }
 
-
+  // Open edit modal
   openEditModal(employee: EmployeeResponse): void {
     this.isEditMode = true;
 
+    // For edit, we need to split fullName into firstName and lastName
     const names = employee.fullName?.split(' ') || [];
+    const firstName = names[0] || '';
+    const lastName = names.slice(1).join(' ') || '';
+
     this.currentEmployee = {
       email: employee.email,
-      firstName: names[0] || '',
-      lastName: names.slice(1).join(' ') || '',
+      firstName: firstName,
+      lastName: lastName,
       dateOfBirth: employee.dateOfBirth,
       startDate: employee.startDate,
-      position: employee.position,
-      jopId: 0,
-      clientId: 0
+      title: employee.title,
+      position: employee.position as Position, // Cast to Position enum
+      salary: employee.salary
     };
     this.selectedEmployee = employee;
+    this.emailError = '';
     this.showModal = true;
   }
 
-
+  // Close modal
   closeModal(): void {
     this.showModal = false;
     this.selectedEmployee = null;
+    this.emailError = '';
   }
 
-  // todo: use toastr for alerts
+  // Validate email format
+  validateEmail(email: string): boolean {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  }
 
+  // Handle email input changes
+  onEmailChange(email: string): void {
+    this.currentEmployee.email = email;
+    if (email && !this.validateEmail(email)) {
+      this.emailError = 'Please enter a valid email address';
+    } else {
+      this.emailError = '';
+    }
+  }
+
+  // Create new employee
   createNewEmployee(): void {
+    if (this.emailError) {
+      return;
+    }
+
+    if (!this.validateEmail(this.currentEmployee.email)) {
+      this.emailError = 'Please enter a valid email address';
+      return;
+    }
+
     this.employeeService.createEmployee(this.currentEmployee).subscribe({
       next: (createdEmployee) => {
         console.log('Employee created:', createdEmployee);
@@ -122,16 +152,30 @@ export class EmployeesComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error creating employee:', error);
+        if (error.status === 400) {
+          this.emailError = 'Email may already exist or is invalid';
+        }
       }
     });
   }
 
+  // Update employee
   updateExistingEmployee(): void {
     if (!this.selectedEmployee?.id) return;
+
+    if (this.emailError) {
+      return;
+    }
+
+    if (!this.validateEmail(this.currentEmployee.email)) {
+      this.emailError = 'Please enter a valid email address';
+      return;
+    }
 
     this.employeeService.updateEmployee(this.selectedEmployee.id, this.currentEmployee).subscribe({
       next: (updatedEmployee) => {
         console.log('Employee updated:', updatedEmployee);
+        // Update the local array
         const index = this.employees.findIndex(e => e.id === updatedEmployee.id);
         if (index !== -1) {
           this.employees[index] = updatedEmployee;
@@ -141,15 +185,20 @@ export class EmployeesComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error updating employee:', error);
+        if (error.status === 400) {
+          this.emailError = 'Email may already exist or is invalid';
+        }
       }
     });
   }
 
+  // Delete employee
   deleteEmployee(id: number): void {
     if (confirm('Are you sure you want to delete this employee?')) {
       this.employeeService.deleteEmployee(id).subscribe({
         next: () => {
           console.log('Employee deleted successfully');
+          // Remove from local array
           this.employees = this.employees.filter(e => e.id !== id);
           if (this.selectedEmployee?.id === id) {
             this.selectedEmployee = null;
@@ -162,6 +211,7 @@ export class EmployeesComponent implements OnInit {
     }
   }
 
+  // Calculate age from date of birth
   calculateAge(dateOfBirth: string | undefined): number {
     if (!dateOfBirth) return 0;
 
@@ -177,7 +227,7 @@ export class EmployeesComponent implements OnInit {
     return age;
   }
 
-  // todo to be changed to a pipe
+  // Calculate tenure from start date
   calculateTenure(startDate: string | undefined): string {
     if (!startDate) return '0 years, 0 months';
 
@@ -191,4 +241,37 @@ export class EmployeesComponent implements OnInit {
     }
     return `${years} years, ${months} months`;
   }
+
+  // Format salary with commas
+  formatSalary(salary: number | undefined): string {
+    if (!salary) return '0';
+    return salary.toLocaleString('en-US');
+  }
+
+  // Get position badge class - handle string or Position enum
+  getPositionBadgeClass(position: string | Position | undefined): string {
+    if (!position) return 'bg-secondary';
+
+    const pos = position.toString(); // Convert to string for comparison
+
+    switch (pos) {
+      case 'DIRECTOR':
+        return 'bg-danger';
+      case 'MANAGER':
+        return 'bg-warning';
+      case 'ADMINISTRATION':
+        return 'bg-info';
+      case 'CONSULTANT':
+        return 'bg-success';
+      default:
+        return 'bg-secondary';
+    }
+  }
+
+  // Convert string to Position enum
+  getPositionDisplay(position: string | Position | undefined): string {
+    if (!position) return 'Unknown';
+    return position.toString();
+  }
+
 }

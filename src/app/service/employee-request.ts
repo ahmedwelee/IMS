@@ -1,10 +1,13 @@
+import { Position } from './position-enum';
 export interface EmployeeRequest {
   email: string;
   firstName: string;
   lastName: string;
   dateOfBirth: string;
   startDate: string;
-  position: string;
-  jopId: number;
-  clientId: number;
+  title: string;
+  position: Position;
+  salary: number;
+  jopId?: number | null;
+  clientId?: number | null;
 }

@@ -47,4 +47,8 @@ export class EmployeesService {
       params: { q: query }
     });
   }
+
+  getManagers() {
+    return this.http.get<EmployeeResponse[]>(`${this.apiUrl}/managers`);
+  }
 }

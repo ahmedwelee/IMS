@@ -7,7 +7,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ComponentsRoutes } from './component.routing';
 import { EmployeesComponent } from "./employee/employee.component";
 import {ClientsComponent} from "./clients/clients.component";
-import {JobComponent} from "./job/job.component";
+import {JobsComponent} from "./job/job.component";
 import {ProfileComponent} from "./profile/profile.component";
 
 @NgModule({
@@ -18,7 +18,7 @@ import {ProfileComponent} from "./profile/profile.component";
     ReactiveFormsModule,
     NgbModule,
     EmployeesComponent,
-    JobComponent,
+    JobsComponent,
     ClientsComponent,
     ProfileComponent
   ],

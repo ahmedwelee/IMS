@@ -22,6 +22,7 @@ import { AppComponent } from './app.component';
 import { SpinnerComponent } from './shared/spinner.component';
 import {ClientsService} from "./service/clients.service";
 import {EmployeesService} from "./service/employee.service";
+import {JobService} from "./service/job.service";
 
 
 @NgModule({
@@ -45,6 +46,7 @@ import {EmployeesService} from "./service/employee.service";
   providers: [
     ClientsService,
     EmployeesService,
+    JobService,
     {
       provide: LocationStrategy,
       useClass: PathLocationStrategy

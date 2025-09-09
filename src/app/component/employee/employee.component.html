@@ -19,8 +19,8 @@
             <tr>
               <th class="text-dark font-medium fs-4">Employee</th>
               <th class="text-dark font-medium fs-4">Position</th>
-              <th class="text-dark font-medium fs-4">Job</th>
-              <th class="text-dark font-medium fs-4">Client</th>
+              <th class="text-dark font-medium fs-4">Title</th>
+              <th class="text-dark font-medium fs-4">Salary</th>
               <th class="text-dark font-medium fs-4">Age</th>
               <th class="text-dark font-medium fs-4">Tenure</th>
               <th class="text-dark font-medium fs-4">Actions</th>
@@ -41,13 +41,15 @@
                 </div>
               </td>
               <td>
-                <span class="badge bg-info">{{emp.position}}</span>
+                  <span class="badge" [class]="getPositionBadgeClass(emp.position)">
+                    {{getPositionDisplay(emp.position)}}
+                  </span>
               </td>
               <td>
-                <span class="text-muted">{{emp.jopName}}</span>
+                <span class="text-muted">{{emp.title}}</span>
               </td>
               <td>
-                <span class="badge bg-secondary">{{emp.clientName}}</span>
+                <span class="fw-bold text-success">${{formatSalary(emp.salary)}}</span>
               </td>
               <td>
                 <span class="text-muted">{{calculateAge(emp.dateOfBirth)}} years</span>
@@ -102,9 +104,20 @@
                 <h6>Employment Information</h6>
                 <p><strong>Start Date:</strong> {{selectedEmployee?.startDate | date:'longDate'}}</p>
                 <p><strong>Tenure:</strong> {{calculateTenure(selectedEmployee?.startDate)}}</p>
-                <p><strong>Position:</strong> <span class="badge bg-info">{{selectedEmployee?.position}}</span></p>
-                <p><strong>Job Name:</strong> {{selectedEmployee?.jopName}}</p>
-                <p><strong>Client:</strong> <span class="badge bg-secondary">{{selectedEmployee?.clientName}}</span></p>
+                <p><strong>Title:</strong> {{selectedEmployee?.title}}</p>
+                <p><strong>Position:</strong>
+                  <span class="badge" [class]="getPositionBadgeClass(selectedEmployee?.position)">
+                    {{getPositionDisplay(selectedEmployee?.position)}}
+                  </span>
+                </p>
+                <p><strong>Salary:</strong> ${{formatSalary(selectedEmployee?.salary)}}</p>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-md-6">
+                <h6>Assignment Information</h6>
+                <p><strong>Job:</strong> {{selectedEmployee?.jopName || 'Not assigned'}}</p>
+                <p><strong>Client:</strong> {{selectedEmployee?.clientName || 'Not assigned'}}</p>
               </div>
             </div>
           </div>
@@ -147,15 +160,22 @@
               <label for="email" class="form-label">Email Address *</label>
               <input type="email" class="form-control" id="email"
                      [ngModel]="currentEmployee.email"
-                     (ngModelChange)="currentEmployee.email = $event"
-                     name="email" required>
+                     (ngModelChange)="onEmailChange($event)"
+                     name="email"
+                     [class.is-invalid]="emailError"
+                     required>
+              <div class="invalid-feedback" *ngIf="emailError">
+                {{emailError}}
+              </div>
+              <small class="form-text text-muted">Format: user@example.com</small>
             </div>
             <div class="col-md-6 mb-3">
-              <label for="position" class="form-label">Position *</label>
-              <input type="text" class="form-control" id="position"
-                     [ngModel]="currentEmployee.position"
-                     (ngModelChange)="currentEmployee.position = $event"
-                     name="position" required>
+              <label for="title" class="form-label">Title *</label>
+              <input type="text" class="form-control" id="title"
+                     [ngModel]="currentEmployee.title"
+                     (ngModelChange)="currentEmployee.title = $event"
+                     name="title" required
+                     placeholder="e.g., Senior Developer, HR Manager">
             </div>
           </div>
 
@@ -178,18 +198,25 @@
 
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label for="jopId" class="form-label">Job ID *</label>
-              <input type="number" class="form-control" id="jopId"
-                     [ngModel]="currentEmployee.jopId"
-                     (ngModelChange)="currentEmployee.jopId = $event"
-                     name="jopId" min="1" required>
+              <label for="position" class="form-label">Position *</label>
+              <select class="form-select" id="position"
+                      [ngModel]="currentEmployee.position"
+                      (ngModelChange)="currentEmployee.position = $event"
+                      name="position" required>
+                <option *ngFor="let position of positionOptions" [value]="position">
+                  {{position}}
+                </option>
+              </select>
             </div>
             <div class="col-md-6 mb-3">
-              <label for="clientId" class="form-label">Client ID *</label>
-              <input type="number" class="form-control" id="clientId"
-                     [ngModel]="currentEmployee.clientId"
-                     (ngModelChange)="currentEmployee.clientId = $event"
-                     name="clientId" min="1" required>
+              <label for="salary" class="form-label">Salary *</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input type="number" class="form-control" id="salary"
+                       [ngModel]="currentEmployee.salary"
+                       (ngModelChange)="currentEmployee.salary = +$event"
+                       name="salary" min="0" step="1000" required>
+              </div>
             </div>
           </div>
         </form>
@@ -198,7 +225,7 @@
         <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
         <button type="button" class="btn btn-primary"
                 (click)="isEditMode ? updateExistingEmployee() : createNewEmployee()"
-                [disabled]="!employeeForm.form.valid">
+                [disabled]="!employeeForm.form.valid || emailError">
           {{isEditMode ? 'Update Employee' : 'Create Employee'}}
         </button>
       </div>
