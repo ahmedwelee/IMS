@@ -5,7 +5,7 @@ export interface JobRequest {
   jobType: string;
   location: string;
   status: string;
-  postedDate: string; // or Date if you prefer
+  postedDate: Date; // or Date if you prefer
   clientId: number | null;
   managerId: number | null;
 }

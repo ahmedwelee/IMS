@@ -1,0 +1,193 @@
+<!-- job-applications.component.html -->
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <!-- Header with Back Button -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <button class="btn btn-outline-secondary btn-sm me-2" (click)="goBack()">
+                <i class="fas fa-arrow-left me-1"></i> Back to Jobs
+              </button>
+              <h4 class="card-title mb-0">Applications for "{{ job?.jopName }}"</h4>
+            </div>
+            <div>
+              <span class="badge bg-primary fs-6">
+                Total Applications: {{ applications.length }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Statistics Cards -->
+          <div class="row mb-4">
+            <div class="col-md-2 col-sm-4 col-6 mb-3">
+              <div class="card bg-light-primary border-0">
+                <div class="card-body text-center p-3">
+                  <div class="text-primary fw-bold fs-3">{{ getApplicationCount('PENDING') }}</div>
+                  <div class="text-muted small">Pending</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6 mb-3">
+              <div class="card bg-light-info border-0">
+                <div class="card-body text-center p-3">
+                  <div class="text-info fw-bold fs-3">{{ getApplicationCount('REVIEWING') }}</div>
+                  <div class="text-muted small">Reviewing</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6 mb-3">
+              <div class="card bg-light-primary border-0">
+                <div class="card-body text-center p-3">
+                  <div class="text-primary fw-bold fs-3">{{ getApplicationCount('INTERVIEW') }}</div>
+                  <div class="text-muted small">Interview</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6 mb-3">
+              <div class="card bg-light-success border-0">
+                <div class="card-body text-center p-3">
+                  <div class="text-success fw-bold fs-3">{{ getApplicationCount('HIRED') }}</div>
+                  <div class="text-muted small">Hired</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6 mb-3">
+              <div class="card bg-light-danger border-0">
+                <div class="card-body text-center p-3">
+                  <div class="text-danger fw-bold fs-3">{{ getApplicationCount('REJECTED') }}</div>
+                  <div class="text-muted small">Rejected</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6 mb-3">
+              <div class="card bg-light-secondary border-0">
+                <div class="card-body text-center p-3">
+                  <div class="text-secondary fw-bold fs-3">{{ applications.length }}</div>
+                  <div class="text-muted small">Total</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Job Information Card -->
+          <div class="card mb-4">
+            <div class="card-header bg-light">
+              <h5 class="card-title mb-0">Job Information</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4">
+                  <p><strong>Job Title:</strong> {{ job?.jopName }}</p>
+                  <p><strong>Type:</strong>
+                    <span class="badge" [class]="getJobTypeBadgeClass(job?.jobType)">
+                      {{ getJobTypeDisplay(job?.jobType) }}
+                    </span>
+                  </p>
+                </div>
+                <div class="col-md-4">
+                  <p><strong>Location:</strong> {{ job?.location }}</p>
+                  <p><strong>Salary:</strong> ${{ formatSalary(job?.salary) }}</p>
+                </div>
+                <div class="col-md-4">
+                  <p><strong>Status:</strong>
+                    <span class="badge" [class]="getStatusBadgeClass(job?.status)">
+                      {{ getStatusDisplay(job?.status) }}
+                    </span>
+                  </p>
+                  <p><strong>Posted Date:</strong> {{ job?.postedDate | date:'dd-MM-yyyy' }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Applications Table -->
+          <div class="card">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table align-middle table-hover">
+                  <thead class="table-light">
+                  <tr>
+                    <th>Candidate</th>
+                    <th>Application Name</th>
+                    <th>Applied Date</th>
+                    <th>Status</th>
+                    <th>Updated Date</th>
+                    <th>Actions</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr *ngFor="let application of applications">
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2"
+                             style="width: 32px; height: 32px;">
+                          <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                          <strong>{{ application.candidateFullName }}</strong>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="text-muted">{{ application.applicationName }}</span>
+                    </td>
+                    <td>
+                      <small class="text-muted">{{ application.appliedDate | date:'dd-MM-yyyy' }}</small>
+                    </td>
+                    <td>
+                        <span class="badge" [class]="getApplicationStatusBadgeClass(application.status)">
+                          {{ getApplicationStatusDisplay(application.status) }}
+                        </span>
+                    </td>
+                    <td>
+                      <small class="text-muted">{{ application.updatedDate | date:'dd-MM-yyyy' }}</small>
+                    </td>
+                    <td>
+                      <div class="btn-group" role="group">
+                        <button *ngIf="application.status !== 'HIRED' && application.status !== 'REJECTED'"
+                                type="button" class="btn btn-outline-success btn-sm"
+                                (click)="openDecisionModal(application, 'HIRED')">
+                          <i class="fas fa-check"></i> Accept
+                        </button>
+                        <button *ngIf="application.status !== 'HIRED' && application.status !== 'REJECTED'"
+                                type="button" class="btn btn-outline-danger btn-sm ms-1"
+                                (click)="openDecisionModal(application, 'REJECTED')">
+                          <i class="fas fa-times"></i> Reject
+                        </button>
+                        <button *ngIf="application.status === 'HIRED' || application.status === 'REJECTED'"
+                                type="button" class="btn btn-outline-secondary btn-sm ms-1"
+                                (click)="resetApplicationStatus(application)">
+                          <i class="fas fa-undo"></i> Reset
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr *ngIf="applications.length === 0">
+                    <td colspan="6" class="text-center py-4">
+                      <div class="text-muted">
+                        <i class="fas fa-file-alt fa-2x mb-3"></i>
+                        <p>No applications found for this job.</p>
+                      </div>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Decision Modal (same as in your original code) -->
+<div class="modal fade" [class.show]="showDecisionModal" [style.display]="showDecisionModal ? 'block' : 'none'"
+     *ngIf="showDecisionModal">
+  <!-- Modal content from your original code -->
+</div>
+
+<div class="modal-backdrop fade show" [class.d-block]="showDecisionModal"
+     *ngIf="showDecisionModal"></div>

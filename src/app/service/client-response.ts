@@ -9,5 +9,5 @@ export interface ClientResponse {
   updatedAt: string;
   employeeId: number | null;
   employeeName: string | null;
-  jopNames: string[];
+  jobsCount: number;
 }

@@ -42,13 +42,8 @@ export class EmployeesService {
     return this.http.get<EmployeeResponse[]>(`${this.endpoint}/position/${position}`);
   }
 
-  searchEmployees(query: string): Observable<EmployeeResponse[]> {
-    return this.http.get<EmployeeResponse[]>(`${this.endpoint}/search`, {
-      params: { q: query }
-    });
-  }
 
   getManagers() {
-    return this.http.get<EmployeeResponse[]>(`${this.apiUrl}/managers`);
+    return this.http.get<EmployeeResponse[]>(`${this.endpoint}/managers`);
   }
 }

@@ -6,7 +6,7 @@ export interface JobResponse {
   jobType: string;
   location: string;
   status: string;
-  postedDate: string; // or Date
+  postedDate: Date; // or Date
   clientName: string | null;
   managerName: string | null;
   applicationsCount: number;

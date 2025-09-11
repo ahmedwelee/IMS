@@ -1,3 +1,55 @@
+<div class="row mb-4">
+  <div class="col-md-2 col-sm-4 col-6 mb-3">
+    <div class="card bg-light-primary border-0">
+      <div class="card-body text-center p-3">
+        <div class="text-primary fw-bold fs-3">{{ jobs.length }}</div>
+        <div class="text-muted small">Total Jobs</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2 col-sm-4 col-6 mb-3">
+    <div class="card bg-light-success border-0">
+      <div class="card-body text-center p-3">
+        <div class="text-success fw-bold fs-3">{{ getStatusCount('OPEN') }}</div>
+        <div class="text-muted small">Open</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2 col-sm-4 col-6 mb-3">
+    <div class="card bg-light-warning border-0">
+      <div class="card-body text-center p-3">
+        <div class="text-warning fw-bold fs-3">{{ getStatusCount('PENDING') }}</div>
+        <div class="text-muted small">Pending</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2 col-sm-4 col-6 mb-3">
+    <div class="card bg-light-info border-0">
+      <div class="card-body text-center p-3">
+        <div class="text-info fw-bold fs-3">{{ getStatusCount('DRAFT') }}</div>
+        <div class="text-muted small">Draft</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2 col-sm-4 col-6 mb-3">
+    <div class="card bg-light-danger border-0">
+      <div class="card-body text-center p-3">
+        <div class="text-danger fw-bold fs-3">{{ getStatusCount('CLOSED') }}</div>
+        <div class="text-muted small">Closed</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2 col-sm-4 col-6 mb-3">
+    <div class="card bg-light-secondary border-0">
+      <div class="card-body text-center p-3">
+        <div class="text-secondary fw-bold fs-3">${{ getAverageSalary() | number:'1.0-0' }}</div>
+        <div class="text-muted small">Avg. Salary</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <!-- Jobs Management Table (Your existing table) -->
 <div class="row">
   <div class="col-12">
     <div class="card">
@@ -58,10 +110,13 @@
                   </span>
               </td>
               <td>
-                <small class="text-muted">{{ formatDate(job.postedDate) }}</small>
+                <small class="text-muted">{{ job.postedDate | date : 'dd-MM-yyyy' }}</small>
               </td>
               <td>
-                <span class="badge bg-info">{{ job.applicationsCount }}</span>
+                <button class="btn btn-link p-0 text-decoration-none"
+                        (click)="viewApplications(job.id)">
+                  <span class="badge bg-info">{{ job.applicationsCount }}</span>
+                </button>
               </td>
               <td>
                 <div class="btn-group" role="group">
@@ -74,7 +129,7 @@
                     <i class="fas fa-edit"></i> Edit
                   </button>
                   <button type="button" class="btn btn-outline-danger btn-sm ms-1"
-                          (click)="deleteJob(job.id)">
+                          (click)="openDeleteModal(job)">
                     <i class="fas fa-trash"></i> Delete
                   </button>
                 </div>
@@ -118,8 +173,13 @@
                     {{ getStatusDisplay(selectedJob?.status) }}
                   </span>
                 </p>
-                <p><strong>Posted Date:</strong> {{ formatDate(selectedJob?.postedDate) }}</p>
-                <p><strong>Applications:</strong> {{ selectedJob?.applicationsCount }}</p>
+                <p><strong>Posted Date:</strong> {{ selectedJob?.postedDate | date : 'dd-MM-yyyy' }}</p>
+                <p><strong>Applications:</strong>
+                  <button class="btn btn-link p-0 text-decoration-none"
+                          (click)="viewApplications(selectedJob.id)">
+                    <span class="badge bg-info">{{ selectedJob?.applicationsCount }}</span>
+                  </button>
+                </p>
                 <p><strong>Client:</strong> {{ selectedJob?.clientName || 'Not assigned' }}</p>
                 <p><strong>Manager:</strong> {{ selectedJob?.managerName || 'Not assigned' }}</p>
               </div>
@@ -179,7 +239,7 @@
                       [ngModel]="currentJob.jobType"
                       (ngModelChange)="currentJob.jobType = $event"
                       name="jobType" required>
-                <option *ngFor="let type of jobTypes" [value]="type">{{ type }}</option>
+                <option *ngFor="let type of jobTypes" [value]="type.value">{{ type.label }}</option>
               </select>
             </div>
             <div class="col-md-4 mb-3">
@@ -249,4 +309,49 @@
     </div>
   </div>
 </div>
-<div class="modal-backdrop fade show" [class.d-block]="showModal" *ngIf="showModal"></div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" [class.show]="showDeleteModal" [style.display]="showDeleteModal ? 'block' : 'none'"
+     *ngIf="showDeleteModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Confirm Deletion
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeDeleteModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="jobToDelete">
+          <p>Are you sure you want to delete the job position:</p>
+          <div class="alert alert-warning">
+            <h6 class="alert-heading">{{ jobToDelete.jopName }}</h6>
+            <p class="mb-0">
+              <strong>Type:</strong> {{ getJobTypeDisplay(jobToDelete.jobType) }}<br>
+              <strong>Location:</strong> {{ jobToDelete.location }}<br>
+              <strong>Salary:</strong> ${{ formatSalary(jobToDelete.salary) }}
+            </p>
+          </div>
+          <p class="text-danger">
+            <i class="fas fa-exclamation-circle me-1"></i>
+            This action cannot be undone. All applications for this job will also be removed.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">
+          <i class="fas fa-times me-1"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-danger" (click)="confirmDeleteJob()">
+          <i class="fas fa-trash me-1"></i> Delete Job
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal backdrop -->
+<div class="modal-backdrop fade show"
+     [class.d-block]="showModal || showDeleteModal"
+     *ngIf="showModal || showDeleteModal"></div>

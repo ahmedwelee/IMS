@@ -10,7 +10,7 @@ import { JobResponse } from './job-response';
 export class JobService {
 
   readonly apiUrl = 'http://localhost:8088';
-  private readonly endpoint = `${this.apiUrl}/jops`;
+  private readonly endpoint = `${this.apiUrl}/jobs`;
 
   constructor(private http: HttpClient) { }
 
@@ -50,9 +50,4 @@ export class JobService {
     return this.http.get<JobResponse[]>(`${this.endpoint}/type/${jobType}`);
   }
 
-  searchJobs(query: string): Observable<JobResponse[]> {
-    return this.http.get<JobResponse[]>(`${this.endpoint}/search`, {
-      params: { q: query }
-    });
-  }
 }

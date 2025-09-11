@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {NgIf, NgFor, SlicePipe} from '@angular/common';
+import {NgIf, NgFor, DatePipe, SlicePipe, DecimalPipe} from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {JobResponse} from "../../service/job-response";
 import {JobRequest} from "../../service/job-request";
@@ -8,12 +8,14 @@ import {EmployeeResponse} from "../../service/employee-response";
 import {ClientResponse} from "../../service/client-response";
 import {EmployeesService} from "../../service/employee.service";
 import {ClientsService} from "../../service/clients.service";
+import {Router} from "@angular/router";
+import {Chart} from "chart.js";
 
 
 @Component({
   selector: 'app-job',
   standalone: true,
-  imports: [NgIf, NgFor, FormsModule],
+  imports: [NgIf, NgFor, FormsModule, DatePipe, SlicePipe, DecimalPipe],
   templateUrl: './job.component.html'
 })
 export class JobsComponent implements OnInit {
@@ -21,6 +23,9 @@ export class JobsComponent implements OnInit {
   selectedJob: JobResponse | null = null;
   showModal: boolean = false;
   isEditMode: boolean = false;
+  showDeleteModal: boolean = false;
+
+
   currentJob: JobRequest = {
     jopName: '',
     description: '',
@@ -28,20 +33,38 @@ export class JobsComponent implements OnInit {
     jobType: 'FULL_TIME',
     location: '',
     status: 'OPEN',
-    postedDate: new Date().toISOString().split('T')[0],
+    postedDate: new Date(),
     clientId: null,
     managerId: null
   };
 
-  jobTypes: string[] = ['FULL_TIME', 'PART_TIME', 'CONTRACT', 'REMOTE', 'INTERNSHIP'];
-  statusOptions: string[] = ['OPEN', 'CLOSED', 'DRAFT', 'PENDING'];
+  // For delete modal
+  jobToDelete: JobResponse | null = null;
+
+  jobTypes: any[] = [
+    {label: 'Full time', value: 'FULL_TIME'},
+    {label: 'Internship', value: 'INTERNSHIP'},
+    {label: 'Part time', value: 'PART_TIME'},
+    {label: 'Contract', value: 'CONTRACT'},
+    {label: 'Remote', value: 'REMOTE'}
+  ];
+
+  statusOptions: any[] = [
+    {label: 'Open', value: 'OPEN'},
+    {label: 'Closed', value: 'CLOSED'},
+    {label: 'Draft', value: 'DRAFT'},
+    {label: 'Pending', value: 'PENDING'}
+  ];
+
+
   clients: ClientResponse[] = [];
   managers: EmployeeResponse[] = [];
 
   constructor(
     private jobService: JobService,
     private clientService: ClientsService,
-    private employeeService: EmployeesService
+    private router: Router,
+    private employeeService: EmployeesService,
   ) {}
 
   ngOnInit(): void {
@@ -109,6 +132,23 @@ export class JobsComponent implements OnInit {
     });
   }
 
+  // View applications for a job - navigate to applications page
+  viewApplications(jobId: number): void {
+    this.router.navigate(['/jobs', jobId, 'applications']);
+  }
+
+  // Open delete confirmation modal
+  openDeleteModal(job: JobResponse): void {
+    this.jobToDelete = job;
+    this.showDeleteModal = true;
+  }
+
+  // Close delete modal
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.jobToDelete = null;
+  }
+
   // Open create modal
   openCreateModal(): void {
     this.isEditMode = false;
@@ -119,14 +159,14 @@ export class JobsComponent implements OnInit {
       jobType: 'FULL_TIME',
       location: '',
       status: 'OPEN',
-      postedDate: new Date().toISOString().split('T')[0],
+      postedDate: new Date(),
       clientId: null,
       managerId: null
     };
     this.showModal = true;
   }
 
-  // Open edit modal - FIXED THIS METHOD
+  // Open edit modal
   openEditModal(job: JobResponse): void {
     this.isEditMode = true;
 
@@ -189,21 +229,26 @@ export class JobsComponent implements OnInit {
     });
   }
 
-  // Delete job
-  deleteJob(id: number): void {
-    if (confirm('Are you sure you want to delete this job?')) {
-      this.jobService.deleteJob(id).subscribe({
-        next: () => {
-          this.jobs = this.jobs.filter(j => j.id !== id);
-          if (this.selectedJob?.id === id) {
-            this.selectedJob = null;
-          }
-        },
-        error: (error) => {
-          console.error('Error deleting job:', error);
+  // Delete job (confirmed from modal)
+  confirmDeleteJob(): void {
+    const jobId = this.jobToDelete?.id;
+    if (!jobId) return;
+
+    this.jobService.deleteJob(jobId).subscribe({
+      next: () => {
+        this.jobs = this.jobs.filter(j => j.id !== jobId);
+
+        if (this.selectedJob?.id === jobId) {
+          this.selectedJob = null;
         }
-      });
-    }
+
+        this.closeDeleteModal();
+      },
+      error: (error) => {
+        console.error('Error deleting job:', error);
+        this.closeDeleteModal();
+      }
+    });
   }
 
   // Format salary with commas
@@ -219,7 +264,7 @@ export class JobsComponent implements OnInit {
     switch (status) {
       case 'OPEN': return 'bg-success';
       case 'CLOSED': return 'bg-danger';
-      case 'DRAFT': return 'bg-warning';
+      case 'DRAFT': return 'bg-warning text-dark';
       case 'PENDING': return 'bg-info';
       default: return 'bg-secondary';
     }
@@ -232,42 +277,40 @@ export class JobsComponent implements OnInit {
     switch (jobType) {
       case 'FULL_TIME': return 'bg-primary';
       case 'PART_TIME': return 'bg-info';
-      case 'CONTRACT': return 'bg-warning';
+      case 'CONTRACT': return 'bg-warning text-dark';
       case 'REMOTE': return 'bg-success';
       case 'INTERNSHIP': return 'bg-secondary';
       default: return 'bg-light text-dark';
     }
   }
 
-  // Format date - handle undefined
-  formatDate(date: string | undefined): string {
-    if (!date) return 'Unknown date';
-    return new Date(date).toLocaleDateString();
-  }
-
-  // Get client name by ID - handle undefined
-  getClientName(clientId: number | null | undefined): string {
-    if (!clientId) return 'Not assigned';
-    const client = this.clients.find(c => c.id === clientId);
-    return client?.name || 'Unknown client';
-  }
-
-  // Get manager name by ID - handle undefined
-  getManagerName(managerId: number | null | undefined): string {
-    if (!managerId) return 'Not assigned';
-    const manager = this.managers.find(m => m.id === managerId);
-    return manager?.fullName || 'Unknown manager';
-  }
 
   // Safe display for job type
   getJobTypeDisplay(jobType: string | undefined): string {
     if (!jobType) return 'Unknown';
-    return jobType;
+
+    const type = this.jobTypes.find(t => t.value === jobType);
+    return type ? type.label : jobType;
   }
 
   // Safe display for status
   getStatusDisplay(status: string | undefined): string {
     if (!status) return 'Unknown';
-    return status;
+
+    const statusObj = this.statusOptions.find(s => s.value === status);
+    return statusObj ? statusObj.label : status;
+  }
+
+  // Get count of jobs by status
+  getStatusCount(status: string): number {
+    return this.jobs.filter(job => job.status === status).length;
+  }
+
+// Calculate average salary
+  getAverageSalary(): number {
+    if (this.jobs.length === 0) return 0;
+
+    const total = this.jobs.reduce((sum, job) => sum + (job.salary || 0), 0);
+    return Math.round(total / this.jobs.length);
   }
 }

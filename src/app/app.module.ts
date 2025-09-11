@@ -23,6 +23,8 @@ import { SpinnerComponent } from './shared/spinner.component';
 import {ClientsService} from "./service/clients.service";
 import {EmployeesService} from "./service/employee.service";
 import {JobService} from "./service/job.service";
+import {ApplicationService} from "./service/application.service";
+import {ErrorModalComponent} from "./shared/error-Modal/error-modal.component";
 
 
 @NgModule({
@@ -38,15 +40,17 @@ import {JobService} from "./service/job.service";
     ReactiveFormsModule,
     HttpClientModule,
     NgbModule,
-    RouterModule.forRoot(Approutes, { useHash: false }),
+    RouterModule.forRoot(Approutes, {useHash: false}),
     FullComponent,
     NavigationComponent,
     SidebarComponent,
+    ErrorModalComponent,
   ],
   providers: [
     ClientsService,
     EmployeesService,
     JobService,
+    ApplicationService,
     {
       provide: LocationStrategy,
       useClass: PathLocationStrategy

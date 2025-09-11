@@ -9,6 +9,8 @@ import { EmployeesComponent } from "./employee/employee.component";
 import {ClientsComponent} from "./clients/clients.component";
 import {JobsComponent} from "./job/job.component";
 import {ProfileComponent} from "./profile/profile.component";
+import {ApplicationsComponent} from "./application/application.component";
+import {JobApplicationsComponent} from "./job/jobApplication/job-application-component";
 
 @NgModule({
   imports: [
@@ -19,6 +21,8 @@ import {ProfileComponent} from "./profile/profile.component";
     NgbModule,
     EmployeesComponent,
     JobsComponent,
+    JobApplicationsComponent,
+    ApplicationsComponent,
     ClientsComponent,
     ProfileComponent
   ],

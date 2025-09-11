@@ -68,7 +68,7 @@
                     <i class="fas fa-edit"></i> Edit
                   </button>
                   <button type="button" class="btn btn-outline-danger btn-sm ms-1"
-                          (click)="deleteEmployee(emp.id)">
+                          (click)="openDeleteModal(emp)">
                     <i class="fas fa-trash"></i> Delete
                   </button>
                 </div>
@@ -233,3 +233,42 @@
   </div>
 </div>
 <div class="modal-backdrop fade show" [class.d-block]="showModal" *ngIf="showModal"></div>
+<div class="modal fade" [class.show]="showDeleteModal" [style.display]="showDeleteModal ? 'block' : 'none'"
+     *ngIf="showDeleteModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Confirm Deletion
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeDeleteModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="employeeToDelete">
+          <p>Are you sure you want to delete the eployee position:</p>
+          <div class="alert alert-warning">
+            <h6 class="alert-heading">{{ employeeToDelete.fullName }}</h6>
+            <p class="mb-0">
+              <strong>Email:</strong> {{ employeeToDelete.email }}<br>
+              <strong>Position:</strong> {{ employeeToDelete.position }}<br>
+              <strong>Salary:</strong> ${{ formatSalary(employeeToDelete.salary) }}
+            </p>
+          </div>
+          <p class="text-danger">
+            <i class="fas fa-exclamation-circle me-1"></i>
+            This action cannot be undone. All actions for this employee will also be removed.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">
+          <i class="fas fa-times me-1"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-danger" (click)="confirmDeleteEmployee()">
+          <i class="fas fa-trash me-1"></i> Delete Employee
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

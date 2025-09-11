@@ -5,6 +5,7 @@ import { EmployeeResponse } from '../../service/employee-response';
 import {DatePipe, NgForOf, NgIf, UpperCasePipe} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {Position} from "../../service/position-enum";
+import {JobResponse} from "../../service/job-response";
 
 @Component({
   selector: 'app-employees',
@@ -23,6 +24,7 @@ export class EmployeesComponent implements OnInit {
   selectedEmployee: EmployeeResponse | null = null;
   showModal: boolean = false;
   isEditMode: boolean = false;
+  showDeleteModal: boolean = false;
   currentEmployee: EmployeeRequest = {
     email: '',
     firstName: '',
@@ -35,6 +37,7 @@ export class EmployeesComponent implements OnInit {
     // jopId and clientId are optional, so we don't need to initialize them
   };
 
+  employeeToDelete: EmployeeResponse | null = null;
   positionOptions = Object.values(Position);
   emailError: string = '';
 
@@ -155,6 +158,38 @@ export class EmployeesComponent implements OnInit {
         if (error.status === 400) {
           this.emailError = 'Email may already exist or is invalid';
         }
+      }
+    });
+  }
+
+  openDeleteModal(employee: EmployeeResponse): void {
+    this.employeeToDelete = employee;
+    this.showDeleteModal = true;
+  }
+
+  // Close delete modal
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.employeeToDelete = null;
+  }
+
+  confirmDeleteEmployee(): void {
+    const employeeId = this.employeeToDelete?.id;
+    if (!employeeId) return;
+
+    this.employeeService.deleteEmployee(employeeId).subscribe({
+      next: () => {
+        this.employees = this.employees.filter(e => e.id !== employeeId);
+
+        if (this.selectedEmployee?.id === employeeId) {
+          this.selectedEmployee = null;
+        }
+
+        this.closeDeleteModal();
+      },
+      error: (error) => {
+        console.error('Error deleting employee:', error);
+        this.closeDeleteModal();
       }
     });
   }
