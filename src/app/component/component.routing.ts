@@ -5,6 +5,7 @@ import {JobsComponent} from "./job/job.component";
 import {ProfileComponent} from "./profile/profile.component";
 import {ApplicationsComponent} from "./application/application.component";
 import {JobApplicationsComponent} from "./job/jobApplication/job-application-component";
+import {ClientJobsComponent} from "./clients/client-application/client-jobs-component";
 
 
 export const ComponentsRoutes: Routes = [
@@ -34,6 +35,10 @@ export const ComponentsRoutes: Routes = [
       {
         path: 'clients',
         component: ClientsComponent
+      },
+      {
+      path: 'client-jobs/:id',
+        component: ClientJobsComponent
       }
 		]
 	}

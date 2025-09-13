@@ -11,6 +11,7 @@ import {JobsComponent} from "./job/job.component";
 import {ProfileComponent} from "./profile/profile.component";
 import {ApplicationsComponent} from "./application/application.component";
 import {JobApplicationsComponent} from "./job/jobApplication/job-application-component";
+import {ClientJobsComponent} from "./clients/client-application/client-jobs-component";
 
 @NgModule({
   imports: [
@@ -24,6 +25,7 @@ import {JobApplicationsComponent} from "./job/jobApplication/job-application-com
     JobApplicationsComponent,
     ApplicationsComponent,
     ClientsComponent,
+    ClientJobsComponent,
     ProfileComponent
   ],
 })

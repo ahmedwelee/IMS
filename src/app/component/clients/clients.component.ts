@@ -4,11 +4,11 @@ import { EmployeesService } from '../../service/employee.service'; // Import Emp
 import { ClientRequest } from '../../service/clients-request';
 import { ClientResponse } from '../../service/client-response';
 import { EmployeeResponse } from '../../service/employee-response';
-import {DatePipe, DecimalPipe, NgForOf, NgIf, SlicePipe, UpperCasePipe} from "@angular/common";
+import {DatePipe, NgForOf, NgIf,  UpperCasePipe} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {JobService} from "../../service/job.service";
-import {JobResponse} from "../../service/job-response";
-import {JobRequest} from "../../service/job-request";
+import {Router} from "@angular/router";
+
 
 @Component({
   selector: 'app-clients',
@@ -18,8 +18,7 @@ import {JobRequest} from "../../service/job-request";
     FormsModule,
     UpperCasePipe,
     NgForOf,
-    NgIf,
-    SlicePipe
+    NgIf
   ],
   templateUrl: './clients.component.html'
 })
@@ -28,13 +27,8 @@ export class ClientsComponent implements OnInit {
   selectedClient: ClientResponse | null = null;
   showModal: boolean = false;
   isEditMode: boolean = false;
-  showJobsModal: boolean = false;
-  showDeleteJobModal: boolean = false;
   showDeleteClientModal: boolean = false;
-  showAddJobModal: boolean = false;
-  clientJobs: JobResponse[] = [];
   clientToDelete: ClientResponse | null = null;
-  jobToDelete: JobResponse | null = null;
 
   currentClient: ClientRequest = {
     name: '',
@@ -45,47 +39,18 @@ export class ClientsComponent implements OnInit {
     employeeId: null
   };
 
-  // For new job form
-  newJob: JobRequest = {
-    jopName: '',
-    description: '',
-    salary: 0,
-    jobType: 'FULL_TIME',
-    location: '',
-    status: 'OPEN',
-    postedDate: new Date(),
-    clientId: null,
-    managerId: null
-  };
-
-  jobTypes: any[] = [
-    {label: 'Full time', value: 'FULL_TIME'},
-    {label: 'Internship', value: 'INTERNSHIP'},
-    {label: 'Part time', value: 'PART_TIME'},
-    {label: 'Contract', value: 'CONTRACT'},
-    {label: 'Remote', value: 'REMOTE'}
-  ];
-
-  statusOptions: any[] = [
-    {label: 'Open', value: 'OPEN'},
-    {label: 'Closed', value: 'CLOSED'},
-    {label: 'Draft', value: 'DRAFT'},
-    {label: 'Pending', value: 'PENDING'}
-  ];
-
   employees: EmployeeResponse[] = [];
-  managers: EmployeeResponse[] = [];
 
   constructor(
     private clientsService: ClientsService,
     private employeeService: EmployeesService,
-    private jobService: JobService
+    private jobService: JobService,
+    private router: Router  // Add Router injection
   ) {}
 
   ngOnInit(): void {
     this.loadClients();
     this.loadEmployees();
-    this.loadManagers();
   }
 
   loadClients(): void {
@@ -111,28 +76,6 @@ export class ClientsComponent implements OnInit {
     });
   }
 
-  loadManagers(): void {
-    this.employeeService.getManagers().subscribe({
-      next: (managers) => {
-        this.managers = managers;
-      },
-      error: (error) => {
-        console.error('Error loading managers:', error);
-        this.employeeService.getAllEmployees().subscribe({
-          next: (employees) => {
-            this.managers = employees.filter(emp =>
-              emp.position === 'MANAGER' || emp.position === 'DIRECTOR'
-            );
-          },
-          error: (err) => {
-            console.error('Error loading employees for managers:', err);
-            this.managers = [];
-          }
-        });
-      }
-    });
-  }
-
   loadClient(id: number): void {
     this.clientsService.getClientById(id).subscribe({
       next: (client) => {
@@ -142,6 +85,21 @@ export class ClientsComponent implements OnInit {
         console.error('Error loading client:', error);
       }
     });
+  }
+
+  // Navigation method for viewing client jobs
+  viewClientJobs(clientId: number): void {
+    this.router.navigate(['/client-jobs', clientId]);
+  }
+
+  // Alternative method if you want to pass client data
+  onViewClientJobs(clientId: number | undefined): void {
+    if (clientId) {
+      const client = this.clients.find(c => c.id === clientId);
+      this.router.navigate(['/client-jobs', clientId], {
+        state: { client: client }  // Pass client data if needed
+      });
+    }
   }
 
   openCreateModal(): void {
@@ -211,13 +169,11 @@ export class ClientsComponent implements OnInit {
     this.showDeleteClientModal = true;
   }
 
-  // Close delete client modal
   closeDeleteClientModal(): void {
     this.showDeleteClientModal = false;
     this.clientToDelete = null;
   }
 
-  // Delete client (confirmed from modal)
   confirmDeleteClient(): void {
     const clientId = this.clientToDelete?.id;
     if (!clientId) return;
@@ -237,118 +193,11 @@ export class ClientsComponent implements OnInit {
     });
   }
 
-  // In your component
-  // Job management methods
-  viewClientJobs(clientId: number): void {
-    this.jobService.getJobsByClient(clientId).subscribe({
-      next: (jobs) => {
-        this.clientJobs = jobs;
-        this.showJobsModal = true;
-      },
-      error: (error) => {
-        console.error('Error loading client jobs:', error);
-        this.clientJobs = [];
-        this.showJobsModal = true;
-      }
-    });
-  }
-
-// Also update the onViewClientJobs method if it exists:
-  onViewClientJobs(clientId: number | undefined): void {
-    if (clientId) {
-      this.viewClientJobs(clientId);
-    }
-  }
-
-
-  closeJobsModal(): void {
-    this.showJobsModal = false;
-    this.clientJobs = [];
-  }
-
-  openAddJobModal(): void {
-    if (!this.selectedClient) return;
-
-    this.newJob = {
-      jopName: '',
-      description: '',
-      salary: 0,
-      jobType: 'FULL_TIME',
-      location: '',
-      status: 'OPEN',
-      postedDate: new Date(),
-      clientId: this.selectedClient.id,
-      managerId: null
-    };
-    this.showAddJobModal = true;
-  }
-
-  closeAddJobModal(): void {
-    this.showAddJobModal = false;
-    this.newJob = {
-      jopName: '',
-      description: '',
-      salary: 0,
-      jobType: 'FULL_TIME',
-      location: '',
-      status: 'OPEN',
-      postedDate: new Date(),
-      clientId: null,
-      managerId: null
-    };
-  }
-
-  createNewJob(): void {
-    if (!this.selectedClient) return;
-
-    this.jobService.createJob(this.newJob).subscribe({
-      next: (createdJob) => {
-        this.clientJobs.push(createdJob);
-        this.closeAddJobModal();
-      },
-      error: (error) => {
-        console.error('Error creating job:', error);
-      }
-    });
-  }
-
-  openDeleteJobModal(job: JobResponse): void {
-    this.jobToDelete = job;
-    this.showDeleteJobModal = true;
-  }
-
-  closeDeleteJobModal(): void {
-    this.showDeleteJobModal = false;
-    this.jobToDelete = null;
-  }
-
-  confirmDeleteJob(): void {
-    const jobId = this.jobToDelete?.id;
-    if (!jobId) return;
-
-    this.jobService.deleteJob(jobId).subscribe({
-      next: () => {
-        this.clientJobs = this.clientJobs.filter(j => j.id !== jobId);
-        this.closeDeleteJobModal();
-      },
-      error: (error) => {
-        console.error('Error deleting job:', error);
-        this.closeDeleteJobModal();
-      }
-    });
-  }
-
   // Utility methods
   getEmployeeName(employeeId: number | null | undefined): string {
     if (!employeeId) return 'Not assigned';
     const employee = this.employees.find(e => e.id === employeeId);
     return employee?.fullName || 'Unknown employee';
-  }
-
-  getManagerName(managerId: number | null | undefined): string {
-    if (!managerId) return 'Not assigned';
-    const manager = this.managers.find(m => m.id === managerId);
-    return manager?.fullName || 'Unknown manager';
   }
 
   getTypeBadgeClass(type: string | undefined): string {
@@ -361,50 +210,6 @@ export class ClientsComponent implements OnInit {
       case 'GOVERNMENT': return 'bg-warning text-dark';
       default: return 'bg-secondary';
     }
-  }
-
-  getJobTypeBadgeClass(jobType: string | undefined): string {
-    if (!jobType) return 'bg-secondary';
-
-    switch (jobType) {
-      case 'FULL_TIME': return 'bg-primary';
-      case 'PART_TIME': return 'bg-info';
-      case 'CONTRACT': return 'bg-warning text-dark';
-      case 'REMOTE': return 'bg-success';
-      case 'INTERNSHIP': return 'bg-secondary';
-      default: return 'bg-light text-dark';
-    }
-  }
-
-  getJobStatusBadgeClass(status: string | undefined): string {
-    if (!status) return 'bg-secondary';
-
-    switch (status) {
-      case 'OPEN': return 'bg-success';
-      case 'CLOSED': return 'bg-danger';
-      case 'DRAFT': return 'bg-warning text-dark';
-      case 'PENDING': return 'bg-info';
-      default: return 'bg-secondary';
-    }
-  }
-
-  getJobTypeDisplay(jobType: string | undefined): string {
-    if (!jobType) return 'Unknown';
-
-    const type = this.jobTypes.find(t => t.value === jobType);
-    return type ? type.label : jobType;
-  }
-
-  getStatusDisplay(status: string | undefined): string {
-    if (!status) return 'Unknown';
-
-    const statusObj = this.statusOptions.find(s => s.value === status);
-    return statusObj ? statusObj.label : status;
-  }
-
-  formatSalary(salary: number | undefined): string {
-    if (!salary) return '0';
-    return salary.toLocaleString('en-US');
   }
 
   hasJobs(jobsCount: number | number[] | undefined): boolean {

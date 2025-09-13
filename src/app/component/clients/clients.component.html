@@ -20,7 +20,7 @@
               <th class="text-dark font-medium fs-4">Client Name</th>
               <th class="text-dark font-medium fs-4">Type</th>
               <th class="text-dark font-medium fs-4">Contact Info</th>
-              <th class="text-dark font-medium fs-4">Assigned Employee</th>
+              <th class="text-dark font-medium fs-4">Business Manager</th>
               <th class="text-dark font-medium fs-4">Jobs</th>
               <th class="text-dark font-medium fs-4">Created Date</th>
               <th class="text-dark font-medium fs-4">Actions</th>
@@ -60,11 +60,15 @@
                           (click)="viewClientJobs(client.id)"
                           style="cursor: pointer;"
                           [title]="'View ' + getJobsCountDisplay(client.jobsCount) + ' jobs for ' + client.name">
-                      {{ getJobsCountDisplay(client.jobsCount) }}
+                      <i class="fas fa-briefcase me-1"></i>
+                      {{ getJobsCountDisplay(client.jobsCount) }} Jobs
                     </span>
                 </div>
                 <ng-template #noJobs>
-                  <span class="text-muted">No jobs</span>
+                  <span class="text-muted">
+                    <i class="fas fa-briefcase me-1"></i>
+                    No jobs
+                  </span>
                 </ng-template>
               </td>
               <td>
@@ -101,8 +105,14 @@
 
         <!-- Selected Client Details -->
         <div class="card mt-4" *ngIf="selectedClient">
-          <div class="card-header">
+          <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">Client Details</h5>
+            <button class="btn btn-outline-primary btn-sm"
+                    *ngIf="hasJobs(selectedClient?.jobsCount)"
+                    (click)="onViewClientJobs(selectedClient?.id)">
+              <i class="fas fa-briefcase me-1"></i>
+              View All Jobs ({{ getJobsCountDisplay(selectedClient?.jobsCount) }})
+            </button>
           </div>
           <div class="card-body">
             <div class="row">
@@ -128,7 +138,8 @@
                             (click)="onViewClientJobs(selectedClient?.id)"
                             style="cursor: pointer;"
                             [title]="'View ' + getJobsCountDisplay(selectedClient?.jobsCount) + ' jobs'">
-                        {{ getJobsCountDisplay(selectedClient?.jobsCount) }}
+                        <i class="fas fa-external-link-alt me-1"></i>
+                        {{ getJobsCountDisplay(selectedClient?.jobsCount) }} Jobs
                       </span>
                   </span>
                   <ng-template #noJobsDetail>
@@ -238,7 +249,8 @@
     </div>
   </div>
 </div>
-<div class="modal-backdrop fade show" [class.d-block]="showModal" *ngIf="showModal"></div>
+
+<!-- Delete Client Confirmation Modal -->
 <div class="modal fade" [class.show]="showDeleteClientModal" [style.display]="showDeleteClientModal ? 'block' : 'none'"
      *ngIf="showDeleteClientModal">
   <div class="modal-dialog" role="document">
@@ -280,236 +292,7 @@
   </div>
 </div>
 
-<!-- Client Jobs Modal -->
-<div class="modal fade" [class.show]="showJobsModal" [style.display]="showJobsModal ? 'block' : 'none'"
-     *ngIf="showJobsModal">
-  <div class="modal-dialog modal-xl" role="document">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title">
-          <i class="fas fa-briefcase me-2"></i>
-          Jobs for {{ selectedClient?.name }}
-        </h5>
-        <button type="button" class="btn-close btn-close-white" (click)="closeJobsModal()"></button>
-      </div>
-      <div class="modal-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <div class="alert alert-info mb-0">
-            <i class="fas fa-info-circle me-2"></i>
-            Total jobs: <strong>{{ clientJobs.length }}</strong>
-          </div>
-          <button class="btn btn-success" (click)="openAddJobModal()">
-            <i class="fas fa-plus me-2"></i>Add New Job
-          </button>
-        </div>
-
-        <div class="table-responsive">
-          <table class="table align-middle table-hover">
-            <thead class="table-light">
-            <tr>
-              <th>Job Title</th>
-              <th>Type</th>
-              <th>Location</th>
-              <th>Salary</th>
-              <th>Status</th>
-              <th>Posted Date</th>
-              <th>Applications</th>
-              <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let job of clientJobs">
-              <td>
-                <strong>{{ job.jopName }}</strong>
-                <div><small class="text-muted">{{ job.description | slice:0:50 }}...</small></div>
-              </td>
-              <td>
-                  <span class="badge" [class]="getJobTypeBadgeClass(job.jobType)">
-                    {{ getJobTypeDisplay(job.jobType) }}
-                  </span>
-              </td>
-              <td>
-                {{ job.location }}
-              </td>
-              <td>
-                <span class="fw-bold text-success">${{ formatSalary(job.salary) }}</span>
-              </td>
-              <td>
-                  <span class="badge" [class]="getJobStatusBadgeClass(job.status)">
-                    {{ getStatusDisplay(job.status) }}
-                  </span>
-              </td>
-              <td>
-                {{ job.postedDate | date:'dd-MM-yyyy' }}
-              </td>
-              <td>
-                <span class="badge bg-info">{{ job.applicationsCount }}</span>
-              </td>
-              <td>
-                <div class="btn-group" role="group">
-                  <button type="button" class="btn btn-outline-danger btn-sm"
-                          (click)="openDeleteJobModal(job)">
-                    <i class="fas fa-trash"></i> Delete
-                  </button>
-                </div>
-              </td>
-            </tr>
-            <tr *ngIf="clientJobs.length === 0">
-              <td colspan="8" class="text-center py-4">
-                <div class="text-muted">
-                  <i class="fas fa-briefcase fa-2x mb-3"></i>
-                  <p>No jobs found for this client.</p>
-                  <button class="btn btn-primary mt-2" (click)="openAddJobModal()">
-                    <i class="fas fa-plus me-2"></i>Add First Job
-                  </button>
-                </div>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeJobsModal()">
-          <i class="fas fa-times me-1"></i> Close
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Add Job Modal -->
-<div class="modal fade" [class.show]="showAddJobModal" [style.display]="showAddJobModal ? 'block' : 'none'"
-     *ngIf="showAddJobModal">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header bg-success text-white">
-        <h5 class="modal-title">
-          <i class="fas fa-plus me-2"></i>
-          Add New Job for {{ selectedClient?.name }}
-        </h5>
-        <button type="button" class="btn-close btn-close-white" (click)="closeAddJobModal()"></button>
-      </div>
-      <div class="modal-body">
-        <form #jobForm="ngForm">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="jopName" class="form-label">Job Title *</label>
-              <input type="text" class="form-control" id="jopName"
-                     [(ngModel)]="newJob.jopName" name="jopName" required>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="salary" class="form-label">Salary *</label>
-              <div class="input-group">
-                <span class="input-group-text">$</span>
-                <input type="number" class="form-control" id="salary"
-                       [(ngModel)]="newJob.salary" name="salary" min="0" step="1000" required>
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-12 mb-3">
-              <label for="description" class="form-label">Description *</label>
-              <textarea class="form-control" id="description"
-                        [(ngModel)]="newJob.description" name="description" rows="3" required></textarea>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <label for="jobType" class="form-label">Job Type *</label>
-              <select class="form-select" id="jobType"
-                      [(ngModel)]="newJob.jobType" name="jobType" required>
-                <option *ngFor="let type of jobTypes" [value]="type.value">{{ type.label }}</option>
-              </select>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="location" class="form-label">Location *</label>
-              <input type="text" class="form-control" id="location"
-                     [(ngModel)]="newJob.location" name="location" required>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="status" class="form-label">Status *</label>
-              <select class="form-select" id="status"
-                      [(ngModel)]="newJob.status" name="status" required>
-                <option *ngFor="let status of statusOptions" [value]="status.value">{{ status.label }}</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="postedDate" class="form-label">Posted Date *</label>
-              <input type="date" class="form-control" id="postedDate"
-                     [(ngModel)]="newJob.postedDate" name="postedDate" required>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="managerId" class="form-label">Manager (Optional)</label>
-              <select class="form-select" id="managerId"
-                      [(ngModel)]="newJob.managerId" name="managerId">
-                <option [value]="null">-- Select a Manager --</option>
-                <option *ngFor="let manager of managers" [value]="manager.id">
-                  {{ manager.fullName }}
-                </option>
-              </select>
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeAddJobModal()">Cancel</button>
-        <button type="button" class="btn btn-success" (click)="createNewJob()"
-                [disabled]="!jobForm.form.valid">
-          <i class="fas fa-plus me-1"></i> Create Job
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Delete Job Confirmation Modal -->
-<div class="modal fade" [class.show]="showDeleteJobModal" [style.display]="showDeleteJobModal ? 'block' : 'none'"
-     *ngIf="showDeleteJobModal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">
-          <i class="fas fa-exclamation-triangle me-2"></i>
-          Confirm Job Deletion
-        </h5>
-        <button type="button" class="btn-close btn-close-white" (click)="closeDeleteJobModal()"></button>
-      </div>
-      <div class="modal-body">
-        <div *ngIf="jobToDelete">
-          <p>Are you sure you want to delete the job position:</p>
-          <div class="alert alert-warning">
-            <h6 class="alert-heading">{{ jobToDelete.jopName }}</h6>
-            <p class="mb-0">
-              <strong>Type:</strong> {{ getJobTypeDisplay(jobToDelete.jobType) }}<br>
-              <strong>Location:</strong> {{ jobToDelete.location }}<br>
-              <strong>Salary:</strong> ${{ formatSalary(jobToDelete.salary) }}
-            </p>
-          </div>
-          <p class="text-danger">
-            <i class="fas fa-exclamation-circle me-1"></i>
-            This action cannot be undone. All applications for this job will also be removed.
-          </p>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeDeleteJobModal()">
-          <i class="fas fa-times me-1"></i> Cancel
-        </button>
-        <button type="button" class="btn btn-danger" (click)="confirmDeleteJob()">
-          <i class="fas fa-trash me-1"></i> Delete Job
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- Modal Backdrop -->
 <div class="modal-backdrop fade show"
-     [class.d-block]="showModal || showJobsModal || showAddJobModal || showDeleteJobModal || showDeleteClientModal"
-     *ngIf="showModal || showJobsModal || showAddJobModal || showDeleteJobModal || showDeleteClientModal"></div>
+     [class.d-block]="showModal || showDeleteClientModal"
+     *ngIf="showModal || showDeleteClientModal"></div>

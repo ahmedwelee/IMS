@@ -25,6 +25,8 @@ import {EmployeesService} from "./service/employee.service";
 import {JobService} from "./service/job.service";
 import {ApplicationService} from "./service/application.service";
 import {ErrorModalComponent} from "./shared/error-Modal/error-modal.component";
+import {ClientJobsComponent} from "./component/clients/client-application/client-jobs-component";
+import {JobApplicationsComponent} from "./component/job/jobApplication/job-application-component";
 
 
 @NgModule({
@@ -44,6 +46,8 @@ import {ErrorModalComponent} from "./shared/error-Modal/error-modal.component";
     FullComponent,
     NavigationComponent,
     SidebarComponent,
+    ClientJobsComponent,
+    JobApplicationsComponent,
     ErrorModalComponent,
   ],
   providers: [
