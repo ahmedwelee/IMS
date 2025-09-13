@@ -1,47 +1,143 @@
 <div class="card">
-    <div class="card-body">
-        <!-- title -->
-                <h4 class="card-title">Top Selling</h4>
-                <h5 class="card-subtitle">Overview of the projects</h5>
-            
-        <!-- title -->
-        <div class="table-responsive">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th class="text-dark font-medium fs-4">Team Lead</th>
-                        <th class="text-dark font-medium fs-4">Project</th>
-                        <th class="text-dark font-medium fs-4">Status</th>
-                        <th class="text-dark font-medium fs-4">Weeks</th>
-                        <th class="text-dark font-medium fs-4">Budget</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor='let ts of topSelling'>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <img [src]=ts.image alt="user" width="45" class="rounded-circle">
-                                <div class="ms-3">
-                                    <h5 class="mb-0 font-medium">{{ts.uname}}</h5>
-                                    <span class="text-muted">{{ts.gmail}}</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="fs-4">{{ts.productName}}</td>
-                        <td>
-                            <span class="p-2 bg-{{ts.status}} rounded-circle d-inline-block ms-3"></span>
-                        </td>
-                        
-                        <td>
-                            <h5 class="mb-0 fw-normal">{{ts.weeks}}</h5>
-                        </td>
-                        <td>
-                            <h5 class="mb-0 fw-normal">{{ts.budget}}</h5>
-                        </td>
-                    </tr>              
-                </tbody>
-            </table>
-        </div>
+  <div class="card-body">
+    <!-- Title -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h4 class="card-title">Top Clients</h4>
+        <h5 class="card-subtitle text-muted">Clients ranked by number of jobs</h5>
+      </div>
+      <div class="d-flex align-items-center">
+        <button class="btn btn-outline-primary btn-sm me-2" (click)="loadTopClients()">
+          <i class="fas fa-sync-alt me-1"></i>Refresh
+        </button>
+        <span class="badge bg-info">{{ topClients.length }} Clients</span>
+      </div>
     </div>
-    
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="text-center py-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2 text-muted">Loading top clients...</p>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table class="table align-middle">
+        <thead>
+        <tr>
+          <th class="text-dark font-medium fs-4">Client</th>
+          <th class="text-dark font-medium fs-4">Type</th>
+          <th class="text-dark font-medium fs-4">Activity</th>
+          <th class="text-dark font-medium fs-4">Jobs Count</th>
+          <th class="text-dark font-medium fs-4">Assigned To</th>
+          <th class="text-dark font-medium fs-4">Joined</th>
+          <th class="text-dark font-medium fs-4">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor='let client of topClients; trackBy: trackByClientId; let i = index'
+            class="client-row">
+          <td>
+            <div class="d-flex align-items-center">
+              <div class="client-avatar bg-{{client.avatar}} me-3">
+                {{ client.name.charAt(0).toUpperCase() }}
+              </div>
+              <div>
+                <h6 class="mb-0 font-medium">{{ client.name }}</h6>
+                <span class="text-muted small">{{ client.email }}</span>
+              </div>
+              <div class="ms-2" *ngIf="i < 3">
+                <i class="fas fa-trophy"
+                   [class]="i === 0 ? 'text-warning' : i === 1 ? 'text-secondary' : 'text-info'">
+                </i>
+              </div>
+            </div>
+          </td>
+
+          <td>
+                            <span class="badge" [class]="getClientTypeBadgeClass(client.type)">
+                                {{ client.type }}
+                            </span>
+          </td>
+
+          <td>
+            <span class="p-2 bg-{{getStatusColor(client.jobsCount)}} rounded-circle d-inline-block me-2"></span>
+            <small class="text-muted">{{ getActivityLevel(client.jobsCount) }}</small>
+          </td>
+
+          <td>
+            <div class="d-flex align-items-center">
+                                <span class="badge bg-primary jobs-count-badge me-2"
+                                      (click)="viewClientJobs(client.id)"
+                                      [title]="'Click to view jobs for ' + client.name">
+                                    <i class="fas fa-briefcase me-1"></i>
+                                  {{ client.jobsCount }}
+                                </span>
+              <span class="text-muted small" *ngIf="client.jobsCount > 0">
+                                    {{ client.jobsCount === 1 ? 'job' : 'jobs' }}
+                                </span>
+            </div>
+          </td>
+
+          <td>
+            <div class="d-flex align-items-center">
+              <i class="fas fa-user-tie me-2 text-muted"></i>
+              <span class="small">{{ client.employeeName }}</span>
+            </div>
+          </td>
+
+          <td>
+            <small class="text-muted">{{ formatDaysAgo(client.createdAt) }}</small>
+          </td>
+
+          <td>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-outline-info btn-sm"
+                      (click)="viewClientJobs(client.id)"
+                      title="View client jobs"
+                      *ngIf="client.jobsCount > 0">
+                <i class="fas fa-briefcase"></i>jobs
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Empty State -->
+        <tr *ngIf="topClients.length === 0 && !isLoading">
+          <td colspan="7" class="text-center py-4">
+            <div class="text-muted">
+              <i class="fas fa-user-tie fa-3x mb-3 opacity-50"></i>
+              <h5>No clients found</h5>
+              <p>There are no clients with jobs in the system yet.</p>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Summary Footer -->
+    <div class="card-footer bg-light" *ngIf="!isLoading && topClients.length > 0">
+      <div class="row text-center">
+        <div class="col-md-3">
+          <small class="text-muted d-block">Total Clients</small>
+          <strong>{{ topClients.length }}</strong>
+        </div>
+        <div class="col-md-3">
+          <small class="text-muted d-block">Active Clients</small>
+          <strong>{{ getActiveClientsCount() }}</strong>
+        </div>
+        <div class="col-md-3">
+          <small class="text-muted d-block">Total Jobs</small>
+          <strong>{{ getTotalJobsCount() }}</strong>
+        </div>
+        <div class="col-md-3">
+          <small class="text-muted d-block">Avg Jobs/Client</small>
+          <strong>{{ getAverageJobsPerClient() }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

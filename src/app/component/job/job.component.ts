@@ -9,13 +9,12 @@ import {ClientResponse} from "../../service/client-response";
 import {EmployeesService} from "../../service/employee.service";
 import {ClientsService} from "../../service/clients.service";
 import {Router} from "@angular/router";
-import {Chart} from "chart.js";
 
 
 @Component({
   selector: 'app-job',
   standalone: true,
-  imports: [NgIf, NgFor, FormsModule, DatePipe, SlicePipe, DecimalPipe],
+  imports: [NgIf, NgFor, FormsModule, DatePipe, DecimalPipe],
   templateUrl: './job.component.html'
 })
 export class JobsComponent implements OnInit {
@@ -23,6 +22,7 @@ export class JobsComponent implements OnInit {
   selectedJob: JobResponse | null = null;
   showModal: boolean = false;
   isEditMode: boolean = false;
+  showJobDetailsModal: boolean = false;
   showDeleteModal: boolean = false;
 
 
@@ -82,6 +82,18 @@ export class JobsComponent implements OnInit {
         console.error('Error loading jobs:', error);
       }
     });
+  }
+
+  openJobDetailsModal(job: any) {
+    this.selectedJob = job;
+    this.showJobDetailsModal = true;
+  }
+
+
+// Method to close the modal
+  closeJobDetailsModal() {
+    this.showJobDetailsModal = false;
+    this.selectedJob = null;
   }
 
   // Load clients and managers from database
@@ -227,6 +239,25 @@ export class JobsComponent implements OnInit {
         console.error('Error updating job:', error);
       }
     });
+  }
+
+  editJobFromModal(job: JobResponse): void {
+    // Close the details modal first
+    this.closeJobDetailsModal();
+
+    // Then open the edit modal
+    setTimeout(() => {
+      this.openEditModal(job);
+    }, 100);
+  }
+  deleteJobFromModal(job: JobResponse): void {
+    // Close the details modal first
+    this.closeJobDetailsModal();
+
+    // Then open the edit modal
+    setTimeout(() => {
+      this.openDeleteModal(job);
+    }, 100);
   }
 
   // Delete job (confirmed from modal)

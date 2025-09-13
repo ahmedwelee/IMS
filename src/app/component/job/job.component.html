@@ -121,7 +121,7 @@
               <td>
                 <div class="btn-group" role="group">
                   <button type="button" class="btn btn-outline-primary btn-sm"
-                          (click)="loadJob(job.id)">
+                          (click)="openJobDetailsModal(job)">
                     <i class="fas fa-eye"></i> View
                   </button>
                   <button type="button" class="btn btn-outline-warning btn-sm ms-1"
@@ -145,46 +145,6 @@
             </tr>
             </tbody>
           </table>
-        </div>
-
-        <!-- Selected Job Details -->
-        <div class="card mt-4" *ngIf="selectedJob">
-          <div class="card-header">
-            <h5 class="card-title mb-0">Job Details</h5>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-md-6">
-                <h6>Job Information</h6>
-                <p><strong>Job Title:</strong> {{ selectedJob?.jopName }}</p>
-                <p><strong>Description:</strong> {{ selectedJob?.description }}</p>
-                <p><strong>Type:</strong>
-                  <span class="badge" [class]="getJobTypeBadgeClass(selectedJob?.jobType)">
-                    {{ getJobTypeDisplay(selectedJob?.jobType) }}
-                  </span>
-                </p>
-                <p><strong>Location:</strong> {{ selectedJob?.location }}</p>
-                <p><strong>Salary:</strong> ${{ formatSalary(selectedJob?.salary) }}</p>
-              </div>
-              <div class="col-md-6">
-                <h6>Status Information</h6>
-                <p><strong>Status:</strong>
-                  <span class="badge" [class]="getStatusBadgeClass(selectedJob?.status)">
-                    {{ getStatusDisplay(selectedJob?.status) }}
-                  </span>
-                </p>
-                <p><strong>Posted Date:</strong> {{ selectedJob?.postedDate | date : 'dd-MM-yyyy' }}</p>
-                <p><strong>Applications:</strong>
-                  <button class="btn btn-link p-0 text-decoration-none"
-                          (click)="viewApplications(selectedJob.id)">
-                    <span class="badge bg-info">{{ selectedJob?.applicationsCount }}</span>
-                  </button>
-                </p>
-                <p><strong>Client:</strong> {{ selectedJob?.clientName || 'Not assigned' }}</p>
-                <p><strong>Manager:</strong> {{ selectedJob?.managerName || 'Not assigned' }}</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -255,7 +215,7 @@
                       [ngModel]="currentJob.status"
                       (ngModelChange)="currentJob.status = $event"
                       name="status" required>
-                <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
+                <option *ngFor="let status of statusOptions" [value]="status.value">{{ status.label }}</option>
               </select>
             </div>
           </div>
@@ -351,7 +311,194 @@
   </div>
 </div>
 
+<div class="modal fade" [class.show]="showJobDetailsModal" [style.display]="showJobDetailsModal ? 'block' : 'none'"
+     *ngIf="showJobDetailsModal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-briefcase me-2"></i>
+          Job Details
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeJobDetailsModal()"></button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedJob">
+        <!-- Job Header Info -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="d-flex align-items-center p-3 bg-light rounded">
+              <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                   style="width: 60px; height: 60px;">
+                <i class="fas fa-briefcase text-white fs-3"></i>
+              </div>
+              <div class="flex-grow-1">
+                <h4 class="mb-1">{{selectedJob?.jopName}}</h4>
+                <span class="badge me-2" [class]="getJobTypeBadgeClass(selectedJob?.jobType)">
+                  {{getJobTypeDisplay(selectedJob?.jobType)}}
+                </span>
+                <span class="badge" [class]="getStatusBadgeClass(selectedJob?.status)">
+                  {{getStatusDisplay(selectedJob?.status)}}
+                </span>
+              </div>
+              <div class="text-end">
+                <div class="text-muted small">
+                  <i class="fas fa-calendar me-1"></i>
+                  Posted: {{selectedJob?.postedDate | date:'mediumDate'}}
+                </div>
+                <div class="text-success small mt-1">
+                  <i class="fas fa-dollar-sign me-1"></i>
+                  ${{formatSalary(selectedJob?.salary)}}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="text-primary border-bottom pb-2">
+              <i class="fas fa-info-circle me-2"></i>Job Information
+            </h6>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Job Title:</label>
+              <p class="mb-2">
+                <i class="fas fa-tag text-muted me-1"></i>
+                {{selectedJob?.jopName}}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Description:</label>
+              <p class="mb-2">
+                <i class="fas fa-align-left text-muted me-1"></i>
+                {{selectedJob?.description}}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Job Type:</label>
+              <div>
+                <span class="badge" [class]="getJobTypeBadgeClass(selectedJob?.jobType)">
+                  {{getJobTypeDisplay(selectedJob?.jobType)}}
+                </span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Location:</label>
+              <p class="mb-2">
+                <i class="fas fa-map-marker-alt text-muted me-1"></i>
+                {{selectedJob?.location}}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Salary:</label>
+              <p class="mb-2">
+                <i class="fas fa-dollar-sign text-muted me-1"></i>
+                ${{formatSalary(selectedJob?.salary)}}
+              </p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <h6 class="text-success border-bottom pb-2">
+              <i class="fas fa-chart-line me-2"></i>Status & Activity
+            </h6>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Current Status:</label>
+              <div>
+                <span class="badge" [class]="getStatusBadgeClass(selectedJob?.status)">
+                  {{getStatusDisplay(selectedJob?.status)}}
+                </span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Posted Date:</label>
+              <p class="mb-2">
+                <i class="fas fa-calendar-plus text-muted me-1"></i>
+                {{selectedJob?.postedDate | date:'longDate'}}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Applications:</label>
+              <p class="mb-2">
+                <button class="btn btn-link p-0 text-decoration-none"
+                        (click)="viewApplications(selectedJob.id)">
+                  <i class="fas fa-file-alt text-muted me-1"></i>
+                  <span class="badge bg-info">{{selectedJob?.applicationsCount}}</span>
+                  <span class="ms-1">View Applications</span>
+                </button>
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Assigned Client:</label>
+              <p class="mb-2">
+                <i class="fas fa-user-tie text-muted me-1"></i>
+                <span *ngIf="selectedJob?.clientName; else noClient">
+                  {{selectedJob?.clientName}}
+                </span>
+                <ng-template #noClient>
+                  <span class="text-muted">Not assigned</span>
+                </ng-template>
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Project Manager:</label>
+              <p class="mb-2">
+                <i class="fas fa-user-cog text-muted me-1"></i>
+                <span *ngIf="selectedJob?.managerName; else noManager">
+                  {{selectedJob?.managerName}}
+                </span>
+                <ng-template #noManager>
+                  <span class="text-muted">Not assigned</span>
+                </ng-template>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions Section -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-outline-primary btn-sm"
+                      (click)="viewApplications(selectedJob.id)">
+                <i class="fas fa-file-alt me-1"></i>
+                View Applications {{selectedJob?.applicationsCount}}
+              </button>
+              <button class="btn btn-outline-warning btn-sm"
+                      (click)="editJobFromModal(selectedJob)">
+                <i class="fas fa-edit me-1"></i>Edit Job
+              </button>
+              <button class="btn btn-outline-danger btn-sm"
+                      (click)="deleteJobFromModal(selectedJob)">
+                <i class="fas fa-trash me-1"></i>Delete Job
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer bg-light">
+        <div>
+          <button type="button" class="btn btn-secondary" (click)="closeJobDetailsModal()">
+            <i class="fas fa-times me-1"></i>Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal backdrop -->
 <div class="modal-backdrop fade show"
-     [class.d-block]="showModal || showDeleteModal"
+     [class.d-block]="showModal || showDeleteModal || showJobDetailsModal"
      *ngIf="showModal || showDeleteModal"></div>

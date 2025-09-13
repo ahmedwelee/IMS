@@ -8,7 +8,7 @@ import { SalesRatioComponent } from "./dashboard-components/sales-ratio/sales-ra
 import { FeedsComponent } from "./dashboard-components/feeds/feeds.component";
 import { TopSellingComponent } from "./dashboard-components/top-selling/top-selling.component";
 import { TopCardsComponent } from "./dashboard-components/top-cards/top-cards.component";
-import { BlogCardsComponent } from "./dashboard-components/blog-cards/blog-cards.component";
+
 
 
 const routes: Routes = [
@@ -36,7 +36,6 @@ const routes: Routes = [
     FeedsComponent,
     TopSellingComponent,
     TopCardsComponent,
-    BlogCardsComponent
   ],
 })
 export class DashboardModule {}

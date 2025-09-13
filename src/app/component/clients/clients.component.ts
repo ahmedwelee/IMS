@@ -28,6 +28,7 @@ export class ClientsComponent implements OnInit {
   showModal: boolean = false;
   isEditMode: boolean = false;
   showDeleteClientModal: boolean = false;
+  showClientDetailsModal: boolean = false; // New modal property
   clientToDelete: ClientResponse | null = null;
 
   currentClient: ClientRequest = {
@@ -45,7 +46,7 @@ export class ClientsComponent implements OnInit {
     private clientsService: ClientsService,
     private employeeService: EmployeesService,
     private jobService: JobService,
-    private router: Router  // Add Router injection
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -76,16 +77,18 @@ export class ClientsComponent implements OnInit {
     });
   }
 
-  loadClient(id: number): void {
-    this.clientsService.getClientById(id).subscribe({
-      next: (client) => {
-        this.selectedClient = client;
-      },
-      error: (error) => {
-        console.error('Error loading client:', error);
-      }
-    });
+  // Client Details Modal Methods
+  openClientDetailsModal(client: ClientResponse): void {
+    this.selectedClient = client;
+    this.showClientDetailsModal = true;
   }
+
+  closeClientDetailsModal(): void {
+    this.showClientDetailsModal = false;
+    this.selectedClient = null;
+  }
+
+  // Updated loadClient method to use modal
 
   // Navigation method for viewing client jobs
   viewClientJobs(clientId: number): void {
@@ -97,11 +100,12 @@ export class ClientsComponent implements OnInit {
     if (clientId) {
       const client = this.clients.find(c => c.id === clientId);
       this.router.navigate(['/client-jobs', clientId], {
-        state: { client: client }  // Pass client data if needed
+        state: { client: client }
       });
     }
   }
 
+  // Create/Edit Modal Methods
   openCreateModal(): void {
     this.isEditMode = false;
     this.currentClient = {
@@ -157,6 +161,10 @@ export class ClientsComponent implements OnInit {
         }
         this.selectedClient = updatedClient;
         this.closeModal();
+        // Refresh the details modal if it's open
+        if (this.showClientDetailsModal) {
+          this.selectedClient = updatedClient;
+        }
       },
       error: (error) => {
         console.error('Error updating client:', error);
@@ -164,6 +172,7 @@ export class ClientsComponent implements OnInit {
     });
   }
 
+  // Delete Modal Methods
   openDeleteClientModal(client: ClientResponse): void {
     this.clientToDelete = client;
     this.showDeleteClientModal = true;
@@ -183,6 +192,7 @@ export class ClientsComponent implements OnInit {
         this.clients = this.clients.filter(c => c.id !== clientId);
         if (this.selectedClient?.id === clientId) {
           this.selectedClient = null;
+          this.showClientDetailsModal = false;
         }
         this.closeDeleteClientModal();
       },
@@ -192,6 +202,19 @@ export class ClientsComponent implements OnInit {
       }
     });
   }
+
+  // Quick Action Methods for Client Details Modal
+  editClientFromModal(client: ClientResponse): void {
+    this.closeClientDetailsModal(); // Close details modal
+    this.openEditModal(client); // Open edit modal
+  }
+
+  deleteClientFromModal(client: ClientResponse): void {
+    this.closeClientDetailsModal(); // Close details modal
+    this.openDeleteClientModal(client); // Open delete modal
+  }
+
+
 
   // Utility methods
   getEmployeeName(employeeId: number | null | undefined): string {

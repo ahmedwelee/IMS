@@ -25,6 +25,8 @@ export class EmployeesComponent implements OnInit {
   showModal: boolean = false;
   isEditMode: boolean = false;
   showDeleteModal: boolean = false;
+  showEmployeeDetailsModal: boolean = false; // New property for details modal
+
   currentEmployee: EmployeeRequest = {
     email: '',
     firstName: '',
@@ -72,6 +74,61 @@ export class EmployeesComponent implements OnInit {
     });
   }
 
+  // NEW: Open employee details modal
+  openEmployeeDetailsModal(employee: EmployeeResponse): void {
+    this.selectedEmployee = employee;
+    this.showEmployeeDetailsModal = true;
+    // Add body class to prevent scrolling
+    document.body.classList.add('modal-open');
+  }
+
+  // NEW: Close employee details modal
+  closeEmployeeDetailsModal(): void {
+    this.showEmployeeDetailsModal = false;
+    this.selectedEmployee = null;
+    // Remove body class to restore scrolling
+    document.body.classList.remove('modal-open');
+  }
+
+  // NEW: Handle backdrop click for employee details modal
+  onEmployeeModalBackdropClick(event: Event): void {
+    if (event.target === event.currentTarget) {
+      this.closeEmployeeDetailsModal();
+    }
+  }
+
+  // NEW: Edit employee from details modal
+  editEmployeeFromModal(employee: EmployeeResponse): void {
+    // Close the details modal first
+    this.closeEmployeeDetailsModal();
+
+    // Then open the edit modal
+    setTimeout(() => {
+      this.openEditModal(employee);
+    }, 100);
+  }
+
+  // NEW: Delete employee from details modal
+  deleteEmployeeFromModal(employee: EmployeeResponse): void {
+    // Close the details modal first
+    this.closeEmployeeDetailsModal();
+
+    // Then open the delete confirmation modal
+    setTimeout(() => {
+      this.openDeleteModal(employee);
+    }, 100);
+  }
+
+  // NEW: View employee's job details
+  viewEmployeeJob(employee: EmployeeResponse): void {
+    // Close employee modal
+    this.closeEmployeeDetailsModal();
+
+    // Your logic to show job details
+    console.log('View job for employee:', employee.jopName);
+    // Example: this.openJobDetailsModal(employee.jobId);
+  }
+
   // Open create modal
   openCreateModal(): void {
     this.isEditMode = false;
@@ -89,7 +146,7 @@ export class EmployeesComponent implements OnInit {
     this.showModal = true;
   }
 
-  // Open edit modal
+  // Open edit modal - Updated to work with details modal
   openEditModal(employee: EmployeeResponse): void {
     this.isEditMode = true;
 
@@ -246,12 +303,12 @@ export class EmployeesComponent implements OnInit {
     }
   }
 
-  // Calculate age from date of birth
+  // Calculate age from date of birth - Enhanced
   calculateAge(dateOfBirth: string | undefined): number {
     if (!dateOfBirth) return 0;
 
-    const birthDate = new Date(dateOfBirth);
     const today = new Date();
+    const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
 
@@ -262,19 +319,25 @@ export class EmployeesComponent implements OnInit {
     return age;
   }
 
-  // Calculate tenure from start date
+  // Calculate tenure from start date - Enhanced
   calculateTenure(startDate: string | undefined): string {
-    if (!startDate) return '0 years, 0 months';
+    if (!startDate) return 'Unknown';
 
     const start = new Date(startDate);
     const today = new Date();
-    const years = today.getFullYear() - start.getFullYear();
-    const months = today.getMonth() - start.getMonth();
+    const diffTime = Math.abs(today.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (months < 0) {
-      return `${years - 1} years, ${12 + months} months`;
+    const years = Math.floor(diffDays / 365);
+    const months = Math.floor((diffDays % 365) / 30);
+
+    if (years > 0) {
+      return `${years} year${years > 1 ? 's' : ''}, ${months} month${months !== 1 ? 's' : ''}`;
+    } else if (months > 0) {
+      return `${months} month${months !== 1 ? 's' : ''}`;
+    } else {
+      return `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
     }
-    return `${years} years, ${months} months`;
   }
 
   // Format salary with commas
@@ -308,5 +371,4 @@ export class EmployeesComponent implements OnInit {
     if (!position) return 'Unknown';
     return position.toString();
   }
-
 }

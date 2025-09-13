@@ -60,7 +60,7 @@
               <td>
                 <div class="btn-group" role="group">
                   <button type="button" class="btn btn-outline-primary btn-sm"
-                          (click)="loadEmployee(emp.id)">
+                          (click)="openEmployeeDetailsModal(emp)">
                     <i class="fas fa-eye"></i> View
                   </button>
                   <button type="button" class="btn btn-outline-warning btn-sm ms-1"
@@ -84,43 +84,6 @@
             </tr>
             </tbody>
           </table>
-        </div>
-
-        <!-- Selected Employee Details -->
-        <div class="card mt-4" *ngIf="selectedEmployee">
-          <div class="card-header">
-            <h5 class="card-title mb-0">Employee Details</h5>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-md-6">
-                <h6>Personal Information</h6>
-                <p><strong>Full Name:</strong> {{selectedEmployee?.fullName}}</p>
-                <p><strong>Email:</strong> {{selectedEmployee?.email}}</p>
-                <p><strong>Date of Birth:</strong> {{selectedEmployee?.dateOfBirth | date:'longDate'}}</p>
-                <p><strong>Age:</strong> {{calculateAge(selectedEmployee?.dateOfBirth)}} years</p>
-              </div>
-              <div class="col-md-6">
-                <h6>Employment Information</h6>
-                <p><strong>Start Date:</strong> {{selectedEmployee?.startDate | date:'longDate'}}</p>
-                <p><strong>Tenure:</strong> {{calculateTenure(selectedEmployee?.startDate)}}</p>
-                <p><strong>Title:</strong> {{selectedEmployee?.title}}</p>
-                <p><strong>Position:</strong>
-                  <span class="badge" [class]="getPositionBadgeClass(selectedEmployee?.position)">
-                    {{getPositionDisplay(selectedEmployee?.position)}}
-                  </span>
-                </p>
-                <p><strong>Salary:</strong> ${{formatSalary(selectedEmployee?.salary)}}</p>
-              </div>
-            </div>
-            <div class="row mt-3">
-              <div class="col-md-6">
-                <h6>Assignment Information</h6>
-                <p><strong>Job:</strong> {{selectedEmployee?.jopName || 'Not assigned'}}</p>
-                <p><strong>Client:</strong> {{selectedEmployee?.clientName || 'Not assigned'}}</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -268,6 +231,166 @@
         <button type="button" class="btn btn-danger" (click)="confirmDeleteEmployee()">
           <i class="fas fa-trash me-1"></i> Delete Employee
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Employee details -->
+<div class="modal fade" [class.show]="showEmployeeDetailsModal" [style.display]="showEmployeeDetailsModal ? 'block' : 'none'"
+     *ngIf="showEmployeeDetailsModal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-user me-2"></i>
+          Employee Details
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeEmployeeDetailsModal()"></button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedEmployee">
+        <!-- Employee Header Info -->
+        <div class="row mb-3">
+          <div class="col-12">
+            <div class="d-flex align-items-center p-3 bg-light rounded">
+              <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                   style="width: 50px; height: 50px;">
+                <span class="text-white fw-bold fs-3">{{selectedEmployee.fullName?.charAt(0) | uppercase}}</span>
+              </div>
+              <div class="flex-grow-1">
+                <h4 class="mb-1">{{selectedEmployee.fullName}}</h4>
+                <p class="mb-0 text-muted">{{selectedEmployee.email}}</p>
+              </div>
+              <div class="text-end">
+                <div class="text-muted small">
+                  <i class="fas fa-calendar me-1"></i>
+                  Started: {{selectedEmployee?.startDate | date:'mediumDate'}}
+                </div>
+                <div class="text-muted small mt-1">
+                  <i class="fas fa-clock me-1"></i>
+                  Tenure: {{calculateTenure(selectedEmployee?.startDate)}}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-5">
+            <h6 class="text-primary border-bottom pb-2">
+              <i class="fas fa-user-circle me-2"></i>Personal Information
+            </h6>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Full Name:</label>
+              <p class="mb-2">
+                <i class="fas fa-id-badge text-muted me-1"></i>
+                {{selectedEmployee?.fullName}}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Email Address:</label>
+              <p class="mb-2">
+                <i class="fas fa-envelope text-muted me-1"></i>
+                <a [href]="'mailto:' + selectedEmployee?.email" class="text-decoration-none">
+                  {{selectedEmployee?.email}}
+                </a>
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Date of Birth:</label>
+              <p class="mb-2">
+                <i class="fas fa-birthday-cake text-muted me-1"></i>
+                {{selectedEmployee?.dateOfBirth | date:'longDate'}}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Age:</label>
+              <p class="mb-2">
+                <i class="fas fa-calculator text-muted me-1"></i>
+                {{calculateAge(selectedEmployee?.dateOfBirth)}} years
+              </p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <h6 class="text-success border-bottom pb-2">
+              <i class="fas fa-briefcase me-2"></i>Employment Information
+            </h6>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Start Date:</label>
+              <p class="mb-2">
+                <i class="fas fa-calendar-plus text-muted me-1"></i>
+                {{selectedEmployee?.startDate | date:'longDate'}}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Tenure:</label>
+              <p class="mb-2">
+                <i class="fas fa-hourglass-half text-muted me-1"></i>
+                {{calculateTenure(selectedEmployee?.startDate)}}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Job Title:</label>
+              <p class="mb-2">
+                <i class="fas fa-user-tag text-muted me-1"></i>
+                {{selectedEmployee?.title}}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Position:</label>
+              <div>
+                <span class="badge" [class]="getPositionBadgeClass(selectedEmployee?.position)">
+                  {{getPositionDisplay(selectedEmployee?.position)}}
+                </span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Salary:</label>
+              <p class="mb-2">
+                <i class="fas fa-dollar-sign text-muted me-1"></i>
+                ${{formatSalary(selectedEmployee?.salary)}}
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Quick Actions Section -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-outline-warning btn-sm"
+                      (click)="editEmployeeFromModal(selectedEmployee)">
+                <i class="fas fa-edit me-1"></i>Edit Employee
+              </button>
+              <button class="btn btn-outline-danger btn-sm"
+                      (click)="deleteEmployeeFromModal(selectedEmployee)">
+                <i class="fas fa-trash me-1"></i>Delete Employee
+              </button>
+              <button class="btn btn-outline-info btn-sm"
+                      *ngIf="selectedEmployee?.jopName"
+                      (click)="viewEmployeeJob(selectedEmployee)">
+                <i class="fas fa-eye me-1"></i>View Job Details
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer bg-light">
+        <div>
+          <button type="button" class="btn btn-secondary" (click)="closeEmployeeDetailsModal()">
+            <i class="fas fa-times me-1"></i>Close
+          </button>
+        </div>
       </div>
     </div>
   </div>

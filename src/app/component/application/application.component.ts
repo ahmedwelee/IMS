@@ -5,7 +5,7 @@ import { ApplicationResponse } from '../../service/application-response';
 import { EmployeesService } from '../../service/employee.service';
 import { JobService } from '../../service/job.service';
 import {FormsModule} from "@angular/forms";
-import {NgForOf, NgIf} from "@angular/common";
+import {NgForOf, NgIf, UpperCasePipe} from "@angular/common";
 
 @Component({
   selector: 'app-applications',
@@ -14,7 +14,8 @@ import {NgForOf, NgIf} from "@angular/common";
   imports: [
     FormsModule,
     NgForOf,
-    NgIf
+    NgIf,
+    UpperCasePipe
   ]
 })
 export class ApplicationsComponent implements OnInit {
@@ -23,6 +24,7 @@ export class ApplicationsComponent implements OnInit {
   showModal: boolean = false;
   isEditMode: boolean = false;
   showDecisionModal: boolean = false;
+  showApplicationDetailsModal: boolean = false; // New property for details modal
   currentDecision: 'HIRED' | 'REJECTED' | null = null;
   decisionFeedback: string = '';
 
@@ -101,12 +103,40 @@ export class ApplicationsComponent implements OnInit {
     });
   }
 
-  // Open decision modal (accept or reject)
+  // NEW: Open application details modal
+  openApplicationDetailsModal(application: ApplicationResponse): void {
+    this.selectedApplication = application;
+    this.showApplicationDetailsModal = true;
+    // Add body class to prevent scrolling
+    document.body.classList.add('modal-open');
+  }
+
+  // NEW: Close application details modal
+  closeApplicationDetailsModal(): void {
+    this.showApplicationDetailsModal = false;
+    this.selectedApplication = null;
+    // Remove body class to restore scrolling
+    document.body.classList.remove('modal-open');
+  }
+
+  // NEW: Handle backdrop click for application details modal
+  onApplicationModalBackdropClick(event: Event): void {
+    if (event.target === event.currentTarget) {
+      this.closeApplicationDetailsModal();
+    }
+  }
+
+  // Open decision modal (accept or reject) - Updated to work with details modal
   openDecisionModal(application: ApplicationResponse, decision: 'HIRED' | 'REJECTED'): void {
     this.selectedApplication = application;
     this.currentDecision = decision;
     this.decisionFeedback = '';
     this.showDecisionModal = true;
+    // Close application details modal if open
+    if (this.showApplicationDetailsModal) {
+      this.showApplicationDetailsModal = false;
+      document.body.classList.remove('modal-open');
+    }
   }
 
   // Close decision modal
@@ -116,7 +146,7 @@ export class ApplicationsComponent implements OnInit {
     this.decisionFeedback = '';
   }
 
-  // Confirm decision (accept or reject)
+  // Confirm decision (accept or reject) - Updated
   confirmDecision(): void {
     if (!this.selectedApplication || !this.currentDecision) return;
 
@@ -145,6 +175,11 @@ export class ApplicationsComponent implements OnInit {
         }
 
         this.closeDecisionModal();
+
+        // Optionally reopen the details modal to show updated status
+        // setTimeout(() => {
+        //   this.openApplicationDetailsModal(updatedApplication);
+        // }, 100);
       },
       error: (error) => {
         console.error('Error updating application:', error);
@@ -153,7 +188,7 @@ export class ApplicationsComponent implements OnInit {
     });
   }
 
-  // Reset application status to PENDING
+  // Reset application status to PENDING - Updated
   resetApplicationStatus(application: ApplicationResponse): void {
     if (confirm(`Are you sure you want to reset the status of ${application.candidateFullName}'s application?`)) {
       const updateRequest: ApplicationRequest = {
@@ -174,6 +209,9 @@ export class ApplicationsComponent implements OnInit {
           if (this.selectedApplication?.id === application.id) {
             this.selectedApplication = updatedApplication;
           }
+
+          // Optionally close the details modal after reset
+          // this.closeApplicationDetailsModal();
         },
         error: (error) => {
           console.error('Error resetting application status:', error);
