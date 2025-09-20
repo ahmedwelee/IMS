@@ -23,9 +23,9 @@ services:
       - 1025:1025
   keycloak:
     container_name: keycloak-ims
-    image: quay.io/keycloak/keycloak:26.3.3
+    image: quay.io/keycloak/keycloak:26.2.0
     ports:
-      - 9090:8080
+      - 8080:8080
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin

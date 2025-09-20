@@ -21,7 +21,9 @@ public class EmployeeMapper {
                 .email(employee.getEmail())
                 .dateOfBirth(employee.getDateOfBirth())
                 .startDate(employee.getStartDate())
+                .title(employee.getTitle())
                 .position(employee.getPosition())
+                .salary(employee.getSalary())
                 .jopName(employee.getJop() != null ? employee.getJop().getJopName() : null)
                 .clientName(employee.getClient() != null ? employee.getClient().getName() : null)
                 .build();
@@ -34,7 +36,9 @@ public class EmployeeMapper {
                 .lastName(request.lastName())
                 .dateOfBirth(request.dateOfBirth())
                 .startDate(request.startDate())
+                .title(request.title())
                 .position(request.position())
+                .salary(request.salary())
                 .jop(jop != null ? jop : null)
                 .client(client != null ? client : null)
                 .build();

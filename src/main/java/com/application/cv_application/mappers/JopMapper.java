@@ -7,26 +7,38 @@ import com.application.cv_application.requests.JopRequest;
 import com.application.cv_application.response.JopResponse;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 public class JopMapper {
-
-    public JopResponse toResponse(Jop jop) {
-        return JopResponse.builder()
-                .id(jop.getId())
-                .jopName(jop.getJopName())
-                .description(jop.getDescription())
-                .clientName(jop.getClient() != null ? jop.getClient().getName() : null)
-                .managerName(jop.getManager() != null ? jop.getManager().getFullName() : null)
-                .build();
+    public static Jop toEntity(JopRequest request, Client client, Employee manager) {
+        Jop jop = new Jop();
+        jop.setJopName(request.jopName());
+        jop.setDescription(request.description());
+        jop.setSalary(request.salary());
+        jop.setJobType(request.jobType());
+        jop.setLocation(request.location());
+        jop.setStatus(request.status());
+        jop.setPostedDate(LocalDateTime.now());
+        jop.setClient(client);
+        jop.setManager(manager);
+        return jop;
     }
 
-    public Jop toJop(JopRequest request, Client client, Employee manager) {
-        return Jop.builder()
-                .jopName(request.jopName())
-                .description(request.description())
-                .client(client)
-                .manager(manager)
-                .build();
+    public static JopResponse toResponse(Jop jop) {
+        return new JopResponse(
+                jop.getId(),
+                jop.getJopName(),
+                jop.getDescription(),
+                jop.getSalary(),
+                jop.getJobType(),
+                jop.getLocation(),
+                jop.getStatus(),
+                jop.getPostedDate(),
+                jop.getClient() != null ? jop.getClient().getName() : null,
+                jop.getManager() != null ? jop.getManager().getFullName() : null,
+                jop.getApplications() != null ? jop.getApplications().size() : 0  // ✅ count applications
+        );
     }
 }
 

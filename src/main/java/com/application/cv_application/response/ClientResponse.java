@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @Builder
@@ -23,5 +22,5 @@ public class ClientResponse {
     private LocalDate updatedAt;
     private Integer employeeId;
     private String employeeName;
-    private List<String> jopNames;
+    private Integer jobsCount;
 }

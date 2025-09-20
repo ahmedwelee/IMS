@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,6 +21,11 @@ public class Jop {
     private Integer id;
     private String jopName;
     private String description;
+    private Integer salary;
+    private String jobType;
+    private String location;
+    private String status;
+    private LocalDateTime postedDate;
 
     @OneToMany(mappedBy = "jop")
     private List<Employee> employees;

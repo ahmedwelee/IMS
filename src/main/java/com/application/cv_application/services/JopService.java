@@ -9,6 +9,7 @@ import com.application.cv_application.repositories.EmployeeRepository;
 import com.application.cv_application.repositories.JopRepository;
 import com.application.cv_application.requests.JopRequest;
 import com.application.cv_application.response.JopResponse;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,46 +25,79 @@ public class JopService {
     private final EmployeeRepository employeeRepository;
     private final JopMapper jopMapper;
 
-    public JopResponse saveJop(JopRequest request) {
+    public JopResponse createJop(JopRequest request) {
         Client client = clientRepository.findById(request.clientId())
-                .orElseThrow(() -> new RuntimeException("Client not found"));
-        Employee manager = employeeRepository.findById(request.managerId())
-                .orElseThrow(() -> new RuntimeException("Manager not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
-        Jop jop = jopMapper.toJop(request, client, manager);
-        return jopMapper.toResponse(jopRepository.save(jop));
+        Employee manager = employeeRepository.findById(request.managerId())
+                .orElseThrow(() -> new EntityNotFoundException("Manager not found"));
+
+        Jop jop = JopMapper.toEntity(request, client, manager);
+        return JopMapper.toResponse(jopRepository.save(jop));
     }
 
     public List<JopResponse> getAllJops() {
-        return jopRepository.findAll().stream()
-                .map(jopMapper::toResponse)
+        return jopRepository.findAll()
+                .stream()
+                .map(JopMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     public JopResponse getJopById(Integer id) {
         Jop jop = jopRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Jop not found"));
-        return jopMapper.toResponse(jop);
+                .orElseThrow(() -> new EntityNotFoundException("Jop not found"));
+        return JopMapper.toResponse(jop);
     }
 
     public JopResponse updateJop(Integer id, JopRequest request) {
         Jop jop = jopRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Jop not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Jop not found"));
 
         Client client = clientRepository.findById(request.clientId())
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Client not found"));
+
         Employee manager = employeeRepository.findById(request.managerId())
-                .orElseThrow(() -> new RuntimeException("Manager not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Manager not found"));
 
         jop.setJopName(request.jopName());
         jop.setDescription(request.description());
+        jop.setSalary(request.salary());
+        jop.setJobType(request.jobType());
+        jop.setLocation(request.location());
+        jop.setStatus(request.status());
+        // check if it's updated to OPEN => we set a new value : jop.setPostedDate(request.postedDate());
         jop.setClient(client);
         jop.setManager(manager);
 
-        return jopMapper.toResponse(jopRepository.save(jop));
+        return JopMapper.toResponse(jopRepository.save(jop));
     }
 
     public void deleteJop(Integer id) {
+        if (!jopRepository.existsById(id)) {
+            throw new EntityNotFoundException("Jop not found");
+        }
         jopRepository.deleteById(id);
+    }
+
+    public List<JopResponse> getJobsByStatus(String status) {
+        return jopRepository.findByStatusIgnoreCase(status).stream()
+                .map(JopMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<JopResponse> getJobsByClient(Integer clientId) {
+        return jopRepository.findByClient_Id(clientId).stream()
+                .map(JopMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<JopResponse> getJobsByType(String jobType) {
+        return jopRepository.findByJobTypeIgnoreCase(jobType).stream()
+                .map(JopMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public int countJobs() {
+        return (int) jopRepository.count();
     }
 }

@@ -7,9 +7,10 @@ import com.application.cv_application.repositories.ClientRepository;
 import com.application.cv_application.repositories.EmployeeRepository;
 import com.application.cv_application.requests.ClientRequest;
 import com.application.cv_application.response.ClientResponse;
-import jakarta.persistence.EntityNotFoundException;
+import com.application.cv_application.response.TopClientsResponse;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -74,5 +75,32 @@ public class ClientService {
             throw new RuntimeException("Client not found with id " + id);
         }
         clientRepository.deleteById(id);
+    }
+
+    public List<ClientResponse> searchClientsByName(String name) {
+        return clientRepository.findByNameContainingIgnoreCase(name).stream()
+                .map(clientMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<ClientResponse> getClientsByType(String type) {
+        return clientRepository.findByType(type).stream()
+                .map(clientMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<ClientResponse> getClientsByEmployee(Integer employeeId) {
+        return clientRepository.findByEmployeeId(employeeId).stream()
+                .map(clientMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public int countClients() {
+        return (int) clientRepository.count();
+    }
+
+    public List<TopClientsResponse> getTopClientsByJobCount(int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        return clientRepository.findTopClientsByJobCount(pageable);
     }
 }

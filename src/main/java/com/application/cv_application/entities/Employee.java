@@ -1,5 +1,6 @@
 package com.application.cv_application.entities;
 
+import com.application.cv_application.enums.Position;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,10 +20,10 @@ import java.util.List;
 public class Employee extends User {
 
     private LocalDate startDate;
-    // position to be used as enum: DIRECTOR, MANAGER, ADMINISTRATION, CONSULTANT
-    private String position;
-
-    // title: to have the employee title: Java developer, Business manager, ...
+    private String title;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Position position;
 
     @ManyToOne
     @JoinColumn(name = "jop_id")

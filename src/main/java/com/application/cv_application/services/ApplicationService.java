@@ -9,10 +9,12 @@ import com.application.cv_application.repositories.CandidateRepository;
 import com.application.cv_application.repositories.JopRepository;
 import com.application.cv_application.requests.ApplicationRequest;
 import com.application.cv_application.response.ApplicationResponse;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,14 +35,14 @@ public class ApplicationService {
     public ApplicationResponse getApplicationById(Integer id) {
         return applicationRepository.findById(id)
                 .map(mapper::toResponse)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Application not found"));
     }
 
     public ApplicationResponse createApplication(ApplicationRequest request) {
         Candidate candidate = candidateRepository.findById(request.candidateId())
-                .orElseThrow(() -> new RuntimeException("Candidate not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Candidate not found"));
         Jop jop = jopRepository.findById(request.jopId())
-                .orElseThrow(() -> new RuntimeException("Jop not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Jop not found"));
 
         Application application = mapper.toEntity(request, candidate, jop);
         return mapper.toResponse(applicationRepository.save(application));
@@ -48,12 +50,12 @@ public class ApplicationService {
 
     public ApplicationResponse updateApplication(Integer id, ApplicationRequest request) {
         Application existing = applicationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Application not found"));
 
         Candidate candidate = candidateRepository.findById(request.candidateId())
-                .orElseThrow(() -> new RuntimeException("Candidate not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Candidate not found"));
         Jop jop = jopRepository.findById(request.jopId())
-                .orElseThrow(() -> new RuntimeException("Jop not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Jop not found"));
 
         existing.setApplicationName(request.applicationName());
         existing.setAppliedDate(request.appliedDate());
@@ -67,6 +69,34 @@ public class ApplicationService {
 
     public void deleteApplication(Integer id) {
         applicationRepository.deleteById(id);
+    }
+
+    public List<ApplicationResponse> getApplicationsByStatus(String status) {
+        return applicationRepository.findByStatus(status).stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<ApplicationResponse> getApplicationsByCandidate(Integer candidateId) {
+        return applicationRepository.findByCandidateId(candidateId).stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<ApplicationResponse> getApplicationsByJob(Integer jopId) {
+        return applicationRepository.findByJopId(jopId).stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<ApplicationResponse> searchApplications(String query) {
+        return applicationRepository.searchApplications(query).stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public int getCount() {
+        return (int) applicationRepository.count();
     }
 }
 

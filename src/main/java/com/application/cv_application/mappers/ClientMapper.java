@@ -35,19 +35,14 @@ public class ClientMapper {
         response.setEmail(client.getEmail());
         response.setCreatedAt(client.getCreatedAt());
         response.setUpdatedAt(client.getUpdatedAt());
+        response.setJobsCount(client.getJops() != null ? client.getJops().size() : 0);
 
         if (client.getEmployee() != null) {
             response.setEmployeeId(client.getEmployee().getId());
             response.setEmployeeName(client.getEmployee().getFullName());
         }
 
-        if (client.getJops() != null) {
-            response.setJopNames(
-                    client.getJops().stream()
-                            .map(Jop::getJopName)
-                            .collect(Collectors.toList())
-            );
-        }
+
 
         return response;
     }

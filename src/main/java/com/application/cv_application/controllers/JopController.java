@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/jops")
+@RequestMapping("/jobs")
 @RequiredArgsConstructor
 public class JopController {
 
@@ -22,7 +22,7 @@ public class JopController {
     public ResponseEntity<JopResponse> create(
             @RequestBody JopRequest request
     ) {
-        return ResponseEntity.ok(service.saveJop(request));
+        return ResponseEntity.ok(service.createJop(request));
     }
 
     @GetMapping
@@ -35,6 +35,29 @@ public class JopController {
             @PathVariable Integer id
     ) {
         return ResponseEntity.ok(service.getJopById(id));
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<JopResponse>> getJobsByStatus(@PathVariable String status) {
+        return ResponseEntity.ok(service.getJobsByStatus(status));
+    }
+
+    // ✅ GET /jobs/client/{clientId}
+    @GetMapping("/client/{clientId}")
+    public ResponseEntity<List<JopResponse>> getJobsByClient(@PathVariable Integer clientId) {
+        return ResponseEntity.ok(service.getJobsByClient(clientId));
+    }
+
+    // ✅ GET /jobs/type/{jobType}
+    @GetMapping("/type/{jobType}")
+    public ResponseEntity<List<JopResponse>> getJobsByType(@PathVariable String jobType) {
+        return ResponseEntity.ok(service.getJobsByType(jobType));
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Integer> getJobsCount() {
+        int count = service.countJobs();
+        return ResponseEntity.ok(count);
     }
 
     @PutMapping("/{id}")

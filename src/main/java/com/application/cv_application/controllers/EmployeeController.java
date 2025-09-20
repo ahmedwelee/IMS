@@ -36,6 +36,22 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
 
+    @GetMapping("/managers")
+    public ResponseEntity<List<EmployeeResponse>> getAllManagers() {
+        return ResponseEntity.ok(employeeService.getAllManagers());
+    }
+
+    @GetMapping("/client/{clientName}")
+    public ResponseEntity<List<EmployeeResponse>> getEmployeesByClient(@PathVariable String clientName) {
+        return ResponseEntity.ok(employeeService.getEmployeesByClient(clientName));
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Integer> getCount(){
+        int count = employeeService.getCount();
+        return ResponseEntity.ok(count);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<EmployeeResponse> update(
             @PathVariable Integer id, @RequestBody EmployeeRequest request

@@ -1,5 +1,6 @@
 package com.application.cv_application.response;
 
+import com.application.cv_application.enums.Position;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +18,9 @@ public class EmployeeResponse {
     private String email;
     private LocalDate dateOfBirth;
     private LocalDate startDate;
-    private String position;
+    private String title;
+    private Position position;
+    private Integer salary;
     private String jopName;
     private String clientName;
 }
