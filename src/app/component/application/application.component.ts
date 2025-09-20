@@ -6,6 +6,7 @@ import { EmployeesService } from '../../service/employee.service';
 import { JobService } from '../../service/job.service';
 import {FormsModule} from "@angular/forms";
 import {NgForOf, NgIf, UpperCasePipe} from "@angular/common";
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-applications',
@@ -44,7 +45,8 @@ export class ApplicationsComponent implements OnInit {
   constructor(
     private applicationService: ApplicationService,
     private employeeService: EmployeesService,
-    private jobService: JobService
+    private jobService: JobService,
+    private toastService: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -59,7 +61,7 @@ export class ApplicationsComponent implements OnInit {
         this.applications = applications;
       },
       error: (error) => {
-        console.error('Error loading applications:', error);
+        this.toastService.error('Error loading applications', 'Error');
       }
     });
   }
@@ -74,7 +76,7 @@ export class ApplicationsComponent implements OnInit {
         );
       },
       error: (error) => {
-        console.error('Error loading candidates:', error);
+        this.toastService.error(error.error.error, 'Oups!!');
         this.candidates = [];
       }
     });
@@ -85,23 +87,12 @@ export class ApplicationsComponent implements OnInit {
         this.jobs = jobs;
       },
       error: (error) => {
-        console.error('Error loading jobs:', error);
+        this.toastService.error(error.error.error, 'Oups!!');
         this.jobs = [];
       }
     });
   }
 
-  // Get single application
-  loadApplication(id: number): void {
-    this.applicationService.getApplicationById(id).subscribe({
-      next: (application) => {
-        this.selectedApplication = application;
-      },
-      error: (error) => {
-        console.error('Error loading application:', error);
-      }
-    });
-  }
 
   // NEW: Open application details modal
   openApplicationDetailsModal(application: ApplicationResponse): void {
@@ -173,7 +164,7 @@ export class ApplicationsComponent implements OnInit {
         if (this.decisionFeedback) {
           console.log('Decision feedback:', this.decisionFeedback);
         }
-
+        this.toastService.success('Application status updated', 'Success');
         this.closeDecisionModal();
 
         // Optionally reopen the details modal to show updated status
@@ -182,7 +173,7 @@ export class ApplicationsComponent implements OnInit {
         // }, 100);
       },
       error: (error) => {
-        console.error('Error updating application:', error);
+        this.toastService.error(error.error.error, 'Oups!!');
         this.closeDecisionModal();
       }
     });
@@ -209,12 +200,12 @@ export class ApplicationsComponent implements OnInit {
           if (this.selectedApplication?.id === application.id) {
             this.selectedApplication = updatedApplication;
           }
-
+          this.toastService.success('Application status reset', 'Success');
           // Optionally close the details modal after reset
           // this.closeApplicationDetailsModal();
         },
         error: (error) => {
-          console.error('Error resetting application status:', error);
+          this.toastService.error(error.error.error, 'Oups!!');
         }
       });
     }

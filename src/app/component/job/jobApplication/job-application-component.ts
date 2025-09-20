@@ -3,6 +3,7 @@ import { ActivatedRoute,Router } from '@angular/router';
 import {CommonModule, DatePipe, Location} from '@angular/common';
 import {JobService} from "../../../service/job.service";
 import {ApplicationService} from "../../../service/application.service";
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-job-applications',
@@ -50,7 +51,8 @@ export class JobApplicationsComponent implements OnInit {
     private router: Router,
     private location: Location,
     private jobService: JobService,
-    private applicationService: ApplicationService
+    private applicationService: ApplicationService,
+    private  toastService: ToastrService,
   ) { }
 
   ngOnInit(): void {
@@ -60,7 +62,8 @@ export class JobApplicationsComponent implements OnInit {
       this.loadJobDetails();
       this.loadApplications();
     } else {
-      console.error('No job ID found in route parameters');
+      this.toastService.error('No job ID found in route parameters', 'Error');
+      this.router.navigate(['/jobs']);
     }
   }
 
@@ -70,7 +73,7 @@ export class JobApplicationsComponent implements OnInit {
         this.job = job;
       },
       error: (error) => {
-        console.error('Error loading job:', error);
+        this.toastService.error(error.error.error, 'Oups!!');
       }
     });
   }
@@ -81,7 +84,7 @@ export class JobApplicationsComponent implements OnInit {
         this.applications = applications;
       },
       error: (error) => {
-        console.error('Error loading applications:', error);
+        this.toastService.error(error.error.error, 'Oups!!');
       }
     });
   }
@@ -157,40 +160,7 @@ export class JobApplicationsComponent implements OnInit {
     this.showDecisionModal = true;
   }
 
-  closeDecisionModal(): void {
-    this.showDecisionModal = false;
-    this.selectedApplication = null;
-    this.currentDecision = null;
-    this.decisionFeedback = '';
-  }
 
-  confirmDecision(): void {
-    if (!this.selectedApplication || !this.currentDecision) return;
-
-    const updateRequest: any = {
-      status: this.currentDecision,
-      updatedDate: new Date().toISOString().split('T')[0]
-    };
-
-    this.applicationService.updateApplication(this.selectedApplication.id, updateRequest).subscribe({
-      next: (updatedApplication) => {
-        const index = this.applications.findIndex(a => a.id === updatedApplication.id);
-        if (index !== -1) {
-          this.applications[index] = updatedApplication;
-        }
-
-        if (this.decisionFeedback) {
-          console.log('Decision feedback:', this.decisionFeedback);
-        }
-
-        this.closeDecisionModal();
-      },
-      error: (error) => {
-        console.error('Error updating application:', error);
-        this.closeDecisionModal();
-      }
-    });
-  }
 
   resetApplicationStatus(application: any): void {
     if (confirm(`Are you sure you want to reset the status of ${application.candidateFullName}'s application?`)) {
@@ -205,27 +175,13 @@ export class JobApplicationsComponent implements OnInit {
           if (index !== -1) {
             this.applications[index] = updatedApplication;
           }
+          this.toastService.success('Application status reset successfully', 'Success');
         },
         error: (error) => {
-          console.error('Error resetting application status:', error);
+          this.toastService.error(error.error.error, 'Oups!!');
         }
       });
     }
-  }
-
-  getDecisionModalTitle(): string {
-    if (!this.currentDecision || !this.selectedApplication) return '';
-    return this.currentDecision === 'HIRED'
-      ? `Accept ${this.selectedApplication.candidateFullName}`
-      : `Reject ${this.selectedApplication.candidateFullName}`;
-  }
-
-  getDecisionButtonText(): string {
-    return this.currentDecision === 'HIRED' ? 'Accept Candidate' : 'Reject Candidate';
-  }
-
-  getDecisionButtonClass(): string {
-    return this.currentDecision === 'HIRED' ? 'btn-success' : 'btn-danger';
   }
 
   goBack(): void {

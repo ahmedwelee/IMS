@@ -49,6 +49,8 @@
   </div>
 </div>
 
+
+
     <!-- Jobs Management Table (Your existing table) -->
 <div class="row">
   <div class="col-12">
@@ -64,10 +66,115 @@
           </button>
         </div>
 
+        <!-- Filters -->
+        <!-- Job Filters Section -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0">
+                <i class="fas fa-filter me-2"></i>Filter Jobs
+              </h6>
+              <span class="badge bg-primary">{{filteredJobs.length}} of {{jobs.length}} jobs</span>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4">
+                <label class="form-label">Search</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-search"></i></span>
+                  <input type="text"
+                         class="form-control"
+                         placeholder="Search by title, description, location..."
+                         [(ngModel)]="searchText"
+                         (input)="applyFilters()">
+                </div>
+              </div>
+
+              <div class="col-md-2">
+                <label class="form-label">Status</label>
+                <select class="form-select"
+                        [(ngModel)]="statusFilter"
+                        (change)="applyFilters()">
+                  <option *ngFor="let option of filterStatusOptions" [value]="option">
+                    {{option === 'ALL' ? 'All Status' : option}}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-2">
+                <label class="form-label">Type</label>
+                <select class="form-select"
+                        [(ngModel)]="typeFilter"
+                        (change)="applyFilters()">
+                  <option *ngFor="let option of filterTypeOptions" [value]="option">
+                    {{option === 'ALL' ? 'All Types' : option}}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-2">
+                <label class="form-label">Client</label>
+                <select class="form-select"
+                        [(ngModel)]="clientFilter"
+                        (change)="applyFilters()">
+                  <option value="ALL">All Clients</option>
+                  <option *ngFor="let client of uniqueClients" [value]="client">
+                    {{client || 'Unassigned'}}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-2">
+                <label class="form-label">Actions</label>
+                <div class="d-grid">
+                  <button class="btn btn-outline-danger btn-sm ms-1"
+                          (click)="clearFilters()"
+                          [disabled]="!hasActiveFilters()">
+                    <i class="fas fa-times me-1"></i>Clear
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Filters Display -->
+            <div class="row mt-3" *ngIf="hasActiveFilters()">
+              <div class="col-12">
+                <div class="d-flex flex-wrap gap-2">
+                  <span class="badge bg-secondary">Active Filters:</span>
+                  <span class="badge bg-info" *ngIf="searchText">
+            Search: "{{searchText}}"
+            <button class="btn-close btn-close-white ms-1"
+                    style="font-size: 0.65em;"
+                    (click)="clearSearchFilter()"></button>
+                </span>
+                  <span class="badge bg-info" *ngIf="statusFilter !== 'ALL'">
+            Status: {{statusFilter}}
+                    <button class="btn-close btn-close-white ms-1"
+                            style="font-size: 0.65em;"
+                            (click)="clearStatusFilter()"></button>
+          </span>
+                  <span class="badge bg-info" *ngIf="typeFilter !== 'ALL'">
+            Type: {{typeFilter}}
+                    <button class="btn-close btn-close-white ms-1"
+                            style="font-size: 0.65em;"
+                            (click)="clearTypeFilter()"></button>
+          </span>
+                  <span class="badge bg-info" *ngIf="salaryFilter !== 'ALL'">
+            Salary: {{getSalaryFilterLabel(salaryFilter)}}
+                    <button class="btn-close btn-close-white ms-1"
+                            style="font-size: 0.65em;"
+                            (click)="clearSalaryFilter()"></button>
+          </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Jobs Table -->
         <div class="table-responsive">
-          <table class="table align-middle text-nowrap">
-            <thead>
+          <table class="table align-middle table-hover">
+            <thead class="table-light">
             <tr>
               <th class="text-dark font-medium fs-4">Job Title</th>
               <th class="text-dark font-medium fs-4">Type</th>
@@ -80,13 +187,9 @@
             </tr>
             </thead>
             <tbody>
-            <tr *ngFor="let job of jobs">
+            <tr *ngFor="let job of filteredJobs">
               <td>
                 <div class="d-flex align-items-center">
-                  <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
-                       style="width: 40px; height: 40px;">
-                    <i class="fas fa-briefcase text-white"></i>
-                  </div>
                   <div>
                     <h6 class="mb-0 font-medium">{{ job.jopName }}</h6>
                     <small class="text-muted">{{ (job.description || '').slice(0, 50) }}...</small>

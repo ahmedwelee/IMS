@@ -42,6 +42,10 @@ export class EmployeesService {
     return this.http.get<EmployeeResponse[]>(`${this.endpoint}/position/${position}`);
   }
 
+  getEmployeesCount(): Observable<number> {
+    return this.http.get<number>(`${this.endpoint}/count`);
+  }
+
 
   getManagers() {
     return this.http.get<EmployeeResponse[]>(`${this.endpoint}/managers`);

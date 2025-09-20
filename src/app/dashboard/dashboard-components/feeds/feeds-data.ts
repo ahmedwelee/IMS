@@ -49,4 +49,4 @@ export const Feeds: Feed[] = [
         task: 'You have 4 pending tasks.',
         time: 'Just Now'
     },
-] 
+]

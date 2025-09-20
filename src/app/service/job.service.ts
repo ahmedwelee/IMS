@@ -22,6 +22,10 @@ export class JobService {
     return this.http.get<JobResponse>(`${this.endpoint}/${id}`);
   }
 
+  getJobsCount(): Observable<number> {
+    return this.http.get<number>(`${this.endpoint}/count`);
+  }
+
 
   createJob(request: JobRequest): Observable<JobResponse> {
     return this.http.post<JobResponse>(this.endpoint, request);

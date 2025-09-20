@@ -49,51 +49,35 @@ export class TopSellingComponent implements OnInit {
     });
   }
 
-  loadTopClients(): void {
-    this.clientsService.getAllClients().subscribe({
-      next: (clients: any[]) => {
-        this.topClients = clients
-          .map(client => this.transformClientData(client))
-          .sort((a, b) => b.jobsCount - a.jobsCount)
-          .slice(0, 10); // Show top 10 clients
+    loadTopClients(): void {
+      this.clientsService.getTopClients(5).subscribe({
+        next: (clients: any[]) => {
+          // Backend already provides sorted + limited data
+          this.topClients = clients.map(client => ({
+            id: client.id,
+            name: client.name,
+            email: client.email,
+            type: client.type,
+            jobsCount: client.jobsCount,
+            employeeName: client.employeeName || 'Not assigned',
+            avatar: this.generateAvatar(client.name),
+            createdAt: client.createdAt,
+            status: this.getStatusColor(client.jobsCount)
+          }));
 
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading clients:', error);
-        this.topClients = [];
-        this.isLoading = false;
-      }
-    });
-  }
-
-  private transformClientData(client: any): TopClient {
-    const employee = this.employees.find(emp => emp.id === client.employeeId);
-    const jobsCount = this.getJobsCount(client.jobsCount);
-
-    return {
-      id: client.id,
-      name: client.name,
-      email: client.email,
-      type: client.type,
-      jobsCount: jobsCount,
-      employeeName: employee?.fullName || 'Not assigned',
-      avatar: this.generateAvatar(client.name),
-      createdAt: client.createdAt,
-      status: this.getStatusColor(jobsCount)
-    };
-  }
-
-  private getJobsCount(jobsCount: number | number[] | undefined): number {
-    if (typeof jobsCount === 'number') {
-      return jobsCount;
-    } else if (Array.isArray(jobsCount)) {
-      return jobsCount.length;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading clients:', error);
+          this.topClients = [];
+          this.isLoading = false;
+        }
+      });
     }
-    return 0;
-  }
 
-  private generateAvatar(name: string): string {
+
+
+    private generateAvatar(name: string): string {
     const initials = name?.charAt(0)?.toUpperCase() || '?';
     const colors = ['primary', 'success', 'info', 'warning', 'danger', 'secondary'];
     const colorIndex = name?.charCodeAt(0) % colors.length || 0;

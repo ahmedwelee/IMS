@@ -37,6 +37,16 @@ export class ClientsService {
     return this.http.delete<void>(`${this.endpoint}/${id}`);
   }
 
+  getClientsCount(): Observable<number> {
+    return this.http.get<number>(`${this.endpoint}/count`);
+  }
+
+  getTopClients(limit: number = 5): Observable<ClientResponse[]> {
+    return this.http.get<ClientResponse[]>(`${this.endpoint}/top`, {
+      params: { limit: limit.toString() }
+    });
+  }
+
   searchClientsByName(name: string): Observable<ClientResponse[]> {
     const params = new HttpParams().set('name', name);
     return this.http.get<ClientResponse[]>(`${this.endpoint}/search`, { params });

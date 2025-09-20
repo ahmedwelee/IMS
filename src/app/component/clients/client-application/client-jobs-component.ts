@@ -9,6 +9,7 @@ import {JobService} from "../../../service/job.service";
 import {ClientsService} from "../../../service/clients.service";
 import {EmployeesService} from "../../../service/employee.service";
 import {EmployeeResponse} from "../../../service/employee-response";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-client-jobs',
@@ -65,6 +66,7 @@ export class ClientJobsComponent implements OnInit {
     private router: Router,
     private location: Location,
     private jobService: JobService,
+    private toastService: ToastrService,
     private clientsService: ClientsService,
     private employeeService: EmployeesService
   ) {}
@@ -95,7 +97,7 @@ export class ClientJobsComponent implements OnInit {
           this.client = client;
         },
         error: (error) => {
-          console.error('Error loading client:', error);
+          this.toastService.error('Error loading client info', 'Error');
         }
       });
     }
@@ -107,7 +109,7 @@ export class ClientJobsComponent implements OnInit {
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading client jobs:', error);
+        this.toastService.error('Error loading client jobs:', error);
         this.jobs = [];
         this.isLoading = false;
       }
@@ -120,7 +122,7 @@ export class ClientJobsComponent implements OnInit {
         this.managers = managers;
       },
       error: (error) => {
-        console.error('Error loading managers:', error);
+        this.toastService.error('Error loading managers:', error);
         this.employeeService.getAllEmployees().subscribe({
           next: (employees) => {
             this.managers = employees.filter(emp =>
@@ -170,10 +172,11 @@ export class ClientJobsComponent implements OnInit {
     this.jobService.createJob(this.newJob).subscribe({
       next: (createdJob) => {
         this.jobs.push(createdJob);
+        this.toastService.success('Job created successfully', 'Success');
         this.closeAddJobModal();
       },
       error: (error) => {
-        console.error('Error creating job:', error);
+        this.toastService.error(error.error.error, 'Oups!!');
       }
     });
   }
@@ -195,10 +198,11 @@ export class ClientJobsComponent implements OnInit {
     this.jobService.deleteJob(jobId).subscribe({
       next: () => {
         this.jobs = this.jobs.filter(j => j.id !== jobId);
+        this.toastService.success('Job deleted successfully', 'Success');
         this.closeDeleteJobModal();
       },
       error: (error) => {
-        console.error('Error deleting job:', error);
+        this.toastService.error(error.error.error, 'Oups!!');
         this.closeDeleteJobModal();
       }
     });

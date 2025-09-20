@@ -4,10 +4,10 @@ import {
   CommonModule, LocationStrategy,
   PathLocationStrategy
 } from '@angular/common';
-import { NgModule } from '@angular/core';
+import {APP_INITIALIZER, NgModule} from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule, HttpClient } from '@angular/common/http';
-import { Routes, RouterModule } from '@angular/router';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
+import {  RouterModule } from '@angular/router';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -24,15 +24,23 @@ import {ClientsService} from "./service/clients.service";
 import {EmployeesService} from "./service/employee.service";
 import {JobService} from "./service/job.service";
 import {ApplicationService} from "./service/application.service";
-import {ErrorModalComponent} from "./shared/error-Modal/error-modal.component";
 import {ClientJobsComponent} from "./component/clients/client-application/client-jobs-component";
 import {JobApplicationsComponent} from "./component/job/jobApplication/job-application-component";
+import {ToastrModule} from "ngx-toastr";
+import {KeycloakService} from "./service/keycloak.service";
+import {HttpTokenInterceptor} from "./service/http-token.interceptor";
+import {LoginComponent} from "./login/login-component";
+
+export function kcFactory(kcService: KeycloakService) {
+  return () => kcService.init();
+}
 
 
 @NgModule({
   declarations: [
     AppComponent,
     SpinnerComponent,
+    LoginComponent
   ],
   imports: [
     CommonModule,
@@ -48,7 +56,14 @@ import {JobApplicationsComponent} from "./component/job/jobApplication/job-appli
     SidebarComponent,
     ClientJobsComponent,
     JobApplicationsComponent,
-    ErrorModalComponent,
+    ToastrModule.forRoot({
+      progressBar: true,
+      closeButton: true,
+      newestOnTop: true,
+      tapToDismiss: true,
+      positionClass: 'toast-bottom-right',
+      timeOut: 8000
+    })
   ],
   providers: [
     ClientsService,
@@ -59,6 +74,17 @@ import {JobApplicationsComponent} from "./component/job/jobApplication/job-appli
       provide: LocationStrategy,
       useClass: PathLocationStrategy
     },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HttpTokenInterceptor,
+      multi: true
+    },
+    {
+      provide: APP_INITIALIZER,
+      deps: [KeycloakService],
+      useFactory: kcFactory,
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })

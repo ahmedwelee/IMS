@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Profile, DefaultProfile, SocialLink, SocialPlatforms } from './profile-data';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import {KeycloakService} from "../../service/keycloak.service";
 
 @Component({
   selector: 'app-profile',
@@ -10,7 +11,12 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent {
+
+  constructor(
+    private kcservice: KeycloakService,
+  ) { }
   // Profile data
+
   profile: Profile = { ...DefaultProfile };
   isEditing = false;
   socialPlatforms = SocialPlatforms;
@@ -89,6 +95,6 @@ export class ProfileComponent {
   // Get social icon class
   getSocialIcon(platform: string): string {
     const social = this.socialPlatforms.find(p => p.name === platform);
-    return social ? social.icon : 'fas fa-link';
+    return social ? social.icon : 'bi bi-link';
   }
 }

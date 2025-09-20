@@ -8,6 +8,7 @@ import {DatePipe, NgForOf, NgIf,  UpperCasePipe} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {JobService} from "../../service/job.service";
 import {Router} from "@angular/router";
+import {ToastrService} from "ngx-toastr";
 
 
 @Component({
@@ -46,21 +47,24 @@ export class ClientsComponent implements OnInit {
     private clientsService: ClientsService,
     private employeeService: EmployeesService,
     private jobService: JobService,
-    private router: Router
+    private router: Router,
+    private toastService: ToastrService
   ) {}
 
   ngOnInit(): void {
     this.loadClients();
     this.loadEmployees();
+    this.loadClients();
   }
 
   loadClients(): void {
     this.clientsService.getAllClients().subscribe({
       next: (clients) => {
         this.clients = clients;
+        this.initializeFilters();
       },
       error: (error) => {
-        console.error('Error loading clients:', error);
+        this.toastService.error('Error loading clients', error);
       }
     });
   }
@@ -71,7 +75,7 @@ export class ClientsComponent implements OnInit {
         this.employees = employees;
       },
       error: (error) => {
-        console.error('Error loading employees:', error);
+        this.toastService.error(error.error.error, 'Oups!!');
         this.employees = [];
       }
     });
@@ -142,10 +146,11 @@ export class ClientsComponent implements OnInit {
     this.clientsService.createClient(this.currentClient).subscribe({
       next: (createdClient) => {
         this.clients.push(createdClient);
+        this.toastService.success('Client created successfully', 'Success');
         this.closeModal();
       },
       error: (error) => {
-        console.error('Error creating client:', error);
+        this.toastService.error(error.error.error, 'Oups!!');
       }
     });
   }
@@ -161,13 +166,13 @@ export class ClientsComponent implements OnInit {
         }
         this.selectedClient = updatedClient;
         this.closeModal();
-        // Refresh the details modal if it's open
+        this.toastService.success('Client updated successfully', 'Success');
         if (this.showClientDetailsModal) {
           this.selectedClient = updatedClient;
         }
       },
       error: (error) => {
-        console.error('Error updating client:', error);
+        this.toastService.error(error.error.error, 'Oups!!');
       }
     });
   }
@@ -194,10 +199,11 @@ export class ClientsComponent implements OnInit {
           this.selectedClient = null;
           this.showClientDetailsModal = false;
         }
+        this.toastService.success('Client deleted successfully', 'Success');
         this.closeDeleteClientModal();
       },
       error: (error) => {
-        console.error('Error deleting client:', error);
+        this.toastService.error(error.error.error, 'Oups!!');
         this.closeDeleteClientModal();
       }
     });
@@ -252,4 +258,105 @@ export class ClientsComponent implements OnInit {
     }
     return 0;
   }
+
+  // Add these properties to your existing client component
+
+// Filter properties
+  searchText: string = '';
+  typeFilter: string = 'ALL';
+  managerFilter: string = 'ALL';
+
+// Filtered results
+  filteredClients: any[] = [];
+
+// Filter options
+  filterTypeOptions: string[] = ['ALL', 'INDIVIDUAL', 'COMPANY', 'ORGANIZATION', 'GOVERNMENT'];
+
+// Dynamic filter options based on client data
+  uniqueManagers: (string | null)[] = [];
+
+
+// Initialize filter options based on client data
+  initializeFilters(): void {
+    if (this.clients && this.clients.length > 0) {
+      // Extract unique business managers using employeeName
+      this.uniqueManagers = [...new Set(this.clients
+        .map(client => client.employeeName)
+        .filter(manager => manager && manager.trim() !== '')
+      )].sort();
+
+      // Apply initial filters
+      this.applyFilters();
+    }
+  }
+
+// Main filter application method
+  applyFilters(): void {
+    if (!this.clients) {
+      this.filteredClients = [];
+      return;
+    }
+
+    this.filteredClients = this.clients.filter(client => {
+      return this.matchesSearchFilter(client) &&
+        this.matchesTypeFilter(client) &&
+        this.matchesManagerFilter(client);
+    });
+  }
+
+// Individual filter methods
+  matchesSearchFilter(client: any): boolean {
+    if (!this.searchText || this.searchText.trim() === '') return true;
+
+    const searchLower = this.searchText.toLowerCase();
+    return (
+      (client.name?.toLowerCase().includes(searchLower)) ||
+      (client.email?.toLowerCase().includes(searchLower)) ||
+      (client.address?.toLowerCase().includes(searchLower)) ||
+      (client.phoneNumber?.toLowerCase().includes(searchLower)) ||
+      (client.employeeName?.toLowerCase().includes(searchLower))
+    );
+  }
+
+  matchesTypeFilter(client: any): boolean {
+    if (this.typeFilter === 'ALL') return true;
+    return client.type === this.typeFilter;
+  }
+
+  matchesManagerFilter(client: any): boolean {
+    if (this.managerFilter === 'ALL') return true;
+    return client.employeeName === this.managerFilter;
+  }
+
+// Clear filter methods
+  clearFilters(): void {
+    this.searchText = '';
+    this.typeFilter = 'ALL';
+    this.managerFilter = 'ALL';
+    this.applyFilters();
+  }
+
+  clearSearchFilter(): void {
+    this.searchText = '';
+    this.applyFilters();
+  }
+
+  clearTypeFilter(): void {
+    this.typeFilter = 'ALL';
+    this.applyFilters();
+  }
+
+  clearManagerFilter(): void {
+    this.managerFilter = 'ALL';
+    this.applyFilters();
+  }
+
+// Helper methods
+  hasActiveFilters(): boolean {
+    return this.searchText !== '' ||
+      this.typeFilter !== 'ALL' ||
+      this.managerFilter !== 'ALL';
+  }
+
+
 }

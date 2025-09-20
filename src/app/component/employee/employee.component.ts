@@ -6,6 +6,7 @@ import {DatePipe, NgForOf, NgIf, UpperCasePipe} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {Position} from "../../service/position-enum";
 import {JobResponse} from "../../service/job-response";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-employees',
@@ -43,7 +44,10 @@ export class EmployeesComponent implements OnInit {
   positionOptions = Object.values(Position);
   emailError: string = '';
 
-  constructor(private employeeService: EmployeesService) {
+  constructor(
+    private employeeService: EmployeesService,
+    private toastService: ToastrService
+  ) {
   }
 
   ngOnInit(): void {
@@ -57,19 +61,7 @@ export class EmployeesComponent implements OnInit {
         this.employees = employees;
       },
       error: (error) => {
-        console.error('Error loading employees:', error);
-      }
-    });
-  }
-
-  // Get single employee
-  loadEmployee(id: number): void {
-    this.employeeService.getEmployeeById(id).subscribe({
-      next: (employee) => {
-        this.selectedEmployee = employee;
-      },
-      error: (error) => {
-        console.error('Error loading employee:', error);
+        this.toastService.error(error.error.error, 'Oups!!')
       }
     });
   }
@@ -206,12 +198,12 @@ export class EmployeesComponent implements OnInit {
 
     this.employeeService.createEmployee(this.currentEmployee).subscribe({
       next: (createdEmployee) => {
-        console.log('Employee created:', createdEmployee);
+        this.toastService.success('created successfully', 'Done!')
         this.employees.push(createdEmployee);
         this.closeModal();
       },
       error: (error) => {
-        console.error('Error creating employee:', error);
+        this.toastService.error(error.error.error, 'Oups!!')
         if (error.status === 400) {
           this.emailError = 'Email may already exist or is invalid';
         }
@@ -237,7 +229,7 @@ export class EmployeesComponent implements OnInit {
     this.employeeService.deleteEmployee(employeeId).subscribe({
       next: () => {
         this.employees = this.employees.filter(e => e.id !== employeeId);
-
+        this.toastService.success('deleted successfully', 'Done!')
         if (this.selectedEmployee?.id === employeeId) {
           this.selectedEmployee = null;
         }
@@ -245,7 +237,7 @@ export class EmployeesComponent implements OnInit {
         this.closeDeleteModal();
       },
       error: (error) => {
-        console.error('Error deleting employee:', error);
+        this.toastService.error(error.error.error, 'Oups!!')
         this.closeDeleteModal();
       }
     });
@@ -263,10 +255,11 @@ export class EmployeesComponent implements OnInit {
       this.emailError = 'Please enter a valid email address';
       return;
     }
+   console.log(this.selectedEmployee.id)
 
     this.employeeService.updateEmployee(this.selectedEmployee.id, this.currentEmployee).subscribe({
       next: (updatedEmployee) => {
-        console.log('Employee updated:', updatedEmployee);
+        this.toastService.success('updated successfully', 'Done!')
         // Update the local array
         const index = this.employees.findIndex(e => e.id === updatedEmployee.id);
         if (index !== -1) {
@@ -275,33 +268,12 @@ export class EmployeesComponent implements OnInit {
         this.selectedEmployee = updatedEmployee;
         this.closeModal();
       },
-      error: (error) => {
-        console.error('Error updating employee:', error);
-        if (error.status === 400) {
-          this.emailError = 'Email may already exist or is invalid';
-        }
+      error: (err) => {
+        this.toastService.error(err.error.error, 'Oups!!')
       }
     });
   }
 
-  // Delete employee
-  deleteEmployee(id: number): void {
-    if (confirm('Are you sure you want to delete this employee?')) {
-      this.employeeService.deleteEmployee(id).subscribe({
-        next: () => {
-          console.log('Employee deleted successfully');
-          // Remove from local array
-          this.employees = this.employees.filter(e => e.id !== id);
-          if (this.selectedEmployee?.id === id) {
-            this.selectedEmployee = null;
-          }
-        },
-        error: (error) => {
-          console.error('Error deleting employee:', error);
-        }
-      });
-    }
-  }
 
   // Calculate age from date of birth - Enhanced
   calculateAge(dateOfBirth: string | undefined): number {

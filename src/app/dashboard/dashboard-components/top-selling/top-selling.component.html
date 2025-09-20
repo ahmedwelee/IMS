@@ -24,8 +24,8 @@
 
     <!-- Table -->
     <div class="table-responsive" *ngIf="!isLoading">
-      <table class="table align-middle">
-        <thead>
+      <table class="table align-middle table-hover">
+        <thead class="table-light">
         <tr>
           <th class="text-dark font-medium fs-4">Client</th>
           <th class="text-dark font-medium fs-4">Type</th>
@@ -41,12 +41,13 @@
             class="client-row">
           <td>
             <div class="d-flex align-items-center">
-              <div class="client-avatar bg-{{client.avatar}} me-3">
-                {{ client.name.charAt(0).toUpperCase() }}
+              <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                   style="width: 40px; height: 40px;">
+                <span class="text-white fw-bold">{{client.name?.charAt(0) | uppercase}}</span>
               </div>
-              <div>
-                <h6 class="mb-0 font-medium">{{ client.name }}</h6>
-                <span class="text-muted small">{{ client.email }}</span>
+              <div class="ms-3">
+                <h6 class="mb-0 font-medium">{{client.name}}</h6>
+                <small class="text-muted">{{client.email}}</small>
               </div>
               <div class="ms-2" *ngIf="i < 3">
                 <i class="fas fa-trophy"
