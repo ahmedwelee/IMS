@@ -29,7 +29,6 @@ import {JobApplicationsComponent} from "./component/job/jobApplication/job-appli
 import {ToastrModule} from "ngx-toastr";
 import {KeycloakService} from "./service/keycloak.service";
 import {HttpTokenInterceptor} from "./service/http-token.interceptor";
-import {LoginComponent} from "./login/login-component";
 
 export function kcFactory(kcService: KeycloakService) {
   return () => kcService.init();
@@ -40,7 +39,6 @@ export function kcFactory(kcService: KeycloakService) {
   declarations: [
     AppComponent,
     SpinnerComponent,
-    LoginComponent
   ],
   imports: [
     CommonModule,
@@ -85,6 +83,8 @@ export function kcFactory(kcService: KeycloakService) {
       useFactory: kcFactory,
       multi: true
     }
+  ],
+  exports: [
   ],
   bootstrap: [AppComponent]
 })

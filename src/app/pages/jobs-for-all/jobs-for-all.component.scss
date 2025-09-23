@@ -1,0 +1,48 @@
+.job-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  border: 1px solid #e0e0e0;
+}
+.job-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  border-color: #007bff;
+}
+.filter-sidebar {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+}
+.salary-range {
+  background: linear-gradient(45deg, #28a745, #20c997);
+  color: white;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.9rem;
+}
+.company-logo {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  border-radius: 8px;
+}
+.search-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 40px 0;
+}
+.filter-chip {
+  background: #e3f2fd;
+  color: #1976d2;
+  border-radius: 20px;
+  padding: 5px 15px;
+  font-size: 0.85rem;
+  border: none;
+}
+.filter-chip:hover {
+  background: #bbdefb;
+}
+.filter-chip.active {
+  background: #1976d2;
+  color: white;
+}

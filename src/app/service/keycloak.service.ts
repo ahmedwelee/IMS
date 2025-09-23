@@ -2,6 +2,8 @@ import {Injectable} from '@angular/core';
 // @ts-ignore
 import Keycloak from "keycloak-js";
 import { UserProfile } from './user-profile';
+import {Router} from "@angular/router";
+import {HttpClient} from "@angular/common/http";
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +11,8 @@ import { UserProfile } from './user-profile';
 export class KeycloakService {
   private _keycloak: Keycloak | undefined;
 
+  constructor(private router: Router, private http: HttpClient) {
+  }
   get keycloak() {
     if (!this._keycloak) {
       this._keycloak = new Keycloak({
@@ -28,7 +32,7 @@ export class KeycloakService {
 
   async init() {
     const authenticated = await this.keycloak.init({
-      onLoad: 'login-required',
+      onLoad: 'check-sso',
     });
 
     if (authenticated) {
@@ -38,7 +42,25 @@ export class KeycloakService {
   }
 
   login() {
-    return this.keycloak.login();
+    return this.keycloak.login().then(() => {
+      const token = this.keycloak.tokenParsed as any;
+      const roles: string[] = token?.realm_access?.roles || [];
+
+      if (roles.includes('candidate')) {
+        this.router.navigate(['/home']);
+      } else if (roles.includes('Director') || roles.includes('Manager')) {
+        this.router.navigate(['/dashboard']);
+      } else {
+        this.router.navigate(['/home']); // fallback
+      }
+
+      //check the user is registered or not
+      this.checkUser();
+    });
+  }
+
+  checkUser() {
+    this.http.get('http://localhost:8088/users/check').subscribe();
   }
 
   logout() {
@@ -48,5 +70,23 @@ export class KeycloakService {
 
   accountManagement() {
     return this.keycloak.accountManagement();
+  }
+
+  async isLoggedIn() {
+    return await this.keycloak.authenticated;
+
+  }
+
+  async loadUserProfile() {
+    return await this.keycloak.loadUserProfile();
+  }
+
+  getUserRoles() {
+    return this.keycloak.tokenParsed?.realm_access?.roles;
+  }
+
+  async register(param: { redirectUri: string }) {
+    return await this.keycloak.register(param);
+
   }
 }

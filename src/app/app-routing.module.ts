@@ -4,8 +4,9 @@ import { Routes } from '@angular/router';
 import { FullComponent } from './layouts/full/full.component';
 import { ClientJobsComponent } from './component/clients/client-application/client-jobs-component';
 import {JobApplicationsComponent} from "./component/job/jobApplication/job-application-component";
-import {LoginComponent} from "./login/login-component";
 import {authGuard} from "./service/auth-guard";
+import {HomeComponent} from "./pages/home/home.component";
+import {JobsForAllComponent} from "./pages/jobs-for-all/jobs-for-all.component";
 
 export const Approutes: Routes = [
   {
@@ -28,10 +29,6 @@ export const Approutes: Routes = [
         component: JobApplicationsComponent,
         canActivate: [authGuard]
       },
-      {
-        path: 'login',
-        component: LoginComponent
-      },
       { path: 'client-jobs/:id', component: ClientJobsComponent , canActivate: [authGuard] },
       {
         path: 'component',
@@ -41,7 +38,16 @@ export const Approutes: Routes = [
     ]
   },
   {
+    path: 'all-jobs',
+    component: JobsForAllComponent,
+  },
+  {
     path: '**',
-    redirectTo: '/starter'
-  }
+    redirectTo: '/home'
+  },
+  {
+    path: 'home',
+    component: HomeComponent,
+  },
+
 ];

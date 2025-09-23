@@ -1,0 +1,392 @@
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="#">
+      <i class="fas fa-briefcase me-2"></i>
+      JobPortal
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="#home">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" (click)="toJobs()">Jobs</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#contact">Contact</a>
+        </li>
+      </ul>
+      <div class="navbar-nav">
+        <div *ngIf="!isLoggedIn" class="d-flex">
+          <button class="btn btn-outline-light me-2" (click)="login()">
+            <i class="fas fa-sign-in-alt me-1"></i>Login
+          </button>
+          <button class="btn btn-primary" (click)="register()">
+            <i class="fas fa-user-plus me-1"></i>Register
+          </button>
+        </div>
+        <div *ngIf="isLoggedIn" class="dropdown">
+          <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="profileDropdown"
+             role="button" data-bs-toggle="dropdown">
+            <img [src]="userProfile?.avatar || 'https://via.placeholder.com/32'"
+                 class="rounded-circle me-2" width="32" height="32">
+            {{ userProfile?.name || 'User' }}
+          </a>
+          <ul class="dropdown-menu" ngbDropdown placement="bottom-end">
+            <li><a class="dropdown-item" href="#" (click)="showProfile = true">
+              <i class="fas fa-user me-2"></i>Profile
+            </a></li>
+            <li><a class="dropdown-item" href="#" routerLink="/dashboard">
+              <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            </a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#" (click)="logout()">
+              <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section id="home" class="hero-section">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <h1 class="display-4 fw-bold mb-4">Find Your Dream Job Today</h1>
+        <p class="lead mb-4">Connect with top employers and discover opportunities that match your skills and aspirations.</p>
+        <div class="d-flex flex-wrap gap-3 mb-4">
+          <button class="btn btn-light btn-lg" (click)="toJobs()">
+            <i class="fas fa-search me-2"></i>Browse Jobs
+          </button>
+          <button class="btn btn-outline-light btn-lg" *ngIf="!isLoggedIn" (click)="register()">
+            <i class="fas fa-user-plus me-2"></i>Create Account
+          </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mt-5">
+          <div class="col-md-4 mb-3">
+            <div class="stats-card p-3 text-center">
+              <h3 class="mb-1">{{ totalJobs || 0 }}</h3>
+              <small>Active Jobs</small>
+            </div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <div class="stats-card p-3 text-center">
+              <h3 class="mb-1">{{ totalClients || 0 }}</h3>
+              <small>Employers</small>
+            </div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <div class="stats-card p-3 text-center">
+              <h3 class="mb-1">{{ totalApplications || 0 }}</h3>
+              <small>Applications</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remove the Quick Login Card section since Keycloak handles auth -->
+
+      <!-- Profile Card (when logged in) -->
+      <div class="col-lg-4" *ngIf="isLoggedIn">
+        <div class="login-card p-4 text-dark">
+          <div class="text-center mb-3">
+            <div class="profile-avatar rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3">
+              <span class="fs-2 text-white">{{ userProfile?.name?.charAt(0) || 'U' }}</span>
+            </div>
+            <h4>Welcome back, {{ userProfile?.name || 'User' }}!</h4>
+            <p class="text-muted">{{ userProfile?.role || 'Job Seeker' }}</p>
+          </div>
+          <div class="row text-center mb-3">
+            <div class="col-4">
+              <strong class="d-block">{{ userProfile?.applicationsCount || 0 }}</strong>
+              <small class="text-muted">Applications</small>
+            </div>
+            <div class="col-4">
+              <strong class="d-block">{{ userProfile?.profileViews || 0 }}</strong>
+              <small class="text-muted">Profile Views</small>
+            </div>
+            <div class="col-4">
+              <strong class="d-block">{{ userProfile?.savedJobs || 0 }}</strong>
+              <small class="text-muted">Saved Jobs</small>
+            </div>
+          </div>
+          <button class="btn btn-primary w-100 mb-2" (click)="navigateToDashboard()" *ngIf="isDirector() || isManager()">
+            <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+          </button>
+          <button class="btn btn-outline-primary w-100" (click)="showProfile = true">
+            <i class="fas fa-user me-2"></i>View Profile
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Jobs Section -->
+<section id="jobs" class="py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5">
+        <h2 class="display-5 fw-bold">Featured Jobs</h2>
+        <p class="lead text-muted">Discover exciting opportunities from top employers</p>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="!loadingJobs && featuredJobs.length > 0">
+      <div class="col-lg-4 col-md-6 mb-4" *ngFor="let job of featuredJobs">
+        <div class="card job-card h-100" (click)="viewJobDetails(job)">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div class="bg-primary rounded p-2">
+                <i class="fas fa-briefcase text-white"></i>
+              </div>
+              <span class="badge" [class]="getJobTypeBadgeClass(job.jobType)">
+                                {{ getJobTypeDisplay(job.jobType) }}
+                            </span>
+            </div>
+            <h5 class="card-title mb-2">{{ job.jopName }}</h5>
+            <p class="text-muted mb-2">
+              <i class="fas fa-building me-1"></i>{{ job.clientName }}
+            </p>
+            <p class="text-muted mb-2">
+              <i class="fas fa-map-marker-alt me-1"></i>{{ job.location }}
+            </p>
+            <p class="card-text">{{ job.description | slice:0:100 }}...</p>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="text-success fw-bold">
+                                <i class="fas fa-dollar-sign"></i>{{ formatSalary(job.salary) }}
+                            </span>
+              <small class="text-muted">{{ job.postedDate | date:'shortDate' }}</small>
+            </div>
+          </div>
+          <div class="card-footer bg-transparent">
+            <button class="btn btn-outline-primary btn-sm me-2"
+                    (click)="applyToJob(job); $event.stopPropagation()">
+              <i class="fas fa-paper-plane me-1"></i>Apply Now
+            </button>
+            <button class="btn btn-outline-secondary btn-sm"
+                    (click)="saveJob(job); $event.stopPropagation()">
+              <i class="fas fa-heart me-1"></i>Save
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loadingJobs" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-3 text-muted">Loading featured jobs...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loadingJobs && featuredJobs.length === 0" class="text-center py-5">
+      <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
+      <h4>No jobs available</h4>
+      <p class="text-muted">Check back later for new opportunities</p>
+    </div>
+
+    <!-- See More Button -->
+    <div class="text-center mt-5" *ngIf="featuredJobs.length > 0">
+      <button class="btn btn-primary btn-lg" (click)="toJobs()">
+        <i class="fas fa-search me-2"></i>See All Jobs
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer" id="contact">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-4 mb-4">
+        <h5>
+          <i class="fas fa-briefcase me-2"></i>
+          JobPortal
+        </h5>
+        <p class="mb-3">Your gateway to exciting career opportunities. Connect with top employers and find your dream job.</p>
+        <div class="d-flex gap-2">
+          <a href="#" class="btn btn-outline-light btn-sm">
+            <i class="fab fa-facebook"></i>
+          </a>
+          <a href="#" class="btn btn-outline-light btn-sm">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="#" class="btn btn-outline-light btn-sm">
+            <i class="fab fa-linkedin"></i>
+          </a>
+          <a href="#" class="btn btn-outline-light btn-sm">
+            <i class="fab fa-instagram"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-2 col-md-6 mb-4">
+        <h6>For Job Seekers</h6>
+        <ul class="list-unstyled">
+          <li class="mb-2"><a href="#" routerLink="/jobs">Browse Jobs</a></li>
+          <li class="mb-2"><a href="#" routerLink="/companies">Companies</a></li>
+          <li class="mb-2"><a href="#" routerLink="/career-advice">Career Advice</a></li>
+          <li class="mb-2"><a href="#" routerLink="/resume-builder">Resume Builder</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-2 col-md-6 mb-4">
+        <h6>For Employers</h6>
+        <ul class="list-unstyled">
+          <li class="mb-2"><a href="#" routerLink="/post-job">Post a Job</a></li>
+          <li class="mb-2"><a href="#" routerLink="/employer-dashboard">Dashboard</a></li>
+          <li class="mb-2"><a href="#" routerLink="/pricing">Pricing</a></li>
+          <li class="mb-2"><a href="#" routerLink="/employer-resources">Resources</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-4 mb-4">
+        <h6>Contact Us</h6>
+        <div class="mb-3">
+          <p class="mb-1">
+            <i class="fas fa-envelope me-2"></i>
+            <a href="mailto:contact@jobportal.com">contact@jobportal.com</a>
+          </p>
+          <p class="mb-1">
+            <i class="fas fa-phone me-2"></i>
+            <a href="tel:+1234567890">+1 (234) 567-8900</a>
+          </p>
+          <p class="mb-1">
+            <i class="fas fa-map-marker-alt me-2"></i>
+            123 Business St, City, State 12345
+          </p>
+        </div>
+        <h6>Newsletter</h6>
+        <form (ngSubmit)="subscribeNewsletter()" #newsletterForm="ngForm">
+          <div class="input-group">
+            <input type="email" class="form-control" placeholder="Enter your email"
+                   [(ngModel)]="newsletterEmail" name="email" required>
+            <button class="btn btn-primary" type="submit" [disabled]="!newsletterForm.form.valid">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="row">
+      <div class="col-md-8">
+        <div class="d-flex flex-wrap gap-3">
+          <a href="#" (click)="showAbout = true">About Us</a>
+          <a href="#" (click)="showPrivacy = true">Privacy Policy</a>
+          <a href="#" (click)="showTerms = true">Terms of Service</a>
+          <a href="#" (click)="showHelp = true">Help Center</a>
+        </div>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <p class="mb-0">&copy; 2024 JobPortal. All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Profile Modal -->
+<div class="modal fade" [class.show]="showProfile" [style.display]="showProfile ? 'block' : 'none'" *ngIf="showProfile">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-user me-2"></i>User Profile
+        </h5>
+        <button type="button" class="btn-close" (click)="showProfile = false"></button>
+      </div>
+      <div class="modal-body">
+        <form #profileForm="ngForm">
+          <div class="text-center mb-4">
+            <div class="profile-avatar rounded-circle d-flex align-items-center justify-content-center mx-auto">
+              <span class="fs-2 text-white">{{ userProfile.name?.charAt(0) || 'U' }}</span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-control" [(ngModel)]="userProfile.name" name="name">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" [(ngModel)]="userProfile.email" name="email">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Phone</label>
+              <input type="tel" class="form-control" [(ngModel)]="userProfile.phone" name="phone">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Role</label>
+              <select class="form-select" [(ngModel)]="userProfile.role" name="role">
+                <option value="Job Seeker">Job Seeker</option>
+                <option value="Employer">Employer</option>
+                <option value="HR Manager">HR Manager</option>
+              </select>
+            </div>
+            <div class="col-12 mb-3">
+              <label class="form-label">Bio</label>
+              <textarea class="form-control" rows="3" [(ngModel)]="userProfile.bio" name="bio"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="showProfile = false">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="updateProfile()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- About Us Modal -->
+<div class="modal fade" [class.show]="showAbout" [style.display]="showAbout ? 'block' : 'none'" *ngIf="showAbout">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">About JobPortal</h5>
+        <button type="button" class="btn-close" (click)="showAbout = false"></button>
+      </div>
+      <div class="modal-body">
+        <h6>Our Mission</h6>
+        <p>JobPortal is dedicated to connecting talented individuals with exceptional career opportunities. We believe that everyone deserves to find work that is meaningful, rewarding, and aligned with their skills and aspirations.</p>
+
+        <h6>What We Do</h6>
+        <ul>
+          <li>Connect job seekers with top employers</li>
+          <li>Provide career guidance and resources</li>
+          <li>Offer resume building and interview preparation tools</li>
+          <li>Support businesses in finding the right talent</li>
+        </ul>
+
+        <h6>Our Values</h6>
+        <p>We are committed to transparency, innovation, and creating value for both job seekers and employers. Our platform is built on trust, integrity, and the belief that great careers start with great connections.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="showAbout = false">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div class="modal-backdrop fade show" *ngIf="showProfile || showAbout"
+     [class.d-block]="showProfile || showAbout"></div>
+

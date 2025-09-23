@@ -1,0 +1,392 @@
+<!-- Search Header -->
+<section class="search-header">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h1 class="display-5 fw-bold text-center mb-4">Find Your Dream Job</h1>
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="card">
+              <div class="card-body p-4">
+                <form (ngSubmit)="searchJobs()" #searchForm="ngForm">
+                  <div class="row">
+                    <div class="col-md-4 mb-3">
+                      <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-search"></i>
+                                                </span>
+                        <input type="text" class="form-control"
+                               placeholder="Job title or keywords"
+                               [(ngModel)]="searchFilters.keyword" name="keyword">
+                      </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                      <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-map-marker-alt"></i>
+                                                </span>
+                        <input type="text" class="form-control"
+                               placeholder="Location"
+                               [(ngModel)]="searchFilters.location" name="location">
+                      </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                      <select class="form-select" [(ngModel)]="searchFilters.jobType" name="jobType">
+                        <option value="">All Job Types</option>
+                        <option value="FULL_TIME">Full Time</option>
+                        <option value="PART_TIME">Part Time</option>
+                        <option value="CONTRACT">Contract</option>
+                        <option value="REMOTE">Remote</option>
+                        <option value="INTERNSHIP">Internship</option>
+                      </select>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                      <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i>Search
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main Content -->
+<div class="container mt-4">
+  <div class="row">
+    <!-- Filters Sidebar -->
+    <div class="col-lg-3 mb-4">
+      <div class="filter-sidebar sticky-top" style="top: 20px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">
+            <i class="fas fa-filter me-2"></i>Filters
+          </h5>
+          <button class="btn btn-link btn-sm p-0" (click)="clearFilters()">
+            Clear All
+          </button>
+        </div>
+
+        <!-- Quick Filters -->
+        <div class="mb-4">
+          <h6 class="text-muted mb-3">Quick Filters</h6>
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn filter-chip"
+                    [class.active]="searchFilters.isRemote"
+                    (click)="toggleRemoteFilter()">
+              <i class="fas fa-home me-1"></i>Remote
+            </button>
+            <button class="btn filter-chip"
+                    [class.active]="searchFilters.isUrgent"
+                    (click)="toggleUrgentFilter()">
+              <i class="fas fa-clock me-1"></i>Urgent
+            </button>
+            <button class="btn filter-chip"
+                    [class.active]="searchFilters.isNew"
+                    (click)="toggleNewFilter()">
+              <i class="fas fa-star me-1"></i>New
+            </button>
+          </div>
+        </div>
+
+        <!-- Salary Range -->
+        <div class="mb-4">
+          <h6 class="text-muted mb-3">Salary Range</h6>
+          <div class="row">
+            <div class="col-6">
+              <input type="number" class="form-control form-control-sm"
+                     placeholder="Min"
+                     [(ngModel)]="searchFilters.minSalary">
+            </div>
+            <div class="col-6">
+              <input type="number" class="form-control form-control-sm"
+                     placeholder="Max"
+                     [(ngModel)]="searchFilters.maxSalary">
+            </div>
+          </div>
+        </div>
+
+        <!-- Job Types -->
+        <div class="mb-4">
+          <h6 class="text-muted mb-3">Job Type</h6>
+          <div class="form-check" *ngFor="let type of jobTypes">
+            <input class="form-check-input" type="checkbox"
+                   [id]="'type-' + type.value"
+                   [checked]="searchFilters.selectedTypes.includes(type.value)"
+                   (change)="toggleJobType(type.value)">
+            <label class="form-check-label" [for]="'type-' + type.value">
+              {{ type.label }}
+            </label>
+          </div>
+        </div>
+
+        <!-- Experience Level -->
+        <div class="mb-4">
+          <h6 class="text-muted mb-3">Experience Level</h6>
+          <div class="form-check" *ngFor="let level of experienceLevels">
+            <input class="form-check-input" type="checkbox"
+                   [id]="'exp-' + level.value"
+                   [checked]="searchFilters.selectedExperience.includes(level.value)"
+                   (change)="toggleExperience(level.value)">
+            <label class="form-check-label" [for]="'exp-' + level.value">
+              {{ level.label }}
+            </label>
+          </div>
+        </div>
+
+        <!-- Companies -->
+        <div class="mb-4" *ngIf="topCompanies.length > 0">
+          <h6 class="text-muted mb-3">Top Companies</h6>
+          <div class="form-check" *ngFor="let company of topCompanies">
+            <input class="form-check-input" type="checkbox"
+                   [id]="'company-' + company.id"
+                   [checked]="searchFilters.selectedCompanies.includes(company.id)"
+                   (change)="toggleCompany(company.id)">
+            <label class="form-check-label" [for]="'company-' + company.id">
+              {{ company.name }}
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jobs List -->
+    <div class="col-lg-9">
+      <!-- Results Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="mb-1">
+            {{ filteredJobs.length }} Jobs Found
+            <span *ngIf="searchFilters.keyword" class="text-muted">
+                            for "{{ searchFilters.keyword }}"
+                        </span>
+          </h4>
+          <p class="text-muted mb-0">
+            Showing {{ (currentPage - 1) * pageSize + 1 }} -
+            {{ Math.min(currentPage * pageSize, filteredJobs.length) }} of {{ filteredJobs.length }} jobs
+          </p>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                    data-bs-toggle="dropdown">
+              <i class="fas fa-sort me-1"></i>Sort by: {{ getSortLabel() }}
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#" (click)="setSortBy('newest')">Newest First</a></li>
+              <li><a class="dropdown-item" href="#" (click)="setSortBy('salary_high')">Highest Salary</a></li>
+              <li><a class="dropdown-item" href="#" (click)="setSortBy('salary_low')">Lowest Salary</a></li>
+              <li><a class="dropdown-item" href="#" (click)="setSortBy('relevance')">Most Relevant</a></li>
+            </ul>
+          </div>
+          <div class="btn-group" role="group">
+            <button type="button" class="btn"
+                    [class]="viewMode === 'grid' ? 'btn-primary' : 'btn-outline-secondary'"
+                    (click)="setViewMode('grid')">
+              <i class="fas fa-th-large"></i>
+            </button>
+            <button type="button" class="btn"
+                    [class]="viewMode === 'list' ? 'btn-primary' : 'btn-outline-secondary'"
+                    (click)="setViewMode('list')">
+              <i class="fas fa-list"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3 text-muted">Loading jobs...</p>
+      </div>
+
+      <!-- Jobs Grid -->
+      <div class="row" *ngIf="!isLoading && viewMode === 'grid'">
+        <div class="col-lg-6 mb-4" *ngFor="let job of paginatedJobs">
+          <div class="card job-card h-100" (click)="viewJobDetails(job)">
+            <div class="card-body">
+              <div class="d-flex mb-3">
+                <div class="company-logo d-flex align-items-center justify-content-center me-3">
+                  <i class="fas fa-building text-white"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <h5 class="card-title mb-1">{{ job.jopName }}</h5>
+                  <p class="text-muted mb-0">{{ job.clientName }}</p>
+                  <small class="text-muted">
+                    <i class="fas fa-map-marker-alt me-1"></i>{{ job.location }}
+                  </small>
+                </div>
+                <div>
+                                    <span class="badge" [class]="getJobTypeBadgeClass(job.jobType)">
+                                        {{ getJobTypeDisplay(job.jobType) }}
+                                    </span>
+                </div>
+              </div>
+
+              <p class="card-text">{{ job.description | slice:0:120 }}...</p>
+
+              <div class="d-flex justify-content-between align-items-center">
+                                <span class="salary-range">
+                                    <i class="fas fa-dollar-sign me-1"></i>{{ formatSalary(job.salary) }}
+                                </span>
+                <small class="text-muted">{{ getTimeAgo(job.postedDate) }}</small>
+              </div>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0">
+              <div class="d-flex justify-content-between">
+                <button class="btn btn-outline-primary btn-sm"
+                        (click)="applyToJob(job); $event.stopPropagation()">
+                  <i class="fas fa-paper-plane me-1"></i>Apply Now
+                </button>
+                <button class="btn btn-outline-secondary btn-sm"
+                        (click)="saveJob(job); $event.stopPropagation()">
+                  <i class="fas fa-heart me-1"></i>Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Jobs List -->
+      <div *ngIf="!isLoading && viewMode === 'list'">
+        <div class="card job-card mb-3" *ngFor="let job of paginatedJobs" (click)="viewJobDetails(job)">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <div class="d-flex mb-2">
+                  <div class="company-logo d-flex align-items-center justify-content-center me-3"
+                       style="width: 40px; height: 40px;">
+                    <i class="fas fa-building text-white fs-6"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h5 class="mb-1">{{ job.jopName }}</h5>
+                    <p class="text-muted mb-1">{{ job.clientName }}</p>
+                    <small class="text-muted">
+                      <i class="fas fa-map-marker-alt me-1"></i>{{ job.location }}
+                      <span class="mx-2">•</span>
+                      <i class="fas fa-clock me-1"></i>{{ getTimeAgo(job.postedDate) }}
+                    </small>
+                  </div>
+                </div>
+                <p class="mb-0">{{ job.description | slice:0:150 }}...</p>
+              </div>
+              <div class="col-md-4 text-md-end">
+                <div class="mb-2">
+                                    <span class="badge" [class]="getJobTypeBadgeClass(job.jobType)">
+                                        {{ getJobTypeDisplay(job.jobType) }}
+                                    </span>
+                </div>
+                <div class="salary-range d-inline-block mb-2">
+                  <i class="fas fa-dollar-sign me-1"></i>{{ formatSalary(job.salary) }}
+                </div>
+                <div>
+                  <button class="btn btn-outline-primary btn-sm me-2"
+                          (click)="applyToJob(job); $event.stopPropagation()">
+                    <i class="fas fa-paper-plane me-1"></i>Apply
+                  </button>
+                  <button class="btn btn-outline-secondary btn-sm"
+                          (click)="saveJob(job); $event.stopPropagation()">
+                    <i class="fas fa-heart me-1"></i>Save
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && filteredJobs.length === 0" class="text-center py-5">
+        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+        <h4>No jobs found</h4>
+        <p class="text-muted">Try adjusting your search criteria or filters</p>
+        <button class="btn btn-primary" (click)="clearFilters()">
+          <i class="fas fa-refresh me-1"></i>Clear Filters
+        </button>
+      </div>
+
+      <!-- Pagination -->
+      <nav *ngIf="totalPages > 1" class="mt-4">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <a class="page-link" href="#" (click)="goToPage(currentPage - 1); $event.preventDefault()">
+              <i class="fas fa-chevron-left"></i>
+            </a>
+          </li>
+          <li class="page-item" *ngFor="let page of getPageNumbers()"
+              [class.active]="page === currentPage">
+            <a class="page-link" href="#" (click)="goToPage(page); $event.preventDefault()">
+              {{ page }}
+            </a>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <a class="page-link" href="#" (click)="goToPage(currentPage + 1); $event.preventDefault()">
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Job Details Modal -->
+<div class="modal fade" [class.show]="showJobModal" [style.display]="showJobModal ? 'block' : 'none'"
+     *ngIf="showJobModal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-briefcase me-2"></i>
+          {{ selectedJob?.jopName }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeJobModal()"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedJob">
+        <!-- Job details content here -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <h6>Company</h6>
+            <p>{{ selectedJob.clientName }}</p>
+          </div>
+          <div class="col-md-6">
+            <h6>Location</h6>
+            <p>{{ selectedJob.location }}</p>
+          </div>
+        </div>
+        <div class="mb-3">
+          <h6>Description</h6>
+          <p>{{ selectedJob.description }}</p>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <h6>Job Type</h6>
+            <span class="badge" [class]="getJobTypeBadgeClass(selectedJob.jobType)">
+                            {{ getJobTypeDisplay(selectedJob.jobType) }}
+                        </span>
+          </div>
+          <div class="col-md-6">
+            <h6>Salary</h6>
+            <p class="text-success fw-bold">${{ formatSalary(selectedJob.salary) }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeJobModal()">Close</button>
+        <button type="button" class="btn btn-success" (click)="applyToJob(selectedJob)">
+          <i class="fas fa-paper-plane me-1"></i>Apply Now
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div class="modal-backdrop fade show" *ngIf="showJobModal" [class.d-block]="showJobModal"></div>
