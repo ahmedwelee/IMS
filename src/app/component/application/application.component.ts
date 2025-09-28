@@ -1,26 +1,33 @@
 import { Component, OnInit } from '@angular/core';
+/*
 import { ApplicationService } from '../../service/application.service';
 import { ApplicationRequest } from '../../service/application-request';
 import { ApplicationResponse } from '../../service/application-response';
 import { EmployeesService } from '../../service/employee.service';
 import { JobService } from '../../service/job.service';
-import {FormsModule} from "@angular/forms";
-import {NgForOf, NgIf, UpperCasePipe} from "@angular/common";
+//import {FormsModule} from "@angular/forms";
+//import {NgForOf, NgIf, UpperCasePipe} from "@angular/common";
 import { ToastrService } from 'ngx-toastr';
+*/
+
 
 @Component({
   selector: 'app-applications',
   templateUrl: './application.component.html',
   standalone: true,
-  imports: [
+ /* imports: [
     FormsModule,
     NgForOf,
     NgIf,
     UpperCasePipe
-  ]
+  ]*/
 })
 export class ApplicationsComponent implements OnInit {
-  applications: ApplicationResponse[] = [];
+  ngOnInit(): void {
+   // this.loadApplications();
+    //this.loadCandidatesAndJobs();
+  }
+  /*applications: ApplicationResponse[] = [];
   selectedApplication: ApplicationResponse | null = null;
   showModal: boolean = false;
   isEditMode: boolean = false;
@@ -49,10 +56,7 @@ export class ApplicationsComponent implements OnInit {
     private toastService: ToastrService
   ) {}
 
-  ngOnInit(): void {
-    this.loadApplications();
-    this.loadCandidatesAndJobs();
-  }
+
 
   // Load all applications
   loadApplications(): void {
@@ -249,5 +253,5 @@ export class ApplicationsComponent implements OnInit {
   // Get decision modal button class
   getDecisionButtonClass(): string {
     return this.currentDecision === 'HIRED' ? 'btn-success' : 'btn-danger';
-  }
+  }*/
 }

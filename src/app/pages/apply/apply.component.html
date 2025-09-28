@@ -1,23 +1,69 @@
 
+<!-- Header Section -->
+<section class="hero-bg">
+  <div class="container">
+    <div class="text-center">
+      <h1 class="display-5 fw-bold mb-3">Job Application</h1>
+      <p class="lead">Complete your application to join our team</p>
+
+      <!-- Progress Steps -->
+      <div class="progress-steps">
+        <div class="step completed">
+          <div class="step-circle">1</div>
+          <span>Job Selected</span>
+        </div>
+        <div class="step active">
+          <div class="step-circle">2</div>
+          <span>Fill Application</span>
+        </div>
+        <div class="step">
+          <div class="step-circle">3</div>
+          <span>Submit & Review</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- Main Content -->
-<div class="container mt-5 pt-5">
+<div class="container">
   <div class="row justify-content-center">
     <div class="col-lg-10">
       <!-- Job Details Card -->
-      <div class="card mb-4" *ngIf="jobDetails && !isLoading">
-        <div class="card-header bg-primary text-white">
-          <h4 class="mb-0">Applying to: {{ jobDetails.jopName }}</h4>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-6">
-              <p class="mb-2"><strong>Company:</strong> {{ jobDetails.clientName }}</p>
-              <p class="mb-2"><strong>Location:</strong> {{ jobDetails.location }}</p>
+      <div class="card form-card mb-4" *ngIf="jobDetails && !isLoading">
+        <div class="card-body job-info-card">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h4 class="text-primary mb-2">
+                <i class="fas fa-briefcase me-2"></i>{{ jobDetails.jopName }}
+              </h4>
+              <div class="row">
+                <div class="col-sm-6">
+                  <p class="mb-1">
+                    <i class="fas fa-building me-2 text-muted"></i>
+                    <strong>Company:</strong> {{ jobDetails.clientName }}
+                  </p>
+                  <p class="mb-1">
+                    <i class="fas fa-map-marker-alt me-2 text-muted"></i>
+                    <strong>Location:</strong> {{ jobDetails.location }}
+                  </p>
+                </div>
+                <div class="col-sm-6">
+                  <p class="mb-1">
+                    <i class="fas fa-dollar-sign me-2 text-muted"></i>
+                    <strong>Salary:</strong> ${{ formatSalary(jobDetails.salary) }}
+                  </p>
+                  <p class="mb-1">
+                    <i class="fas fa-clock me-2 text-muted"></i>
+                    <strong>Type:</strong> {{ getJobTypeDisplay(jobDetails.jobType) }}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div class="col-md-6">
-              <p class="mb-2"><strong>Salary:</strong> {{ jobDetails.salary | currency }}</p>
-              <p class="mb-2"><strong>Type:</strong> {{ jobDetails.jobType }}</p>
+            <div class="col-md-4 text-md-end">
+              <button class="btn btn-outline-primary btn-sm" (click)="goToJob()">
+                <i class="fas fa-eye me-1"></i>View Full Details
+              </button>
             </div>
           </div>
         </div>
@@ -25,26 +71,45 @@
 
       <!-- Loading State -->
       <div *ngIf="isLoading" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
           <span class="visually-hidden">Loading...</span>
         </div>
-        <p class="mt-3">Loading job details...</p>
+        <h4 class="mt-3">Loading job details...</h4>
+        <p class="text-muted">Please wait while we prepare your application form</p>
       </div>
 
       <!-- Application Form -->
-      <div class="card" *ngIf="!isLoading">
-        <div class="card-header">
-          <h4 class="mb-0">Application Form</h4>
-          <p class="text-muted mb-0">Please fill in your details accurately</p>
+      <div class="card form-card" *ngIf="!isLoading && jobDetails">
+        <div class="card-header bg-white">
+          <div class="row align-items-center">
+            <div class="col">
+              <h4 class="mb-0">
+                <i class="fas fa-user-edit me-2 text-primary"></i>Application Form
+              </h4>
+              <p class="text-muted mb-0">Please provide accurate information for your application</p>
+            </div>
+            <div class="col-auto">
+              <span class="badge bg-info">Required fields marked with *</span>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
           <form [formGroup]="applyForm" (ngSubmit)="onSubmit()">
-            <!-- Personal Information -->
+            <!-- Personal Information Section -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <h5 class="border-bottom pb-2 mb-3">
+                  <i class="fas fa-user me-2 text-primary"></i>Personal Information
+                </h5>
+              </div>
+            </div>
+
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label for="firstName" class="form-label">First Name *</label>
                 <input type="text" class="form-control" id="firstName" formControlName="firstName"
-                       [class.is-invalid]="isFieldInvalid('firstName')">
+                       [class.is-invalid]="isFieldInvalid('firstName')"
+                       placeholder="Enter your first name">
                 <div class="invalid-feedback" *ngIf="isFieldInvalid('firstName')">
                   {{ getFieldError('firstName') }}
                 </div>
@@ -52,7 +117,8 @@
               <div class="col-md-6 mb-3">
                 <label for="lastName" class="form-label">Last Name *</label>
                 <input type="text" class="form-control" id="lastName" formControlName="lastName"
-                       [class.is-invalid]="isFieldInvalid('lastName')">
+                       [class.is-invalid]="isFieldInvalid('lastName')"
+                       placeholder="Enter your last name">
                 <div class="invalid-feedback" *ngIf="isFieldInvalid('lastName')">
                   {{ getFieldError('lastName') }}
                 </div>
@@ -62,8 +128,14 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label for="phoneNumber" class="form-label">Phone Number *</label>
-                <input type="tel" class="form-control" id="phoneNumber" formControlName="phoneNumber"
-                       [class.is-invalid]="isFieldInvalid('phoneNumber')">
+                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-phone"></i>
+                                    </span>
+                  <input type="tel" class="form-control" id="phoneNumber" formControlName="phoneNumber"
+                         [class.is-invalid]="isFieldInvalid('phoneNumber')"
+                         placeholder="+1 (555) 123-4567">
+                </div>
                 <div class="invalid-feedback" *ngIf="isFieldInvalid('phoneNumber')">
                   {{ getFieldError('phoneNumber') }}
                 </div>
@@ -96,68 +168,128 @@
               <div class="col-md-6 mb-3">
                 <label for="nationality" class="form-label">Nationality *</label>
                 <input type="text" class="form-control" id="nationality" formControlName="nationality"
-                       [class.is-invalid]="isFieldInvalid('nationality')">
+                       [class.is-invalid]="isFieldInvalid('nationality')"
+                       placeholder="e.g., American, British, etc.">
                 <div class="invalid-feedback" *ngIf="isFieldInvalid('nationality')">
                   {{ getFieldError('nationality') }}
                 </div>
               </div>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-4">
               <label for="address" class="form-label">Address *</label>
               <textarea class="form-control" id="address" rows="3" formControlName="address"
-                        [class.is-invalid]="isFieldInvalid('address')"></textarea>
+                        [class.is-invalid]="isFieldInvalid('address')"
+                        placeholder="Enter your complete address"></textarea>
               <div class="invalid-feedback" *ngIf="isFieldInvalid('address')">
                 {{ getFieldError('address') }}
               </div>
             </div>
 
-            <!-- CV Upload -->
-            <div class="mb-4">
-              <label for="cvUpload" class="form-label">Upload CV/Resume *</label>
-              <input type="file" class="form-control" id="cvUpload" (change)="onFileSelected($event)"
-                     accept=".pdf,.doc,.docx" required>
-              <div class="form-text">
-                Accepted formats: PDF, DOC, DOCX (Max 5MB)
-              </div>
-              <div *ngIf="selectedFile" class="mt-2">
-                <span class="badge bg-success">
-                  <i class="bi bi-check-circle me-1"></i>
-                  {{ selectedFile.name }}
-                </span>
+            <!-- CV Upload Section -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <h5 class="border-bottom pb-2 mb-3">
+                  <i class="fas fa-file-upload me-2 text-primary"></i>CV / Resume Upload
+                </h5>
               </div>
             </div>
 
+            <div class="mb-4">
+              <label for="cvUpload" class="form-label">Upload CV/Resume *</label>
+              <div class="file-upload-area"
+                   [class.file-selected]="selectedFile"
+                   (click)="fileInput.click()">
+                <div *ngIf="!selectedFile">
+                  <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                  <h6>Drag and drop your CV here, or click to browse</h6>
+                  <p class="text-muted mb-0">Accepted formats: PDF, DOC, DOCX (Max 5MB)</p>
+                </div>
+                <div *ngIf="selectedFile" class="text-success">
+                  <i class="fas fa-file-check fa-3x mb-3"></i>
+                  <h6>{{ selectedFile.name }}</h6>
+                  <p class="mb-0">File size: {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB</p>
+                  <button type="button" class="btn btn-outline-danger btn-sm mt-2" (click)="removeFile(); $event.stopPropagation()">
+                    <i class="fas fa-trash me-1"></i>Remove File
+                  </button>
+                </div>
+              </div>
+              <input type="file" #fileInput class="d-none" id="cvFile" (change)="onFileSelected($event)"
+                     accept=".pdf,.doc,.docx">
+            </div>
+
             <!-- Form Actions -->
-            <div class="d-flex gap-2 justify-content-end">
-              <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isSubmitting">
-                Cancel
-              </button>
-              <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
-                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
-                {{ isSubmitting ? 'Submitting...' : 'Submit Application' }}
-              </button>
+            <div class="border-top pt-4">
+              <div class="row">
+                <div class="col-md-6">
+                  <p class="text-muted mb-0">
+                    <i class="fas fa-shield-alt me-1"></i>
+                    Your information is secure and will only be used for this application.
+                  </p>
+                </div>
+                <div class="col-md-6">
+                  <div class="d-flex gap-2 justify-content-md-end">
+                    <button type="button" class="btn btn-outline-secondary" (click)="cancel()" [disabled]="isSubmitting">
+                      <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary px-4" [disabled]="isSubmitting || !selectedFile">
+                      <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+                      <i *ngIf="!isSubmitting" class="fas fa-paper-plane me-1"></i>
+                      {{ isSubmitting ? 'Submitting...' : 'Submit Application' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </form>
         </div>
       </div>
 
       <!-- No Job ID Warning -->
-      <div *ngIf="!jobId && !isLoading" class="alert alert-warning text-center">
-        <h4>No Job Selected</h4>
-        <p>Please select a job to apply for from the jobs page.</p>
-        <a routerLink="/jobs" class="btn btn-primary">Browse Jobs</a>
+      <div *ngIf="!jobId && !isLoading" class="card form-card">
+        <div class="card-body text-center py-5">
+          <div class="text-warning mb-4">
+            <i class="fas fa-exclamation-triangle fa-4x"></i>
+          </div>
+          <h4 class="text-warning">No Job Selected</h4>
+          <p class="text-muted mb-4">Please select a job to apply for from the jobs page.</p>
+          <a routerLink="/jobs" class="btn btn-primary">
+            <i class="fas fa-search me-2"></i>Browse Available Jobs
+          </a>
+        </div>
+      </div>
+
+      <!-- Authentication Warning -->
+      <div *ngIf="!isLoggedIn && !isLoading" class="alert alert-info mt-4">
+        <div class="d-flex align-items-center">
+          <i class="fas fa-info-circle fa-2x me-3"></i>
+          <div>
+            <h6 class="alert-heading mb-1">Authentication Required</h6>
+            <p class="mb-0">You need to be logged in to submit a job application. You will be redirected to login shortly.</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Footer (same as your home page) -->
-<footer class="footer mt-5">
+<!-- Footer -->
+<footer class="footer mt-5 py-4 bg-light">
   <div class="container">
     <div class="row">
-      <div class="col-12 text-center">
-        <p>&copy; 2024 JobPortal. All rights reserved.</p>
+      <div class="col-md-6">
+        <h6>
+          <i class="fas fa-briefcase me-2"></i>JobPortal
+        </h6>
+        <p class="text-muted mb-0">Your gateway to exciting career opportunities.</p>
+      </div>
+      <div class="col-md-6 text-md-end">
+        <p class="text-muted mb-0">&copy; 2024 JobPortal. All rights reserved.</p>
+        <div class="mt-1">
+          <a href="#" class="text-muted me-3">Privacy Policy</a>
+          <a href="#" class="text-muted me-3">Terms of Service</a>
+          <a href="#" class="text-muted">Support</a>
+        </div>
       </div>
     </div>
   </div>

@@ -1,9 +1,14 @@
 export interface ApplicationResponse {
   id: number;
-  applicationName: string;
-  appliedDate: string; // or Date
-  updatedDate: string; // or Date
-  status: string;
+  appliedDate: string;
+  updatedDate: string;
   candidateFullName: string;
-  jopTitle: string;
+  jopName: string;
+  status: string;
+  phoneNumber: string;
+  address: string;
+  nationality: string;
+  gender: string;
+  dateOfBirth: string;
+  cvPath: string;
 }

@@ -167,10 +167,10 @@ export class HomeComponent implements OnInit {
     if (this.userRoles.includes('admin')) return 'Admin';
     if (this.userRoles.includes('Director')) return 'Director';
     if (this.userRoles.includes('Manager')) return 'Manager';
-    if (this.userRoles.includes('hr_manager')) return 'HR Manager';
+    if (this.userRoles.includes('Candidate')) return 'Candidate';
     if (this.userRoles.includes('employer')) return 'Employer';
     if (this.userRoles.includes('recruiter')) return 'Recruiter';
-    return 'Job Seeker';
+    return 'Candidate';
   }
 
   loadAdditionalProfileData(): void {
@@ -289,16 +289,6 @@ export class HomeComponent implements OnInit {
       }
     });
 
-    // Load total clients
-   /* this.clientsService.getAllClients().subscribe({
-      next: (clients) => {
-        this.totalClients = clients.length;
-      },
-      error: (error) => {
-        console.error('Error loading clients count:', error);
-        this.totalClients = 25;
-      }
-    });*/
 
     // Load total applications
     if (this.applicationService && this.applicationService.getAllApplications) {

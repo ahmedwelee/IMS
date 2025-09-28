@@ -1,8 +1,14 @@
 export interface ApplicationRequest {
-  applicationName: string;
-  appliedDate: string; // or Date
-  updatedDate: string; // or Date
+  appliedDate: string;
+  updatedDate: string;
+  candidateId: number;
+  jopId: number;
   status: string;
-  candidateId: number; // Changed from number | null to number (required)
-  jopId: number; // Changed from number | null to number (required)
-}
+  firstname: string;
+  lastname: string;
+  phoneNumber: string;
+  address: string;
+  nationality: string;
+  gender: string;
+  dateOfBirth: string;
+  cvPath: string;}

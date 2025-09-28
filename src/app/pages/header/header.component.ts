@@ -1,9 +1,25 @@
-import { Component } from '@angular/core';
+import {Component, HostListener} from '@angular/core';
 // @ts-ignore
 import {KeycloakProfile} from "keycloak-js";
-import {UserProfile} from "../../service/user-profile";
 import {Router} from "@angular/router";
 import {KeycloakService} from "../../service/keycloak.service";
+
+interface UserProfile {
+  id?: string;
+  username?: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
+  phone?: string;
+  role?: string;
+  bio?: string;
+  avatar?: string;
+  applicationsCount?: number;
+  profileViews?: number;
+  savedJobs?: number;
+  roles?: string[];
+}
 
 @Component({
   selector: 'app-header',
@@ -18,11 +34,110 @@ export class HeaderComponent {
   keycloakProfile: KeycloakProfile | null = null;
   userProfile: UserProfile = {};
   showProfile: boolean = false;
+  userRoles: string[] = [];
 
   constructor(
     private router: Router,
     private keycloakService: KeycloakService,
   ) {}
+  async ngOnInit(): Promise<void> {
+    await this.initializeAuth();
+    if (this.keycloakService.isCandidate()) {
+      // get candidate information in candidate service
+
+    }
+  }
+
+  // Keycloak Authentication Methods
+  async initializeAuth(): Promise<void> {
+    try {
+      this.isLoggedIn = await this.keycloakService.isLoggedIn();
+
+      if (this.isLoggedIn) {
+        await this.loadKeycloakProfile();
+        this.loadUserRoles();
+        this.buildUserProfile();
+      }
+    } catch (error) {
+      console.error('Error initializing auth:', error);
+    }
+  }
+
+  async loadKeycloakProfile(): Promise<void> {
+    try {
+      this.keycloakProfile = await this.keycloakService.loadUserProfile();
+    } catch (error) {
+      console.error('Error loading Keycloak profile:', error);
+    }
+  }
+
+  loadUserRoles(): void {
+    try {
+      // Get realm roles
+      const realmRoles = this.keycloakService.getUserRoles();
+      this.userRoles = realmRoles;
+    } catch (error) {
+      console.error('Error loading user roles:', error);
+    }
+  }
+
+  buildUserProfile(): void {
+    if (this.keycloakProfile) {
+      this.userProfile = {
+        id: this.keycloakProfile.id,
+        username: this.keycloakProfile.username,
+        email: this.keycloakProfile.email,
+        firstName: this.keycloakProfile.firstName,
+        lastName: this.keycloakProfile.lastName,
+        name: this.getDisplayName(),
+        roles: this.userRoles,
+        role: this.getPrimaryRole(),
+        // These would come from your application's user service
+        applicationsCount: 0,
+        profileViews: 0,
+        savedJobs: 0
+      };
+
+      // Load additional profile data from your backend if needed
+      this.loadAdditionalProfileData();
+    }
+
+  }
+
+  async updateProfile(): Promise<void> {
+    try {
+      // Update application-specific profile data through your backend
+      // await this.userService.updateUserProfile(this.userProfile);
+
+      this.showProfile = false;
+      console.log('Profile updated successfully');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  }
+
+
+
+  getPrimaryRole(): string {
+    if (this.userRoles.includes('admin')) return 'Admin';
+    if (this.userRoles.includes('Director')) return 'Director';
+    if (this.userRoles.includes('Manager')) return 'Manager';
+    if (this.userRoles.includes('Candidate')) return 'Candidate';
+    if (this.userRoles.includes('employer')) return 'Employer';
+    if (this.userRoles.includes('recruiter')) return 'Recruiter';
+    return 'Candidate';
+  }
+
+  loadAdditionalProfileData(): void {
+    // Load additional user data from your backend using the user ID
+    const userId = this.keycloakProfile?.id;
+    if (userId) {
+      // Example: Load user's application count
+      // this.applicationService.getUserApplicationCount(userId).subscribe(count => {
+      //   this.userProfile.applicationsCount = count;
+      // });
+    }
+  }
 
   async login(): Promise<void> {
     try {
@@ -120,6 +235,13 @@ export class HeaderComponent {
       await this.keycloakService.logout();
     } catch (error) {
       console.error('Logout failed:', error);
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: any): void {
+    if (!event.target.closest('.dropdown')) {
+      this.closeProfileDropdown();
     }
   }
 }

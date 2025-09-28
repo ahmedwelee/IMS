@@ -43,7 +43,6 @@ export function kcFactory(kcService: KeycloakService) {
   declarations: [
     AppComponent,
     SpinnerComponent,
-    ApplyComponent,
     PublicComponent,
     HeaderComponent,
   ],
