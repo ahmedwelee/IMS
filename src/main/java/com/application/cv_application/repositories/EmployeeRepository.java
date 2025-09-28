@@ -17,4 +17,5 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 
     @Query("SELECT COUNT(e) FROM Employee e")
     int countEmployees();
+
 }

@@ -21,6 +21,7 @@ public class Application {
     private LocalDate appliedDate;
     private LocalDate updatedDate;
     private String status;
+    private String cvPath;
 
     @ManyToOne
     @JoinColumn(name = "candidate_id")

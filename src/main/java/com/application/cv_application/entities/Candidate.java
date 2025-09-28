@@ -26,7 +26,9 @@ public class Candidate {
     private String nationality;
     private String gender;
     private LocalDate dateOfBirth;
-    private String cvPath;
+    @Column(unique = true)
+    private String email;
+    private String password;
 
     @OneToMany(mappedBy = "candidate")
     private List<Application> applications;

@@ -30,6 +30,11 @@ public class JopController {
         return ResponseEntity.ok(service.getAllJops());
     }
 
+    @GetMapping("/open-jobs/getALl")
+    public ResponseEntity<List<JopResponse>> openJobsGetAll() {
+        return ResponseEntity.ok(service.getAllJops());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<JopResponse> getById(
             @PathVariable Integer id

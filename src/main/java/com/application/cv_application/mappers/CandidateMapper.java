@@ -19,7 +19,6 @@ public class CandidateMapper {
                 .nationality(candidate.getNationality())
                 .gender(candidate.getGender())
                 .dateOfBirth(candidate.getDateOfBirth())
-                .cvPath(candidate.getCvPath())
                 .build();
     }
 
@@ -33,7 +32,6 @@ public class CandidateMapper {
                 .nationality(request.nationality())
                 .gender(request.gender())
                 .dateOfBirth(request.dateOfBirth())
-                .cvPath(request.cvPath())
                 .build();
     }
 }

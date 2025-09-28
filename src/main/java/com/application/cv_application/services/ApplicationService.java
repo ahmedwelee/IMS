@@ -44,7 +44,11 @@ public class ApplicationService {
         Jop jop = jopRepository.findById(request.jopId())
                 .orElseThrow(() -> new EntityNotFoundException("Jop not found"));
 
+        // modify candidate's information if needed
+
+
         Application application = mapper.toEntity(request, candidate, jop);
+        // save the CV in the application
         return mapper.toResponse(applicationRepository.save(application));
     }
 

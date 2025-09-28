@@ -3,11 +3,17 @@ package com.application.cv_application.requests;
 import java.time.LocalDate;
 
 public record ApplicationRequest(
-        String applicationName,
         LocalDate appliedDate,
         LocalDate updatedDate,
-        String status,
         Integer candidateId,
-        Integer jopId
+        Integer jopId,
+        String status,
+        String firstname,
+        String lastname,
+        String phoneNumber,
+        String address,
+        String nationality,
+        String gender,
+        LocalDate dateOfBirth
 ) {}
 

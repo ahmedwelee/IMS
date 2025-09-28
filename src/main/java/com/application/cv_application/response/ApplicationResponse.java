@@ -8,6 +8,7 @@ public record ApplicationResponse(
         LocalDate appliedDate,
         LocalDate updatedDate,
         String status,
+        String cvPath,
         String candidateFullName,
         String jopTitle
 ) {}
