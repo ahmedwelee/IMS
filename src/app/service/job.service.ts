@@ -17,6 +17,9 @@ export class JobService {
   getAllJobs(): Observable<JobResponse[]> {
     return this.http.get<JobResponse[]>(this.endpoint);
   }
+  openJobsGetAll(): Observable<JobResponse[]> {
+    return this.http.get<JobResponse[]>(`${this.endpoint}/open-jobs/getALl`);
+  }
 
   getJobById(id: number): Observable<JobResponse> {
     return this.http.get<JobResponse>(`${this.endpoint}/${id}`);

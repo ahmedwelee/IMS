@@ -143,7 +143,7 @@ export class JobsForAllComponent implements OnInit{
   // Data Loading
   loadJobs(): void {
     this.isLoading = true;
-    this.jobService.getAllJobs().subscribe({
+    this.jobService.openJobsGetAll().subscribe({
       next: (jobs) => {
         this.allJobs = jobs;
         this.applyFilters();

@@ -45,17 +45,20 @@ export class KeycloakService {
     return this.keycloak.login().then(() => {
       const token = this.keycloak.tokenParsed as any;
       const roles: string[] = token?.realm_access?.roles || [];
-
+      this.checkUser();
       if (roles.includes('candidate')) {
+        // get candidate information by email
         this.router.navigate(['/home']);
       } else if (roles.includes('Director') || roles.includes('Manager')) {
+        //get manager information
         this.router.navigate(['/dashboard']);
       } else {
         this.router.navigate(['/home']); // fallback
       }
 
       //check the user is registered or not
-      this.checkUser();
+
+      // check if the connected user is candidate =
     });
   }
 
@@ -65,7 +68,7 @@ export class KeycloakService {
 
   logout() {
 
-    return this.keycloak.logout({redirectUri: 'http://localhost:4200'});
+    return this.keycloak.logout({redirectUri: 'http://localhost:4200/home'});
   }
 
   accountManagement() {
@@ -82,11 +85,23 @@ export class KeycloakService {
   }
 
   getUserRoles() {
-    return this.keycloak.tokenParsed?.realm_access?.roles;
+    return this.keycloak.tokenParsed?.realm_access?.roles || [];
   }
 
   async register(param: { redirectUri: string }) {
     return await this.keycloak.register(param);
 
+  }
+
+  isCandidate(): boolean {
+    return this.getUserRoles().includes('candidate');
+  }
+
+  isDirector(): boolean {
+    return this.getUserRoles().includes('Director');
+  }
+
+  isManager(): boolean {
+    return this.getUserRoles().includes('Manager');
   }
 }

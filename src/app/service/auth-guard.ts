@@ -11,3 +11,13 @@ export const authGuard: CanActivateFn = () => {
   }
   return true;
 };
+
+export const adminGuard: CanActivateFn = () => {
+  const tokenService  = inject(KeycloakService);
+  const router = inject(Router);
+  if (!(tokenService.isDirector() || tokenService.isManager())) {
+    router.navigate(['home']);
+    return false;
+  }
+  return true;
+};

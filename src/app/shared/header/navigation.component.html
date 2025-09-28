@@ -1,7 +1,7 @@
 <!-- ============================================================== -->
 <!-- toggle and nav items -->
 <!-- ============================================================== -->
-<ul class="navbar-nav float-start me-auto">
+<ul *ngIf="isDirector() || isManager()" class="navbar-nav float-start me-auto">
   <li class="nav-item">
     <a class="nav-link waves-effect waves-dark" href="/dashboard"> Starter </a>
   </li>

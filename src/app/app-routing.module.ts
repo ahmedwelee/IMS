@@ -4,24 +4,22 @@ import { Routes } from '@angular/router';
 import { FullComponent } from './layouts/full/full.component';
 import { ClientJobsComponent } from './component/clients/client-application/client-jobs-component';
 import {JobApplicationsComponent} from "./component/job/jobApplication/job-application-component";
-import {authGuard} from "./service/auth-guard";
+import {adminGuard, authGuard} from "./service/auth-guard";
 import {HomeComponent} from "./pages/home/home.component";
 import {JobsForAllComponent} from "./pages/jobs-for-all/jobs-for-all.component";
-
+import {ApplyComponent} from "./pages/apply/apply.component";
+import {PublicComponent} from "./layouts/public/public.component";
 export const Approutes: Routes = [
   {
-    path: '',
+
+    path: 'dashboard',
     component: FullComponent,
+    canActivate: [adminGuard],
     children: [
-      { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+      // 👇 remove redirect to dashboard
       {
-        path: 'dashboard',
+        path: '',
         loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule),
-        canActivate: [authGuard]
-      },
-      {
-        path: 'about',
-        loadChildren: () => import('./about/about.module').then(m => m.AboutModule),
         canActivate: [authGuard]
       },
       {
@@ -38,16 +36,28 @@ export const Approutes: Routes = [
     ]
   },
   {
-    path: 'all-jobs',
-    component: JobsForAllComponent,
-  },
-  {
-    path: '**',
-    redirectTo: '/home'
-  },
-  {
-    path: 'home',
-    component: HomeComponent,
-  },
+    path: '',
+    component: PublicComponent,
+    children: [
+      {
+        path: 'all-jobs',
+        component: JobsForAllComponent,
+      },
+      {
+        path: 'apply',
+        component: ApplyComponent,
+      },
+      {
+        path: 'home',
+        component: HomeComponent,
+      },
+      // 👇 keep wildcard last
+      {
+        path: '**',
+        redirectTo: '/home',
+        pathMatch: 'full'
+      }
+    ]
+  }
 
 ];

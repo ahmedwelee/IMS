@@ -1,13 +1,14 @@
 import { Component, AfterViewInit, EventEmitter, Output } from '@angular/core';
 import { NgbDropdownModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {KeycloakService} from "../../service/keycloak.service";
+import {NgIf} from "@angular/common";
 
 declare var $: any;
 
 @Component({
   selector: 'app-navigation',
   standalone: true,
-  imports:[NgbDropdownModule],
+  imports: [NgbDropdownModule, NgIf],
   templateUrl: './navigation.component.html'
 })
 export class NavigationComponent implements AfterViewInit {
@@ -121,5 +122,13 @@ export class NavigationComponent implements AfterViewInit {
 
   profile() {
     this.KcService.accountManagement()
+  }
+
+  isDirector(): boolean {
+    return this.KcService.getUserRoles().includes('Director');
+  }
+
+  isManager(): boolean {
+    return this.KcService.getUserRoles()?.includes('Manager');
   }
 }

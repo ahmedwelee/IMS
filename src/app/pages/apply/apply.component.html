@@ -1,0 +1,164 @@
+
+
+<!-- Main Content -->
+<div class="container mt-5 pt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <!-- Job Details Card -->
+      <div class="card mb-4" *ngIf="jobDetails && !isLoading">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">Applying to: {{ jobDetails.jopName }}</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <p class="mb-2"><strong>Company:</strong> {{ jobDetails.clientName }}</p>
+              <p class="mb-2"><strong>Location:</strong> {{ jobDetails.location }}</p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-2"><strong>Salary:</strong> {{ jobDetails.salary | currency }}</p>
+              <p class="mb-2"><strong>Type:</strong> {{ jobDetails.jobType }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3">Loading job details...</p>
+      </div>
+
+      <!-- Application Form -->
+      <div class="card" *ngIf="!isLoading">
+        <div class="card-header">
+          <h4 class="mb-0">Application Form</h4>
+          <p class="text-muted mb-0">Please fill in your details accurately</p>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="applyForm" (ngSubmit)="onSubmit()">
+            <!-- Personal Information -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="firstName" class="form-label">First Name *</label>
+                <input type="text" class="form-control" id="firstName" formControlName="firstName"
+                       [class.is-invalid]="isFieldInvalid('firstName')">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('firstName')">
+                  {{ getFieldError('firstName') }}
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="lastName" class="form-label">Last Name *</label>
+                <input type="text" class="form-control" id="lastName" formControlName="lastName"
+                       [class.is-invalid]="isFieldInvalid('lastName')">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('lastName')">
+                  {{ getFieldError('lastName') }}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="phoneNumber" class="form-label">Phone Number *</label>
+                <input type="tel" class="form-control" id="phoneNumber" formControlName="phoneNumber"
+                       [class.is-invalid]="isFieldInvalid('phoneNumber')">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('phoneNumber')">
+                  {{ getFieldError('phoneNumber') }}
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="dateOfBirth" class="form-label">Date of Birth *</label>
+                <input type="date" class="form-control" id="dateOfBirth" formControlName="dateOfBirth"
+                       [class.is-invalid]="isFieldInvalid('dateOfBirth')">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('dateOfBirth')">
+                  {{ getFieldError('dateOfBirth') }}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="gender" class="form-label">Gender *</label>
+                <select class="form-select" id="gender" formControlName="gender"
+                        [class.is-invalid]="isFieldInvalid('gender')">
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('gender')">
+                  {{ getFieldError('gender') }}
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="nationality" class="form-label">Nationality *</label>
+                <input type="text" class="form-control" id="nationality" formControlName="nationality"
+                       [class.is-invalid]="isFieldInvalid('nationality')">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('nationality')">
+                  {{ getFieldError('nationality') }}
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="address" class="form-label">Address *</label>
+              <textarea class="form-control" id="address" rows="3" formControlName="address"
+                        [class.is-invalid]="isFieldInvalid('address')"></textarea>
+              <div class="invalid-feedback" *ngIf="isFieldInvalid('address')">
+                {{ getFieldError('address') }}
+              </div>
+            </div>
+
+            <!-- CV Upload -->
+            <div class="mb-4">
+              <label for="cvUpload" class="form-label">Upload CV/Resume *</label>
+              <input type="file" class="form-control" id="cvUpload" (change)="onFileSelected($event)"
+                     accept=".pdf,.doc,.docx" required>
+              <div class="form-text">
+                Accepted formats: PDF, DOC, DOCX (Max 5MB)
+              </div>
+              <div *ngIf="selectedFile" class="mt-2">
+                <span class="badge bg-success">
+                  <i class="bi bi-check-circle me-1"></i>
+                  {{ selectedFile.name }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="d-flex gap-2 justify-content-end">
+              <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isSubmitting">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+                {{ isSubmitting ? 'Submitting...' : 'Submit Application' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- No Job ID Warning -->
+      <div *ngIf="!jobId && !isLoading" class="alert alert-warning text-center">
+        <h4>No Job Selected</h4>
+        <p>Please select a job to apply for from the jobs page.</p>
+        <a routerLink="/jobs" class="btn btn-primary">Browse Jobs</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer (same as your home page) -->
+<footer class="footer mt-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center">
+        <p>&copy; 2024 JobPortal. All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+</footer>

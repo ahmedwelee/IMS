@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, HostListener, OnInit} from '@angular/core';
 import {KeycloakService} from "../../service/keycloak.service";
 import {Router, RouterLink} from "@angular/router";
 import {JobService} from "../../service/job.service";
@@ -11,6 +11,7 @@ import {DatePipe, NgForOf, NgIf, SlicePipe} from "@angular/common";
 // @ts-ignore
 import {KeycloakProfile} from "keycloak-js";
 import {NgbDropdown} from "@ng-bootstrap/ng-bootstrap";
+
 
 interface UserProfile {
   id?: string;
@@ -28,6 +29,7 @@ interface UserProfile {
   savedJobs?: number;
   roles?: string[];
 }
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -38,8 +40,7 @@ interface UserProfile {
     SlicePipe,
     NgIf,
     RouterLink,
-    NgForOf,
-    NgbDropdown
+    NgForOf
   ],
   styleUrls: ['./home.component.scss']
 })
@@ -57,6 +58,10 @@ export class HomeComponent implements OnInit {
   showPrivacy: boolean = false;
   showTerms: boolean = false;
   showHelp: boolean = false;
+
+  // Navbar UI state
+  isNavbarCollapsed: boolean = true;
+  isProfileDropdownOpen: boolean = false;
 
   // Data
   featuredJobs: any[] = [];
@@ -80,6 +85,10 @@ export class HomeComponent implements OnInit {
     await this.initializeAuth();
     this.loadFeaturedJobs();
     this.loadStatistics();
+    if (this.keycloakService.isCandidate()) {
+      // get candidate information in candidate service
+
+    }
   }
 
   // Keycloak Authentication Methods
@@ -109,10 +118,6 @@ export class HomeComponent implements OnInit {
     try {
       // Get realm roles
       const realmRoles = this.keycloakService.getUserRoles();
-
-      // Get client roles (if you have specific client roles)
-      // const clientRoles = this.keycloakService.getUserRoles(true);
-
       this.userRoles = realmRoles;
     } catch (error) {
       console.error('Error loading user roles:', error);
@@ -160,6 +165,8 @@ export class HomeComponent implements OnInit {
 
   getPrimaryRole(): string {
     if (this.userRoles.includes('admin')) return 'Admin';
+    if (this.userRoles.includes('Director')) return 'Director';
+    if (this.userRoles.includes('Manager')) return 'Manager';
     if (this.userRoles.includes('hr_manager')) return 'HR Manager';
     if (this.userRoles.includes('employer')) return 'Employer';
     if (this.userRoles.includes('recruiter')) return 'Recruiter';
@@ -168,7 +175,6 @@ export class HomeComponent implements OnInit {
 
   loadAdditionalProfileData(): void {
     // Load additional user data from your backend using the user ID
-    // This could include application counts, saved jobs, etc.
     const userId = this.keycloakProfile?.id;
     if (userId) {
       // Example: Load user's application count
@@ -207,9 +213,6 @@ export class HomeComponent implements OnInit {
 
   // Profile Management
   async updateProfile(): Promise<void> {
-    // Note: Keycloak profile updates typically need to be done through Keycloak Admin API
-    // or through Keycloak Account Console. Here you might update your application-specific data
-
     try {
       // Update application-specific profile data through your backend
       // await this.userService.updateUserProfile(this.userProfile);
@@ -223,26 +226,47 @@ export class HomeComponent implements OnInit {
 
   // Navigation based on roles
   navigateToDashboard(): void {
-
+    if (this.isDirector()) {
       this.router.navigate(['/dashboard']);
-
+    } else if (this.isManager()) {
+      this.router.navigate(['/dashboard']);
+    } else {
+      this.router.navigate(['/dashboard']);
+    }
   }
 
-  // Role checking
+  // Role checking methods
   hasRole(role: string): boolean {
     return this.userRoles.includes(role);
   }
 
   canPostJobs(): boolean {
-    return this.hasRole('admin') || this.hasRole('hr_manager') || this.hasRole('employer');
+    return this.hasRole('Director') || this.hasRole('Manager') || this.hasRole('employer');
   }
 
-  // Data Loading Methods (same as before)
+  isDirector(): boolean {
+    return this.keycloakService.getUserRoles().includes('Director');
+  }
+
+  isManager(): boolean {
+    return this.keycloakService.getUserRoles()?.includes('Manager');
+  }
+
+  canAccessClients(): boolean {
+    return this.isDirector() || this.isManager();
+  }
+
+  canAccessAdmin(): boolean {
+    return this.hasRole('Director') || this.isDirector();
+  }
+
+  // Data Loading Methods
   loadFeaturedJobs(): void {
     this.loadingJobs = true;
-    this.jobService.getAllJobs().subscribe({
+    this.jobService.openJobsGetAll().subscribe({
       next: (jobs) => {
-        this.featuredJobs = jobs;
+        // Get only first 3 jobs for featured section
+        this.featuredJobs = jobs.slice(0, 3);
         this.loadingJobs = false;
       },
       error: (error) => {
@@ -255,7 +279,7 @@ export class HomeComponent implements OnInit {
 
   loadStatistics(): void {
     // Load total jobs
-    this.jobService.getAllJobs().subscribe({
+    this.jobService.openJobsGetAll().subscribe({
       next: (jobs) => {
         this.totalJobs = jobs.length;
       },
@@ -266,7 +290,7 @@ export class HomeComponent implements OnInit {
     });
 
     // Load total clients
-    this.clientsService.getAllClients().subscribe({
+   /* this.clientsService.getAllClients().subscribe({
       next: (clients) => {
         this.totalClients = clients.length;
       },
@@ -274,7 +298,7 @@ export class HomeComponent implements OnInit {
         console.error('Error loading clients count:', error);
         this.totalClients = 25;
       }
-    });
+    });*/
 
     // Load total applications
     if (this.applicationService && this.applicationService.getAllApplications) {
@@ -309,14 +333,21 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  async saveJob(job: any): Promise<void> {
-    if (!this.isLoggedIn) {
-      await this.login();
-      return;
-    }
 
-    // Implement save job functionality
-    console.log('Saving job:', job);
+
+  // Navigation methods
+  toJobs(): void {
+    this.router.navigate(['/all-jobs']);
+  }
+
+  toClients(): void {
+    if (this.canAccessClients()) {
+      this.router.navigate(['/clients']);
+    }
+  }
+
+  toDashboard(): void {
+    this.navigateToDashboard();
   }
 
   // Newsletter
@@ -324,7 +355,29 @@ export class HomeComponent implements OnInit {
     if (!this.newsletterEmail) return;
 
     console.log('Subscribing email:', this.newsletterEmail);
+    // Add actual newsletter subscription logic here
+    // this.newsletterService.subscribe(this.newsletterEmail).subscribe(...)
+
     this.newsletterEmail = '';
+    // Show success message
+    // this.showSuccessMessage('Successfully subscribed to newsletter!');
+  }
+
+  // Modal control methods
+  openProfile(): void {
+    this.showProfile = true;
+  }
+
+  closeProfile(): void {
+    this.showProfile = false;
+  }
+
+  openAbout(): void {
+    this.showAbout = true;
+  }
+
+  closeAbout(): void {
+    this.showAbout = false;
   }
 
   // Utility Methods
@@ -360,7 +413,29 @@ export class HomeComponent implements OnInit {
     return salary.toLocaleString('en-US');
   }
 
-  // Demo Data
+  getTimeAgo(date: Date | string): string {
+    const now = new Date();
+    const jobDate = new Date(date);
+    const diffTime = Math.abs(now.getTime() - jobDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+    return `${Math.ceil(diffDays / 30)} months ago`;
+  }
+
+  // User profile helpers
+  getUserInitials(): string {
+    const name = this.getDisplayName();
+    if (name.includes(' ')) {
+      const parts = name.split(' ');
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+    return name.charAt(0).toUpperCase();
+  }
+
+  // Demo Data (fallback when API fails)
   getDemoJobs(): any[] {
     return [
       {
@@ -398,17 +473,21 @@ export class HomeComponent implements OnInit {
       }
     ];
   }
-  toJobs(){
-    this.router.navigate(['/all-jobs']);
+
+
+  toggleProfileDropdown(): void {
+    this.isProfileDropdownOpen = !this.isProfileDropdownOpen;
   }
 
-  isDirector() {
-
-      return this.keycloakService.getUserRoles().includes('Director');
+  closeProfileDropdown(): void {
+    this.isProfileDropdownOpen = false;
   }
 
-  isManager() {
-    return this.keycloakService.getUserRoles()?.includes('Manager');
+  // Add HostListener to close dropdown when clicking outside
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: any): void {
+    if (!event.target.closest('.dropdown')) {
+      this.closeProfileDropdown();
+    }
   }
 }
-
