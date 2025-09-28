@@ -48,6 +48,7 @@ public class ApplicationService {
 
 
         Application application = mapper.toEntity(request, candidate, jop);
+        candidateRepository.save(application.getCandidate());
         // save the CV in the application
         return mapper.toResponse(applicationRepository.save(application));
     }
@@ -60,7 +61,7 @@ public class ApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException("Candidate not found"));
         Jop jop = jopRepository.findById(request.jopId())
                 .orElseThrow(() -> new EntityNotFoundException("Jop not found"));
-        
+
         existing.setAppliedDate(request.appliedDate());
         existing.setUpdatedDate(request.updatedDate());
         existing.setStatus(request.status());
