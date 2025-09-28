@@ -60,8 +60,7 @@ public class ApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException("Candidate not found"));
         Jop jop = jopRepository.findById(request.jopId())
                 .orElseThrow(() -> new EntityNotFoundException("Jop not found"));
-
-        existing.setApplicationName(request.applicationName());
+        
         existing.setAppliedDate(request.appliedDate());
         existing.setUpdatedDate(request.updatedDate());
         existing.setStatus(request.status());
