@@ -17,7 +17,6 @@ public class Application {
     @Id
     @GeneratedValue
     private Integer id;
-    private String applicationName;
     private LocalDate appliedDate;
     private LocalDate updatedDate;
     private String status;

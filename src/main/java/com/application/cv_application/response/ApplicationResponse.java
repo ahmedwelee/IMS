@@ -4,12 +4,16 @@ import java.time.LocalDate;
 
 public record ApplicationResponse(
         Integer id,
-        String applicationName,
         LocalDate appliedDate,
         LocalDate updatedDate,
-        String status,
-        String cvPath,
         String candidateFullName,
-        String jopTitle
+        String jopName,
+        String status,
+        String phoneNumber,
+        String address,
+        String nationality,
+        String gender,
+        LocalDate dateOfBirth,
+        String cvPath
 ) {}
 

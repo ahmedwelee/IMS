@@ -14,6 +14,7 @@ public record ApplicationRequest(
         String address,
         String nationality,
         String gender,
-        LocalDate dateOfBirth
+        LocalDate dateOfBirth,
+        String cvPath
 ) {}
 

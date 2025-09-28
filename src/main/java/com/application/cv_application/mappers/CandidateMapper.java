@@ -11,8 +11,6 @@ public class CandidateMapper {
     public CandidateResponse toResponse(Candidate candidate) {
         return CandidateResponse.builder()
                 .id(candidate.getId())
-                .firstName(candidate.getFirstName())
-                .lastName(candidate.getLastName())
                 .fullName(candidate.getFirstName() + " " + candidate.getLastName())
                 .phoneNumber(candidate.getPhoneNumber())
                 .address(candidate.getAddress())

@@ -46,7 +46,6 @@ public class CandidateService {
         existing.setNationality(request.nationality());
         existing.setGender(request.gender());
         existing.setDateOfBirth(request.dateOfBirth());
-        existing.setCvPath(request.cvPath());
 
         return mapper.toResponse(candidateRepository.save(existing));
     }

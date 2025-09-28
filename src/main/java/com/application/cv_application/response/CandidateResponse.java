@@ -14,8 +14,6 @@ import java.time.LocalDate;
 public class CandidateResponse {
 
     private Integer id;
-    private String firstName;
-    private String lastName;
     private String fullName;
     private String phoneNumber;
     private String address;

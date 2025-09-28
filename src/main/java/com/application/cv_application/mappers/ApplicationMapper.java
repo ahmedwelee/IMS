@@ -18,13 +18,18 @@ public class ApplicationMapper {
     public ApplicationResponse toResponse(Application application) {
         return new ApplicationResponse(
                 application.getId(),
-                application.getApplicationName(),
                 application.getAppliedDate(),
                 application.getUpdatedDate(),
-                application.getStatus(),
                 application.getCandidate().getFullName(),
-                application.getCvPath(),
-                application.getJop().getJopName()
+                application.getJop().getJopName(),
+                application.getStatus(),
+                application.getCandidate().getPhoneNumber(),
+                application.getCandidate().getAddress(),
+                application.getCandidate().getNationality(),
+                application.getCandidate().getGender(),
+                application.getCandidate().getDateOfBirth(),
+                application.getCvPath()
+
         );
     }
 
