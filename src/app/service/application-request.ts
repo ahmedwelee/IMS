@@ -11,4 +11,5 @@ export interface ApplicationRequest {
   nationality: string;
   gender: string;
   dateOfBirth: string;
-  cvPath: string;}
+  cvPath: string;
+}

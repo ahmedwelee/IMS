@@ -45,22 +45,20 @@ export class KeycloakService {
     return this.keycloak.login().then(() => {
       const token = this.keycloak.tokenParsed as any;
       const roles: string[] = token?.realm_access?.roles || [];
-      this.checkUser();
+
+      // 🔹 Call backend to check/register user
+      this.http.get("http://localhost:8088/users/check").subscribe();
+
       if (roles.includes('candidate')) {
-        // get candidate information by email
         this.router.navigate(['/home']);
       } else if (roles.includes('Director') || roles.includes('Manager')) {
-        //get manager information
         this.router.navigate(['/dashboard']);
       } else {
         this.router.navigate(['/home']); // fallback
       }
-
-      //check the user is registered or not
-
-      // check if the connected user is candidate =
     });
   }
+
 
   checkUser() {
     this.http.get('http://localhost:8088/users/check').subscribe();

@@ -8,7 +8,6 @@ import { ComponentsRoutes } from './component.routing';
 import { EmployeesComponent } from "./employee/employee.component";
 import {ClientsComponent} from "./clients/clients.component";
 import {JobsComponent} from "./job/job.component";
-import {ProfileComponent} from "./profile/profile.component";
 import {ApplicationsComponent} from "./application/application.component";
 import {JobApplicationsComponent} from "./job/jobApplication/job-application-component";
 import {ClientJobsComponent} from "./clients/client-application/client-jobs-component";
@@ -25,8 +24,7 @@ import {ClientJobsComponent} from "./clients/client-application/client-jobs-comp
     JobApplicationsComponent,
     ApplicationsComponent,
     ClientsComponent,
-    ClientJobsComponent,
-    ProfileComponent
+    ClientJobsComponent
   ],
 })
 export class ComponentsModule { }

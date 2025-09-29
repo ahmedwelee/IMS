@@ -68,6 +68,16 @@ export class ApplicationService {
     });
   }
 
+  uploadCV(formData: FormData): Observable<any> {
+    return this.http.post<any>(`${this.endpoint}/files/upload/cv`, formData);
+  }
+
+  downloadCV(filePath: string): Observable<Blob> {
+    return this.http.get(`${this.endpoint}/files/download/cv/${filePath}`, {
+      responseType: 'blob'
+    });
+  }
+
 
 
 }

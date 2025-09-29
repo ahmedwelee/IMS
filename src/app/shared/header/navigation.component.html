@@ -1,7 +1,7 @@
 <!-- ============================================================== -->
 <!-- toggle and nav items -->
 <!-- ============================================================== -->
-<ul *ngIf="isDirector() || isManager()" class="navbar-nav float-start me-auto">
+<ul class="navbar-nav float-start me-auto">
   <li class="nav-item">
     <a class="nav-link waves-effect waves-dark" href="/dashboard"> Starter </a>
   </li>
@@ -34,37 +34,103 @@
 <!-- Right side toggle and nav items -->
 <!-- ============================================================== -->
 <ul class="navbar-nav float-end">
-  <!-- ============================================================== -->
-  <!-- User profile and search -->
-  <!-- ============================================================== -->
-  <li class="nav-item" ngbDropdown placement="bottom-end">
+  <li class="nav-item dropdown" ngbDropdown placement="bottom-end">
     <a
       ngbDropdownToggle
-      class="nav-link waves-effect waves-dark pro-pic"
+      class="nav-link dropdown-toggle waves-effect waves-dark d-flex align-items-center"
       href="javascript:void(0)"
       data-toggle="dropdown"
       aria-haspopup="true"
       aria-expanded="false"
     >
-      <img
-        src="assets/images/users/user1.jpg"
-        alt="user"
-        class="rounded-circle"
-        width="31"
-      />
-      <span class="ms-2">Steve Jobs</span>
+      <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-2"
+           style="width: 32px; height: 32px;">
+        <span class="text-white fw-bold" style="font-size: 0.8rem;">
+          {{ getUserInitials() }}
+        </span>
+      </div>
+      {{ getDisplayName() }}
     </a>
-    <div class="dropdown-menu-right" ngbDropdownMenu>
-      <a class="dropdown-item" href="javascript:void(0)" (click)="profile()"> My Profile</a>
-      <a class="dropdown-item" href="javascript:void(0)"> My Balance</a>
-      <a class="dropdown-item" href="javascript:void(0)"> Inbox</a>
+    <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
+      <div class="dropdown-header">
+        <strong>{{ getDisplayName() }}</strong>
+        <br>
+        <small class="text-muted">{{ userProfile?.email }}</small>
+      </div>
       <div class="dropdown-divider"></div>
-      <a class="dropdown-item" href="javascript:void(0)"> Account Setting</a>
+
+      <a class="dropdown-item waves-effect waves-dark" href="javascript:void(0)" (click)="openProfile()">
+        <i class="bi bi-user me-2"></i>View Profile
+      </a>
+
+      <a class="dropdown-item waves-effect waves-dark" href="/home">
+        <i class="fas fa-tachometer-alt me-2"></i>HomePage
+      </a>
+
+      <a class="dropdown-item waves-effect waves-dark" href="javascript:void(0)" (click)="toClients()">
+        <i class="bi bi-users me-2"></i>Manage Clients
+      </a>
+
       <div class="dropdown-divider"></div>
-      <a class="dropdown-item" href="javascript:void(0)" (click)="logout()"> Logout</a>
+
+      <a class="dropdown-item waves-effect waves-dark text-danger" href="javascript:void(0)" (click)="logout()">
+        <i class="bi bi-sign-out-alt me-2"></i>Logout
+      </a>
     </div>
   </li>
-  <!-- ============================================================== -->
-  <!-- User profile and search -->
-  <!-- ============================================================== -->
 </ul>
+
+
+<div class="modal fade" [class.show]="showProfile" [style.display]="showProfile ? 'block' : 'none'" *ngIf="showProfile">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-user me-2"></i>User Profile
+        </h5>
+        <button type="button" class="btn-close" (click)="showProfile = false"></button>
+      </div>
+      <div class="modal-body">
+        <form #profileForm="ngForm">
+          <div class="text-center mb-4">
+            <div class="profile-avatar rounded-circle d-flex align-items-center justify-content-center mx-auto">
+              <span class="fs-2 text-white">{{ userProfile.name?.charAt(0) || 'U' }}</span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-control" [(ngModel)]="userProfile.name" name="name">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" [(ngModel)]="userProfile.email" name="email">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Phone</label>
+              <input type="tel" class="form-control" [(ngModel)]="userProfile.phone" name="phone">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Role</label>
+              <select class="form-select" [(ngModel)]="userProfile.role" name="role">
+                <option value="Job Seeker">Job Seeker</option>
+                <option value="Employer">Employer</option>
+                <option value="HR Manager">HR Manager</option>
+              </select>
+            </div>
+            <div class="col-12 mb-3">
+              <label class="form-label">Bio</label>
+              <textarea class="form-control" rows="3" [(ngModel)]="userProfile.bio" name="bio"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="showProfile = false">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="updateProfile()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+

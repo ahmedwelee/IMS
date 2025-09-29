@@ -12,13 +12,13 @@ import {PublicComponent} from "./layouts/public/public.component";
 export const Approutes: Routes = [
   {
 
-    path: 'dashboard',
+    path: '',
     component: FullComponent,
     canActivate: [adminGuard],
     children: [
       // 👇 remove redirect to dashboard
       {
-        path: '',
+        path: 'dashboard',
         loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule),
         canActivate: [authGuard]
       },

@@ -1,4 +1,3 @@
-<!--
 <div class="row">
   <div class="col-12">
     <div class="card">
@@ -10,8 +9,104 @@
           </div>
         </div>
 
-        &lt;!&ndash; Applications Table &ndash;&gt;
-        <div class="table-responsive">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+          <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card bg-primary text-white h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h6 class="card-title text-white-50">Total Applications</h6>
+                    <h3 class="mb-0">{{ getTotalApplications() }}</h3>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="fas fa-file-alt fa-2x"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card bg-warning text-dark h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h6 class="card-title text-dark-50">Pending</h6>
+                    <h3 class="mb-0">{{ getPendingApplications() }}</h3>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="fas fa-clock fa-2x"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card bg-success text-white h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h6 class="card-title text-white-50">Hired</h6>
+                    <h3 class="mb-0">{{ getHiredApplications() }}</h3>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="fas fa-check-circle fa-2x"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card bg-danger text-white h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h6 class="card-title text-white-50">Rejected</h6>
+                    <h3 class="mb-0">{{ getRejectedApplications() }}</h3>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="fas fa-times-circle fa-2x"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="fas fa-search"></i>
+              </span>
+              <input type="text" class="form-control" placeholder="Search by candidate or job title..."
+                     [(ngModel)]="searchTerm" (input)="applyFilters()">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <select class="form-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
+              <option value="">All Statuses</option>
+              <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+              <i class="fas fa-times me-1"></i>Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div *ngIf="isLoading" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="text-muted mt-2">Loading applications...</p>
+        </div>
+
+        <!-- Applications Table -->
+        <div class="table-responsive" *ngIf="!isLoading">
           <table class="table align-middle table-hover">
             <thead class="table-light">
             <tr>
@@ -24,7 +119,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr *ngFor="let application of applications">
+            <tr *ngFor="let application of filteredApplications">
               <td>
                 <div class="d-flex align-items-center">
                   <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
@@ -32,18 +127,18 @@
                     <i class="fas fa-user text-white"></i>
                   </div>
                   <div>
-                    <h6 class="mb-0 font-medium">{{ application.candidateFullName }}</h6>
-                    <small class="text-muted">Application: {{ application.applicationName }}</small>
+                    <h6 class="mb-0 font-medium">{{ getCandidateName(application) }}</h6>
+                    <small class="text-muted">{{ application.phoneNumber }}</small>
                   </div>
                 </div>
               </td>
               <td>
-                <span class="text-muted">{{ application.jopTitle }}</span>
+                <span class="text-muted">{{ getJobTitle(application) }}</span>
               </td>
               <td>
-                <span class="badge" [class]="getStatusBadgeClass(application.status)">
-                  {{ application.status }}
-                </span>
+                  <span class="badge" [class]="getStatusBadgeClass(application.status)">
+                    {{ application.status || 'UNKNOWN' }}
+                  </span>
               </td>
               <td>
                 <small class="text-muted">{{ formatDate(application.appliedDate) }}</small>
@@ -53,32 +148,46 @@
               </td>
               <td>
                 <div class="btn-group" role="group">
-                  <button class="btn btn-outline-primary btn-sm" (click)="openApplicationDetailsModal(application)">
-                    <i class="fas fa-eye"></i>View
+                  <button class="btn btn-outline-primary btn-sm"
+                          (click)="openApplicationDetailsModal(application)"
+                          title="View Details">
+                    <i class="fas fa-eye"></i> View
                   </button>
                   <button *ngIf="application.status !== 'HIRED' && application.status !== 'REJECTED'"
-                          type="button" class="btn btn-outline-success btn-sm"
-                          (click)="openDecisionModal(application, 'HIRED')">
+                          type="button" class="btn btn-outline-success btn-sm ms-1"
+                          (click)="openDecisionModal(application, 'HIRED')"
+                          title="Accept Application">
                     <i class="fas fa-check"></i> Accept
                   </button>
                   <button *ngIf="application.status !== 'HIRED' && application.status !== 'REJECTED'"
                           type="button" class="btn btn-outline-danger btn-sm ms-1"
-                          (click)="openDecisionModal(application, 'REJECTED')">
+                          (click)="openDecisionModal(application, 'REJECTED')"
+                          title="Reject Application">
                     <i class="fas fa-times"></i> Reject
                   </button>
                   <button *ngIf="application.status === 'HIRED' || application.status === 'REJECTED'"
                           type="button" class="btn btn-outline-secondary btn-sm ms-1"
-                          (click)="resetApplicationStatus(application)">
+                          (click)="resetApplicationStatus(application)"
+                          title="Reset Status">
                     <i class="fas fa-undo"></i> Reset
+                  </button>
+                  <button *ngIf="application.cvPath"
+                          type="button" class="btn btn-outline-info btn-sm ms-1"
+                          (click)="downloadCV(application.cvPath)"
+                          title="View CV">
+                    <i class="fas fa-file-pdf"></i> CV
                   </button>
                 </div>
               </td>
             </tr>
-            <tr *ngIf="applications.length === 0">
+            <tr *ngIf="filteredApplications.length === 0 && !isLoading">
               <td colspan="6" class="text-center py-4">
                 <div class="text-muted">
                   <i class="fas fa-file-alt fa-2x mb-3"></i>
                   <p>No applications found.</p>
+                  <button *ngIf="searchTerm || statusFilter" class="btn btn-primary btn-sm" (click)="clearFilters()">
+                    Clear filters
+                  </button>
                 </div>
               </td>
             </tr>
@@ -90,14 +199,14 @@
   </div>
 </div>
 
-&lt;!&ndash; Decision Modal (Accept/Reject) &ndash;&gt;
+<!-- Decision Modal (Accept/Reject) -->
 <div class="modal fade" [class.show]="showDecisionModal" [style.display]="showDecisionModal ? 'block' : 'none'"
      *ngIf="showDecisionModal">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header" [class.bg-success]="currentDecision === 'HIRED'" [class.bg-danger]="currentDecision === 'REJECTED'">
         <h5 class="modal-title text-white">
-          <i class="fas" [class.fa-check]="currentDecision === 'HIRED'" [class.fa-times]="currentDecision === 'REJECTED'" me-2></i>
+          <i class="fas me-2" [class.fa-check]="currentDecision === 'HIRED'" [class.fa-times]="currentDecision === 'REJECTED'"></i>
           {{ getDecisionModalTitle() }}
         </h5>
         <button type="button" class="btn-close btn-close-white" (click)="closeDecisionModal()" aria-label="Close"></button>
@@ -105,8 +214,8 @@
       <div class="modal-body">
         <div *ngIf="selectedApplication">
           <p>You are about to <strong>{{ currentDecision === 'HIRED' ? 'accept' : 'reject' }}</strong>
-            <strong>{{ selectedApplication.candidateFullName }}</strong> for the
-            <strong>{{ selectedApplication.jopTitle }}</strong> position.</p>
+            <strong>{{ getCandidateName(selectedApplication) }}</strong> for the
+            <strong>{{ getJobTitle(selectedApplication) }}</strong> position.</p>
 
           <div class="mb-3">
             <label for="decisionFeedback" class="form-label">Feedback (Optional)</label>
@@ -119,14 +228,15 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="closeDecisionModal()">Cancel</button>
         <button type="button" class="btn" [class]="getDecisionButtonClass()" (click)="confirmDecision()">
-          <i class="fas" [class.fa-check]="currentDecision === 'HIRED'" [class.fa-times]="currentDecision === 'REJECTED'" me-1></i>
+          <i class="fas me-1" [class.fa-check]="currentDecision === 'HIRED'" [class.fa-times]="currentDecision === 'REJECTED'"></i>
           {{ getDecisionButtonText() }}
         </button>
       </div>
     </div>
   </div>
 </div>
-&lt;!&ndash; details modal &ndash;&gt;
+
+<!-- Application Details Modal -->
 <div class="modal fade" [class.show]="showApplicationDetailsModal" [style.display]="showApplicationDetailsModal ? 'block' : 'none'"
      *ngIf="showApplicationDetailsModal">
   <div class="modal-dialog modal-lg" role="document">
@@ -140,25 +250,29 @@
       </div>
 
       <div class="modal-body" *ngIf="selectedApplication">
-        &lt;!&ndash; Application Header Info &ndash;&gt;
+        <!-- Application Header Info -->
         <div class="row mb-4">
           <div class="col-12">
             <div class="d-flex align-items-center p-3 bg-light rounded">
               <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
                    style="width: 60px; height: 60px;">
-                <span class="text-white fw-bold fs-3">{{selectedApplication.candidateFullName?.charAt(0) | uppercase}}</span>
+                <span class="text-white fw-bold fs-3">{{(getCandidateName(selectedApplication)?.charAt(0) || '?') | uppercase}}</span>
               </div>
               <div class="flex-grow-1">
-                <h4 class="mb-1">{{selectedApplication.candidateFullName}}</h4>
-                <p class="mb-0 text-muted">{{selectedApplication.jopTitle}}</p>
+                <h4 class="mb-1">{{ getCandidateName(selectedApplication) }}</h4>
+                <p class="mb-0 text-muted">{{ getJobTitle(selectedApplication) }}</p>
                 <span class="badge" [class]="getStatusBadgeClass(selectedApplication.status)">
-                  {{selectedApplication.status}}
+                  {{ selectedApplication.status || 'UNKNOWN' }}
                 </span>
               </div>
               <div class="text-end">
                 <div class="text-muted small">
                   <i class="fas fa-calendar me-1"></i>
-                  Applied: {{ formatDate(selectedApplication?.appliedDate) }}
+                  Applied: {{ formatDate(selectedApplication.appliedDate) }}
+                </div>
+                <div class="text-muted small">
+                  <i class="fas fa-sync-alt me-1"></i>
+                  Updated: {{ formatDate(selectedApplication.updatedDate) }}
                 </div>
               </div>
             </div>
@@ -168,66 +282,99 @@
         <div class="row">
           <div class="col-md-6">
             <h6 class="text-primary border-bottom pb-2">
-              <i class="fas fa-info-circle me-2"></i>Application Information
+              <i class="fas fa-user me-2"></i>Candidate Information
             </h6>
 
             <div class="mb-3">
-              <label class="form-label fw-bold text-muted">Application Name:</label>
-              <p class="mb-2">{{selectedApplication?.applicationName}}</p>
+              <label class="form-label fw-bold text-muted">Full Name:</label>
+              <p class="mb-2">
+                <i class="fas fa-user text-muted me-1"></i>
+                {{ getCandidateName(selectedApplication) }}
+              </p>
             </div>
 
             <div class="mb-3">
-              <label class="form-label fw-bold text-muted">Candidate Name:</label>
+              <label class="form-label fw-bold text-muted">Phone Number:</label>
               <p class="mb-2">
-                <i class="fas fa-user text-muted me-1"></i>
-                {{selectedApplication?.candidateFullName}}
+                <i class="fas fa-phone text-muted me-1"></i>
+                {{ selectedApplication.phoneNumber || 'N/A' }}
               </p>
             </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Address:</label>
+              <p class="mb-2">
+                <i class="fas fa-map-marker-alt text-muted me-1"></i>
+                {{ selectedApplication.address || 'N/A' }}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Nationality:</label>
+              <p class="mb-2">
+                <i class="fas fa-flag text-muted me-1"></i>
+                {{ selectedApplication.nationality || 'N/A' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <h6 class="text-success border-bottom pb-2">
+              <i class="fas fa-briefcase me-2"></i>Job & Status Information
+            </h6>
 
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Job Title:</label>
               <p class="mb-2">
                 <i class="fas fa-briefcase text-muted me-1"></i>
-                {{selectedApplication?.jopTitle}}
+                {{ getJobTitle(selectedApplication) }}
               </p>
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Application Status:</label>
               <div>
-                <span class="badge" [class]="getStatusBadgeClass(selectedApplication?.status)">
-                  {{selectedApplication?.status}}
+                <span class="badge" [class]="getStatusBadgeClass(selectedApplication.status)">
+                  {{ selectedApplication.status || 'UNKNOWN' }}
                 </span>
               </div>
             </div>
-          </div>
-
-          <div class="col-md-6">
-            <h6 class="text-success border-bottom pb-2">
-              <i class="fas fa-clock me-2"></i>Timeline Information
-            </h6>
 
             <div class="mb-3">
-              <label class="form-label fw-bold text-muted">Applied Date:</label>
+              <label class="form-label fw-bold text-muted">Gender:</label>
               <p class="mb-2">
-                <i class="fas fa-calendar-plus text-muted me-1"></i>
-                {{ formatDate(selectedApplication?.appliedDate) }}
+                <i class="fas fa-venus-mars text-muted me-1"></i>
+                {{ selectedApplication.gender || 'N/A' }}
               </p>
             </div>
 
             <div class="mb-3">
-              <label class="form-label fw-bold text-muted">Last Updated:</label>
+              <label class="form-label fw-bold text-muted">Date of Birth:</label>
               <p class="mb-2">
-                <i class="fas fa-calendar-check text-muted me-1"></i>
-                {{ formatDate(selectedApplication?.updatedDate) }}
+                <i class="fas fa-birthday-cake text-muted me-1"></i>
+                {{ formatDate(selectedApplication.dateOfBirth) }}
               </p>
+            </div>
+
+            <!-- CV Download Section -->
+            <div class="mb-3" *ngIf="selectedApplication.cvPath">
+              <label class="form-label fw-bold text-muted">CV/Resume:</label>
+              <div>
+                <button type="button" class="btn btn-outline-primary btn-sm"
+                        (click)="downloadCV(selectedApplication.cvPath!)">
+                  <i class="fas fa-file-pdf me-1"></i>View CV
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        &lt;!&ndash; Application Management Section &ndash;&gt;
+        <!-- Application Management Section -->
         <div class="row mt-4" *ngIf="selectedApplication">
           <div class="col-12">
+            <h6 class="text-info border-bottom pb-2 mb-3">
+              <i class="fas fa-tasks me-2"></i>Actions
+            </h6>
             <div class="d-flex flex-wrap gap-2">
               <button *ngIf="selectedApplication.status !== 'HIRED' && selectedApplication.status !== 'REJECTED'"
                       type="button" class="btn btn-success btn-sm"
@@ -245,15 +392,14 @@
       </div>
 
       <div class="modal-footer bg-light">
-        <div>
-          <button type="button" class="btn btn-secondary" (click)="closeApplicationDetailsModal()">
-            <i class="fas fa-times me-1"></i>Close
-          </button>
-        </div>
+        <button type="button" class="btn btn-secondary" (click)="closeApplicationDetailsModal()">
+          <i class="fas fa-times me-1"></i>Close
+        </button>
       </div>
     </div>
   </div>
 </div>
 
-<div class="modal-backdrop fade show" [class.d-block]="showDecisionModal" *ngIf="showDecisionModal"></div>
--->
+<!-- Modal Backdrop -->
+<div class="modal-backdrop fade show" [class.d-block]="showDecisionModal || showApplicationDetailsModal"
+     *ngIf="showDecisionModal || showApplicationDetailsModal"></div>

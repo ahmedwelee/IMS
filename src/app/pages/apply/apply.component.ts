@@ -6,7 +6,7 @@ import {JobService} from "../../service/job.service";
 import {KeycloakService} from "../../service/keycloak.service";
 import {ApplicationRequest} from "../../service/application-request";
 import {ApplicationResponse} from "../../service/application-response";
-import {NgIf} from "@angular/common";
+import {NgForOf, NgIf} from "@angular/common";
 
 
 @Component({
@@ -16,7 +16,8 @@ import {NgIf} from "@angular/common";
   imports: [
     ReactiveFormsModule,
     NgIf,
-    RouterLink
+    RouterLink,
+    NgForOf
   ],
   styleUrls: ['./apply.component.scss']
 })
@@ -26,7 +27,7 @@ export class ApplyComponent implements OnInit {
   jobDetails: any = null;
   isLoading = false;
   isSubmitting = false;
-  selectedFile: File | null = null;
+  cvUrl: string = '';
   userProfile: any = null;
   isLoggedIn = false;
 
@@ -63,7 +64,6 @@ export class ApplyComponent implements OnInit {
       if (this.isLoggedIn) {
         this.userProfile = await this.keycloakService.loadUserProfile();
       } else {
-        // Redirect to login if not authenticated
         await this.keycloakService.login();
       }
     } catch (error) {
@@ -76,7 +76,6 @@ export class ApplyComponent implements OnInit {
       this.applyForm.patchValue({
         firstName: this.userProfile.firstName || '',
         lastName: this.userProfile.lastName || '',
-        // You might have additional user data from your backend
       });
     }
   }
@@ -90,7 +89,7 @@ export class ApplyComponent implements OnInit {
       nationality: ['', [Validators.required]],
       gender: ['', [Validators.required]],
       dateOfBirth: ['', [Validators.required]],
-      cvPath: ['']
+      cvUrl: ['', [Validators.required, Validators.pattern(/https?:\/\/.+/)]]
     });
   }
 
@@ -105,97 +104,39 @@ export class ApplyComponent implements OnInit {
       error: (error) => {
         console.error('Error loading job details:', error);
         this.isLoading = false;
-        // Show error message or redirect
         alert('Job not found or error loading job details');
         this.router.navigate(['/jobs']);
       }
     });
   }
 
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      // Validate file type and size
-      const allowedTypes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-      ];
-      const maxSize = 5 * 1024 * 1024; // 5MB
-
-      if (!allowedTypes.includes(file.type)) {
-        alert('Please upload a PDF or Word document');
-        event.target.value = ''; // Clear the input
-        return;
-      }
-
-      if (file.size > maxSize) {
-        alert('File size must be less than 5MB');
-        event.target.value = ''; // Clear the input
-        return;
-      }
-
-      this.selectedFile = file;
-      this.applyForm.patchValue({ cvPath: file.name });
-    }
-  }
-
   onSubmit(): void {
     if (!this.applyForm.valid) {
       this.markFormGroupTouched();
+      alert('Please fill all required fields correctly.');
       return;
     }
 
-    if (!this.selectedFile) {
-      alert('Please upload your CV/Resume');
+    if (!this.applyForm.value.cvUrl) {
+      alert('Please provide a valid CV URL');
       return;
     }
 
     this.isSubmitting = true;
 
-    // First upload the CV file, then create the application
-    this.uploadCVFile().then((cvPath) => {
-      this.createApplication(cvPath);
-    }).catch((error) => {
-      console.error('Error uploading CV:', error);
-      this.isSubmitting = false;
-      alert('Error uploading CV. Please try again.');
-    });
+    this.createApplication();
   }
 
-  private uploadCVFile(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      if (!this.selectedFile) {
-        reject('No file selected');
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('cvFile', this.selectedFile);
-
-      // Upload CV file to your file storage service
-      // Replace this with your actual file upload service
-     /* this.applicationService.uploadCV(formData).subscribe({
-        next: (response: any) => {
-          resolve(response.filePath || response.path || response.url);
-        },
-        error: (error) => {
-          reject(error);
-        }
-      });*/
-    });
-  }
-
-  private createApplication(cvPath: string): void {
+  private createApplication(): void {
     const formData = this.applyForm.value;
     const currentDate = new Date().toISOString();
 
     const applicationRequest: ApplicationRequest = {
       appliedDate: currentDate,
       updatedDate: currentDate,
-      candidateId: this.getUserId(), // Get from Keycloak or your user service
+      candidateId: this.getUserId() || 2,
       jopId: +this.jobId,
-      status: 'PENDING', // Default status
+      status: 'PENDING',
       firstname: formData.firstName,
       lastname: formData.lastName,
       phoneNumber: formData.phoneNumber,
@@ -203,7 +144,7 @@ export class ApplyComponent implements OnInit {
       nationality: formData.nationality,
       gender: formData.gender,
       dateOfBirth: formData.dateOfBirth,
-      cvPath: cvPath
+      cvPath: formData.cvUrl  // Using the URL directly
     };
 
     this.applicationService.createApplication(applicationRequest).subscribe({
@@ -218,7 +159,6 @@ export class ApplyComponent implements OnInit {
         console.error('Error submitting application:', error);
         this.isSubmitting = false;
 
-        // Handle different error types
         if (error.status === 409) {
           alert('You have already applied for this job.');
         } else if (error.status === 404) {
@@ -231,14 +171,18 @@ export class ApplyComponent implements OnInit {
   }
 
   private getUserId(): number {
-    // Get user ID from Keycloak token or your user service
-    // This is a placeholder - implement based on your auth setup
-    //const token = this.keycloakService.getToken();
-    //if (token) {
-      // Parse token to get user ID, or make API call to get user details
-      // For now, return a placeholder
-      //return 1; // Replace with actual user ID
-    //}
+    // Implement this based on your Keycloak setup
+    try {
+      if (this.userProfile && this.userProfile.id) {
+        return +this.userProfile.id;
+      }
+      if (this.userProfile && this.userProfile.username) {
+        // You might need to call your backend to get the numeric user ID
+        return 0; // Placeholder
+      }
+    } catch (error) {
+      console.error('Error getting user ID:', error);
+    }
     return 0;
   }
 
@@ -265,14 +209,22 @@ export class ApplyComponent implements OnInit {
       if (control.errors['minlength']) {
         return `Minimum length is ${control.errors['minlength'].requiredLength}`;
       }
-      if (control.errors['pattern']) return 'Invalid format';
+      if (control.errors['pattern']) {
+        if (controlName === 'cvUrl') return 'Please enter a valid URL (http:// or https://)';
+        return 'Invalid format';
+      }
     }
     return '';
   }
 
   // Utility methods
   formatSalary(salary: number): string {
-    return salary ? salary.toLocaleString('en-US') : '0';
+    if (!salary) return 'Not specified';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0
+    }).format(salary);
   }
 
   getJobTypeDisplay(jobType: string): string {
@@ -281,28 +233,70 @@ export class ApplyComponent implements OnInit {
       'PART_TIME': 'Part Time',
       'CONTRACT': 'Contract',
       'REMOTE': 'Remote',
-      'INTERNSHIP': 'Internship'
+      'INTERNSHIP': 'Internship',
+      'FULLTIME': 'Full Time',
+      'PARTTIME': 'Part Time'
     };
     return typeMap[jobType] || jobType;
   }
 
+  getJobTypeBadgeClass(jobType: string): string {
+    const classMap: { [key: string]: string } = {
+      'FULL_TIME': 'bg-success',
+      'PART_TIME': 'bg-warning text-dark',
+      'CONTRACT': 'bg-info',
+      'REMOTE': 'bg-primary',
+      'INTERNSHIP': 'bg-secondary',
+      'FULLTIME': 'bg-success',
+      'PARTTIME': 'bg-warning text-dark'
+    };
+    return classMap[jobType] || 'bg-secondary';
+  }
+
   // Navigation methods
   cancel(): void {
-    this.router.navigate(['/jobs']);
+    if (confirm('Are you sure you want to cancel? Your application progress will be lost.')) {
+      this.router.navigate(['/jobs']);
+    }
   }
 
   goToJob(): void {
     this.router.navigate(['/jobs', this.jobId]);
   }
 
-  // File handling
-  removeFile(): void {
-    this.selectedFile = null;
-    this.applyForm.patchValue({ cvPath: '' });
-    // Clear file input
-    const fileInput = document.getElementById('cvFile') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
+  // Helper method to suggest CV hosting services
+  getCVHostingSuggestions(): string[] {
+    return [
+      'Google Drive: Upload your CV and share the link',
+      'Dropbox: Upload and create a shareable link',
+      'OneDrive: Microsoft\'s cloud storage service',
+      'LinkedIn: Use your LinkedIn profile URL',
+      'Personal website or portfolio'
+    ];
+  }
+
+  // Format date for display
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  // Calculate age from date of birth
+  calculateAge(dateOfBirth: string): number {
+    if (!dateOfBirth) return 0;
+    const birthDate = new Date(dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
     }
+
+    return age;
   }
 }

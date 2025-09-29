@@ -11,4 +11,8 @@ export interface ApplicationResponse {
   gender: string;
   dateOfBirth: string;
   cvPath: string;
+  candidateId: number;
+  jobId: number;
+  firstname: string;
+  lastname: string;
 }
