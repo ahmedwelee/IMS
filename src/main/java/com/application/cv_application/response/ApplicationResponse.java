@@ -14,6 +14,8 @@ public record ApplicationResponse(
         String nationality,
         String gender,
         LocalDate dateOfBirth,
-        String cvPath
+        String cvPath,
+        Integer candidateId,
+        Integer jobId
 ) {}
 

@@ -1,6 +1,8 @@
 package com.application.cv_application.services;
 
 import com.application.cv_application.entities.Candidate;
+import com.application.cv_application.entities.Employee;
+import com.application.cv_application.enums.Position;
 import com.application.cv_application.repositories.CandidateRepository;
 import com.application.cv_application.repositories.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +11,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -18,29 +21,36 @@ public class UserService {
     private final CandidateRepository candidateRepository;
 
     public void checkUser(OidcUser oidcUser) {
-        String username = oidcUser.getPreferredUsername(); // or oidcUser.getName()
         String email = oidcUser.getEmail();
+        String username = oidcUser.getPreferredUsername();
 
-        // extract roles from Keycloak token
+        // Extract Keycloak roles
         Collection<? extends GrantedAuthority> authorities = oidcUser.getAuthorities();
-        String role = authorities.stream()
+        List<String> roles = authorities.stream()
                 .map(GrantedAuthority::getAuthority)
-                .filter(r -> r.startsWith("ROLE_")) // Spring prefixes roles
-                .map(r -> r.substring(5))          // remove "ROLE_"
-                .findFirst()
-                .orElse("candidate"); // default fallback
+                .filter(r -> r.startsWith("ROLE_"))
+                .map(r -> r.substring(5)) // remove ROLE_
+                .toList();
 
-        // Check DB
-        if (employeeRepository.existsByEmail(email)) {
-            // already registered → do nothing
-            return;
+        if (roles.contains("Director") || roles.contains("Manager")) {
+            if (!employeeRepository.existsByEmail(email)) {
+                Employee emp = new Employee();
+                emp.setEmail(email);
+
+                // Convert string role to enum
+                Position pos = roles.contains("Director") ? Position.DIRECTOR : Position.MANAGER;
+                emp.setPosition(pos);
+
+                employeeRepository.save(emp);
+            }
+        } else {
+            // Candidate case
+            if (!candidateRepository.existsByEmail(email)) {
+                Candidate cand = new Candidate();
+                cand.setEmail(email);
+                candidateRepository.save(cand);
+            }
         }
-
-        // Register new user
-        Candidate user = new Candidate();
-        user.setEmail(email);
-         // store Keycloak role in your DB
-        candidateRepository.save(user);
     }
 }
 

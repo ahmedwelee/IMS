@@ -28,7 +28,9 @@ public class ApplicationMapper {
                 application.getCandidate().getNationality(),
                 application.getCandidate().getGender(),
                 application.getCandidate().getDateOfBirth(),
-                application.getCvPath()
+                application.getCvPath(),
+                application.getCandidate().getId(),
+                application.getJop().getId()
 
         );
     }
