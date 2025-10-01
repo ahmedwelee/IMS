@@ -7,6 +7,7 @@ import {KeycloakService} from "../../service/keycloak.service";
 import {ApplicationRequest} from "../../service/application-request";
 import {ApplicationResponse} from "../../service/application-response";
 import {NgForOf, NgIf} from "@angular/common";
+import {CandidateService} from "../../service/candidate.service";
 
 
 @Component({
@@ -22,6 +23,7 @@ import {NgForOf, NgIf} from "@angular/common";
   styleUrls: ['./apply.component.scss']
 })
 export class ApplyComponent implements OnInit {
+
   applyForm: FormGroup;
   jobId: string = '';
   jobDetails: any = null;
@@ -36,6 +38,7 @@ export class ApplyComponent implements OnInit {
     private router: Router,
     private fb: FormBuilder,
     private applicationService: ApplicationService,
+    private candidateService: CandidateService,
     private jobService: JobService,
     private keycloakService: KeycloakService
   ) {
@@ -127,14 +130,15 @@ export class ApplyComponent implements OnInit {
     this.createApplication();
   }
 
-  private createApplication(): void {
+  async createApplication(): Promise<void>  {
     const formData = this.applyForm.value;
     const currentDate = new Date().toISOString();
-
+    const userId = await this.getUserIdAsync();
+    console.log(this.userProfile.id);
     const applicationRequest: ApplicationRequest = {
       appliedDate: currentDate,
       updatedDate: currentDate,
-      candidateId: this.getUserId() || 2,
+      candidateId: userId,
       jopId: +this.jobId,
       status: 'PENDING',
       firstname: formData.firstName,
@@ -170,21 +174,18 @@ export class ApplyComponent implements OnInit {
     });
   }
 
-  private getUserId(): number {
-    // Implement this based on your Keycloak setup
-    try {
-      if (this.userProfile && this.userProfile.id) {
-        return +this.userProfile.id;
+  private async getUserIdAsync(): Promise<number> {
+    if (this.userProfile && this.userProfile.email) {
+      try {
+        const candidate = await this.candidateService.getCandidateByEmail(this.userProfile.email).toPromise();
+        return candidate?.id ?? 0 ;
+      } catch (err) {
+        console.error('Error fetching user by email:', err);
       }
-      if (this.userProfile && this.userProfile.username) {
-        // You might need to call your backend to get the numeric user ID
-        return 0; // Placeholder
-      }
-    } catch (error) {
-      console.error('Error getting user ID:', error);
     }
     return 0;
   }
+
 
   // Form validation helper methods
   markFormGroupTouched(): void {

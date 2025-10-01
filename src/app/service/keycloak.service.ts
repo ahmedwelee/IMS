@@ -10,9 +10,10 @@ import {HttpClient} from "@angular/common/http";
 })
 export class KeycloakService {
   private _keycloak: Keycloak | undefined;
+  private _profile: UserProfile | undefined;
 
-  constructor(private router: Router, private http: HttpClient) {
-  }
+  constructor(private router: Router, private http: HttpClient) {}
+
   get keycloak() {
     if (!this._keycloak) {
       this._keycloak = new Keycloak({
@@ -24,31 +25,29 @@ export class KeycloakService {
     return this._keycloak;
   }
 
-  private _profile: UserProfile | undefined;
-
   get profile(): UserProfile | undefined {
     return this._profile;
   }
 
   async init() {
     const authenticated = await this.keycloak.init({
-      onLoad: 'check-sso',
+      onLoad: 'check-sso', // can be 'login-required' if you want force login
+      pkceMethod: 'S256'
     });
 
     if (authenticated) {
+      // Load user profile
       this._profile = (await this.keycloak.loadUserProfile()) as UserProfile;
-      this._profile.token = this.keycloak.token || '';
-    }
-  }
+      (this._profile as any).token = this.keycloak.token || '';
 
-  login() {
-    return this.keycloak.login().then(() => {
+      // ✅ Check/register user in backend
+      this.http.get("http://localhost:8088/users/check").subscribe();
+
+      // Get roles
       const token = this.keycloak.tokenParsed as any;
       const roles: string[] = token?.realm_access?.roles || [];
 
-      // 🔹 Call backend to check/register user
-      this.http.get("http://localhost:8088/users/check").subscribe();
-
+      // ✅ Navigate according to role
       if (roles.includes('candidate')) {
         this.router.navigate(['/home']);
       } else if (roles.includes('Director') || roles.includes('Manager')) {
@@ -56,17 +55,15 @@ export class KeycloakService {
       } else {
         this.router.navigate(['/home']); // fallback
       }
-    });
+    }
   }
 
-
-  checkUser() {
-    this.http.get('http://localhost:8088/users/check').subscribe();
+  login() {
+    return this.keycloak.login(); // navigation handled in init()
   }
 
   logout() {
-
-    return this.keycloak.logout({redirectUri: 'http://localhost:4200/home'});
+    return this.keycloak.logout({ redirectUri: 'http://localhost:4200/home' });
   }
 
   accountManagement() {
@@ -75,7 +72,6 @@ export class KeycloakService {
 
   async isLoggedIn() {
     return await this.keycloak.authenticated;
-
   }
 
   async loadUserProfile() {
@@ -88,7 +84,6 @@ export class KeycloakService {
 
   async register(param: { redirectUri: string }) {
     return await this.keycloak.register(param);
-
   }
 
   isCandidate(): boolean {

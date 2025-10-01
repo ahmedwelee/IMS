@@ -191,6 +191,7 @@ export class HomeComponent implements OnInit {
     } catch (error) {
       console.error('Login failed:', error);
     }
+    console.log('Login successful');
   }
 
   async logout(): Promise<void> {

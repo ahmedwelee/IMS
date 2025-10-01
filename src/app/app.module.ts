@@ -29,9 +29,9 @@ import {JobApplicationsComponent} from "./component/job/jobApplication/job-appli
 import {ToastrModule} from "ngx-toastr";
 import {KeycloakService} from "./service/keycloak.service";
 import {HttpTokenInterceptor} from "./service/http-token.interceptor";
-import { ApplyComponent } from './pages/apply/apply.component';
 import { PublicComponent } from './layouts/public/public.component';
 import { HeaderComponent } from './pages/header/header.component';
+import {CandidateService} from "./service/candidate.service";
 
 
 export function kcFactory(kcService: KeycloakService) {
@@ -74,6 +74,7 @@ export function kcFactory(kcService: KeycloakService) {
     EmployeesService,
     JobService,
     ApplicationService,
+    CandidateService,
     {
       provide: LocationStrategy,
       useClass: PathLocationStrategy
