@@ -35,6 +35,13 @@ public class CandidateService {
         return mapper.toResponse(candidateRepository.save(candidate));
     }
 
+    public CandidateResponse getCandidateByEmail(String email) {
+        Candidate candidate = candidateRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Candidate not found with email: " + email));
+        return mapper.toResponse(candidate);
+    }
+
+
     public CandidateResponse updateCandidate(Integer id, CandidateRequest request) {
         Candidate existing = candidateRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Candidate not found"));

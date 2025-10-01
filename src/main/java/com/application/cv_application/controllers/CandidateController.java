@@ -4,6 +4,7 @@ import com.application.cv_application.requests.CandidateRequest;
 import com.application.cv_application.response.CandidateResponse;
 import com.application.cv_application.services.CandidateService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,11 @@ public class CandidateController {
     @GetMapping("/{id}")
     public CandidateResponse getById(@PathVariable Integer id) {
         return service.getCandidateById(id);
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<CandidateResponse> getCandidateByEmail(@PathVariable String email) {
+        return ResponseEntity.ok(service.getCandidateByEmail(email));
     }
 
     @PostMapping
