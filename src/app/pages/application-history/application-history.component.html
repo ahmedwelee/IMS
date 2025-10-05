@@ -1,0 +1,318 @@
+<div class="hero-section">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <!-- Header -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h4 class="card-title mb-1">
+                <i class="bi bi-history me-2"></i>My Application History
+              </h4>
+              <p class="text-muted mb-0">Track the status of your job applications</p>
+            </div>
+            <button class="btn btn-outline-primary" (click)="loadMyApplications()">
+              <i class="bi bi-sync-alt me-1"></i>Refresh
+            </button>
+          </div>
+
+          <!-- Statistics Cards -->
+          <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-3">
+              <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between">
+                    <div>
+                      <h6 class="card-title text-white-50">Total Applications</h6>
+                      <h3 class="mb-0">{{ getTotalApplications() }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                      <i class="bi bi-file-alt bi-2x"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+              <div class="card bg-warning text-dark h-100">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between">
+                    <div>
+                      <h6 class="card-title text-dark-50">Pending</h6>
+                      <h3 class="mb-0">{{ getPendingApplications() }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                      <i class="bi bi-clock bi-2x"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+              <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between">
+                    <div>
+                      <h6 class="card-title text-white-50">Active</h6>
+                      <h3 class="mb-0">{{ getActiveApplications() }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                      <i class="bi bi-tasks bi-2x"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+              <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between">
+                    <div>
+                      <h6 class="card-title text-white-50">Hired</h6>
+                      <h3 class="mb-0">{{ getHiredApplications() }}</h3>
+                    </div>
+                    <div class="align-self-center">
+                      <i class="bi bi-check-circle bi-2x"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search and Filter Section -->
+          <div class="row mb-3">
+            <div class="col-md-8">
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control" placeholder="Search by job title..."
+                       [(ngModel)]="searchTerm" (input)="applyFilters()">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
+                <option value="">All Statuses</option>
+                <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
+              </select>
+            </div>
+            <div class="col-md-1">
+              <button class="btn btn-outline-secondary w-100" (click)="clearFilters()" title="Clear filters">
+                <i class="bi bi-times"></i>Clear
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading Spinner -->
+          <div *ngIf="isLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted mt-2">Loading your applications...</p>
+          </div>
+
+          <!-- Applications List -->
+          <div *ngIf="!isLoading" class="row">
+            <!-- Application Cards -->
+            <div class="col-lg-6 mb-3" *ngFor="let application of filteredApplications">
+              <div class="card h-100 shadow-sm hover-shadow">
+                <div class="card-body">
+                  <!-- Job Title -->
+                  <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <h5 class="card-title mb-1">
+                        <i class="bi bi-briefcase text-primary me-2"></i>
+                        {{ application.jopName }}
+                      </h5>
+                      <small class="text-muted">
+                        <i class="bi bi-calendar me-1"></i>
+                        Applied {{ getDaysSinceApplied(application.appliedDate) }} days ago
+                      </small>
+                    </div>
+                    <span class="badge" [class]="getStatusBadgeClass(application.status)">
+                      <i class="fas me-1" [class]="getStatusIcon(application.status)"></i>
+                      {{ application.status }}
+                    </span>
+                  </div>
+
+                  <!-- Status Message -->
+                  <div class="alert mb-3"
+                       [class.alert-warning]="application.status === 'PENDING'"
+                       [class.alert-info]="application.status === 'REVIEWING' || application.status === 'INTERVIEW'"
+                       [class.alert-success]="application.status === 'HIRED' || application.status === 'OFFERED'"
+                       [class.alert-danger]="application.status === 'REJECTED'">
+                    <i class="fas me-2" [class]="getStatusIcon(application.status)"></i>
+                    {{ getStatusMessage(application.status) }}
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm w-100"
+                            (click)="openDetailsModal(application)">
+                      <i class="bi bi-eye me-1"></i>View Details
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="col-12" *ngIf="filteredApplications.length === 0 && !isLoading">
+              <div class="text-center py-5">
+                <i class="bi bi-inbox bi-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No applications found</h5>
+                <p class="text-muted" *ngIf="searchTerm || statusFilter">
+                  Try adjusting your filters
+                </p>
+                <p class="text-muted" *ngIf="!searchTerm && !statusFilter">
+                  You haven't submitted any applications yet
+                </p>
+                <button *ngIf="searchTerm || statusFilter"
+                        class="btn btn-primary btn-sm mt-2"
+                        (click)="clearFilters()">
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Application Details Modal -->
+<div class="modal fade"
+     [class.show]="showDetailsModal"
+     [style.display]="showDetailsModal ? 'block' : 'none'"
+     *ngIf="showDetailsModal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header"
+           [class.bg-primary]="selectedApplication?.status === 'INTERVIEW'"
+           [class.bg-success]="selectedApplication?.status === 'HIRED' || selectedApplication?.status === 'OFFERED'"
+           [class.bg-danger]="selectedApplication?.status === 'REJECTED'"
+           [class.bg-warning]="selectedApplication?.status === 'PENDING'"
+           [class.bg-info]="selectedApplication?.status === 'REVIEWING'">
+        <h5 class="modal-title"
+            [class.text-white]="selectedApplication?.status !== 'PENDING'"
+            [class.text-dark]="selectedApplication?.status === 'PENDING'">
+          <i class="bi bi-file-alt me-2"></i>
+          Application Details
+        </h5>
+        <button type="button"
+                class="btn-close"
+                [class.btn-close-white]="selectedApplication?.status !== 'PENDING'"
+                (click)="closeDetailsModal()"></button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedApplication">
+        <!-- Status Banner -->
+        <div class="alert mb-4"
+             [class.alert-warning]="selectedApplication.status === 'PENDING'"
+             [class.alert-info]="selectedApplication.status === 'REVIEWING' || selectedApplication.status === 'INTERVIEW'"
+             [class.alert-success]="selectedApplication.status === 'HIRED' || selectedApplication.status === 'OFFERED'"
+             [class.alert-danger]="selectedApplication.status === 'REJECTED'">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-3x me-3" [class]="getStatusIcon(selectedApplication.status)"></i>
+            <div>
+              <h5 class="alert-heading mb-1">{{ selectedApplication.status }}</h5>
+              <p class="mb-0">{{ getStatusMessage(selectedApplication.status) }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Job Information -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <h6 class="text-primary border-bottom pb-2 mb-3">
+              <i class="bi bi-briefcase me-2"></i>Job Information
+            </h6>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold text-muted">Job Title:</label>
+                <p class="mb-0">{{ selectedApplication.jopName }}</p>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold text-muted">Application Status:</label>
+                <div>
+                  <span class="badge" [class]="getStatusBadgeClass(selectedApplication.status)">
+                    {{ selectedApplication.status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <h6 class="text-success border-bottom pb-2 mb-3">
+              <i class="bi bi-clock me-2"></i>Application Timeline
+            </h6>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold text-muted">Applied Date:</label>
+                <p class="mb-0">
+                  <i class="bi bi-calendar-plus text-muted me-2"></i>
+                  {{ formatDate(selectedApplication.appliedDate) }}
+                </p>
+                <small class="text-muted">{{ getDaysSinceApplied(selectedApplication.appliedDate) }} days ago</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold text-muted">Last Updated:</label>
+                <p class="mb-0">
+                  <i class="bi bi-calendar-check text-muted me-2"></i>
+                  {{ formatDate(selectedApplication.updatedDate) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Personal Information -->
+        <div class="row">
+          <div class="col-12">
+            <h6 class="text-info border-bottom pb-2 mb-3">
+              <i class="bi bi-user me-2"></i>Your Information
+            </h6>
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <label class="form-label fw-bold text-muted">Phone:</label>
+                <p class="mb-0">{{ selectedApplication.phoneNumber || 'N/A' }}</p>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label fw-bold text-muted">Address:</label>
+                <p class="mb-0">{{ selectedApplication.address || 'N/A' }}</p>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label fw-bold text-muted">Nationality:</label>
+                <p class="mb-0">{{ selectedApplication.nationality || 'N/A' }}</p>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label fw-bold text-muted">Gender:</label>
+                <p class="mb-0">{{ selectedApplication.gender || 'N/A' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CV Section - Removed -->
+
+      </div>
+
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" (click)="closeDetailsModal()">
+          <i class="bi bi-times me-1"></i>Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div class="modal-backdrop fade show"
+     [class.d-block]="showDetailsModal"
+     *ngIf="showDetailsModal"></div>
