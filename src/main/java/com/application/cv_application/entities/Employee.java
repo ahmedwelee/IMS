@@ -24,6 +24,7 @@ public class Employee extends User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Position position;
+    private boolean isActive;
 
     @ManyToOne
     @JoinColumn(name = "jop_id")

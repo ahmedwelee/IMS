@@ -26,6 +26,7 @@ public class EmployeeMapper {
                 .salary(employee.getSalary())
                 .jopName(employee.getJop() != null ? employee.getJop().getJopName() : null)
                 .clientName(employee.getClient() != null ? employee.getClient().getName() : null)
+                .isActive(employee.isActive())
                 .build();
     }
 
@@ -41,6 +42,7 @@ public class EmployeeMapper {
                 .salary(request.salary())
                 .jop(jop != null ? jop : null)
                 .client(client != null ? client : null)
+                .isActive(request.isActive())
                 .build();
     }
 

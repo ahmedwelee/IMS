@@ -14,6 +14,7 @@ public record EmployeeRequest(
          Position position,
          Integer salary,
          Integer jopId,
-         Integer clientId
+         Integer clientId,
+         Boolean isActive
 ) {
 }

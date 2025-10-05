@@ -23,5 +23,6 @@ public class EmployeeResponse {
     private Integer salary;
     private String jopName;
     private String clientName;
+    private Boolean isActive;
 }
 

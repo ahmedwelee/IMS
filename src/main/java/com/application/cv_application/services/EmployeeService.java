@@ -58,6 +58,7 @@ public class EmployeeService {
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
         return employeeMapper.toResponse(employee);
     }
+
     public List<EmployeeResponse> getAllManagers() {
         List<Employee> managers = employeeRepository.findEmployeeByPosition(Position.MANAGER);
         return managers.stream()
@@ -70,7 +71,6 @@ public class EmployeeService {
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
 
-
         employee.setEmail(request.email());
         employee.setFirstName(request.firstName());
         employee.setLastName(request.lastName());
@@ -79,6 +79,7 @@ public class EmployeeService {
         employee.setTitle(request.title());
         employee.setPosition(request.position());
         employee.setSalary(request.salary());
+        employee.setActive(request.isActive());
 
         return employeeMapper.toResponse(employeeRepository.save(employee));
     }
@@ -95,6 +96,16 @@ public class EmployeeService {
 
     public int getCount() {
         return (int) employeeRepository.count();
+    }
+
+    public EmployeeResponse updateEmployeeStatus(Integer employeeId, boolean isActive) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found with id: " + employeeId));
+
+        employee.setActive(isActive);  // assuming you have a boolean field isActive in Employee entity
+        Employee updated = employeeRepository.save(employee);
+
+        return employeeMapper.toResponse(updated);
     }
 }
 
