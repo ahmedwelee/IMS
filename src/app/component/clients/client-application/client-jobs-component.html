@@ -7,11 +7,11 @@
           <div>
             <div class="d-flex align-items-center mb-2">
               <button class="btn btn-outline-secondary me-3" (click)="goBack()">
-                <i class="fas fa-arrow-left me-1"></i> Back to Clients
+                <i class="bi bi-arrow-left me-1"></i> Back to Clients
               </button>
               <div>
                 <h4 class="card-title mb-0">
-                  <i class="fas fa-briefcase me-2 text-primary"></i>
+                  <i class="bi bi-briefcase me-2 text-primary"></i>
                   Jobs for {{ client?.name || 'Client' }}
                 </h4>
                 <p class="text-muted mb-0" *ngIf="client">
@@ -21,7 +21,7 @@
             </div>
           </div>
           <button class="btn btn-success" (click)="openAddJobModal()">
-            <i class="fas fa-plus me-2"></i>Add New Job
+            <i class="bi bi-plus me-2"></i>Add New Job
           </button>
         </div>
 
@@ -86,7 +86,7 @@
                   </span>
               </td>
               <td>
-                <i class="fas fa-map-marker-alt me-1 text-muted"></i>
+                <i class="bi bi-map-marker-alt me-1 text-muted"></i>
                 {{ job.location }}
               </td>
               <td>
@@ -110,7 +110,7 @@
                 <div class="btn-group" role="group">
                   <button type="button" class="btn btn-outline-danger btn-sm"
                           (click)="openDeleteJobModal(job)" title="Delete Job">
-                    <i class="fas fa-trash"></i>delete
+                    <i class="bi bi-trash"></i>delete
                   </button>
                 </div>
               </td>
@@ -118,11 +118,11 @@
             <tr *ngIf="jobs.length === 0 && !isLoading">
               <td colspan="9" class="text-center py-5">
                 <div class="text-muted">
-                  <i class="fas fa-briefcase fa-3x mb-3"></i>
+                  <i class="bi bi-briefcase bi-3x mb-3"></i>
                   <h5>No jobs found</h5>
                   <p>This client doesn't have any jobs yet. Click "Add New Job" to create the first one.</p>
                   <button class="btn btn-success mt-2" (click)="openAddJobModal()">
-                    <i class="fas fa-plus me-2"></i>Add First Job
+                    <i class="bi bi-plus me-2"></i>Add First Job
                   </button>
                 </div>
               </td>
@@ -142,7 +142,7 @@
     <div class="modal-content">
       <div class="modal-header bg-success text-white">
         <h5 class="modal-title">
-          <i class="fas fa-plus me-2"></i>
+          <i class="bi bi-plus me-2"></i>
           Add New Job for {{ client?.name }}
         </h5>
         <button type="button" class="btn-close btn-close-white" (click)="closeAddJobModal()"></button>
@@ -218,7 +218,7 @@
         <button type="button" class="btn btn-secondary" (click)="closeAddJobModal()">Cancel</button>
         <button type="button" class="btn btn-success" (click)="createNewJob()"
                 [disabled]="!jobForm.form.valid">
-          <i class="fas fa-plus me-1"></i> Create Job
+          <i class="bi bi-plus me-1"></i> Create Job
         </button>
       </div>
     </div>
@@ -232,7 +232,7 @@
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
         <h5 class="modal-title">
-          <i class="fas fa-exclamation-triangle me-2"></i>
+          <i class="bi bi-exclamation-triangle me-2"></i>
           Confirm Job Deletion
         </h5>
         <button type="button" class="btn-close btn-close-white" (click)="closeDeleteJobModal()"></button>
@@ -249,17 +249,17 @@
             </p>
           </div>
           <p class="text-danger">
-            <i class="fas fa-exclamation-circle me-1"></i>
+            <i class="bi bi-exclamation-circle me-1"></i>
             This action cannot be undone. All applications for this job will also be removed.
           </p>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="closeDeleteJobModal()">
-          <i class="fas fa-times me-1"></i> Cancel
+          <i class="bi bi-times me-1"></i> Cancel
         </button>
         <button type="button" class="btn btn-danger" (click)="confirmDeleteJob()">
-          <i class="fas fa-trash me-1"></i> Delete Job
+          <i class="bi bi-trash me-1"></i> Delete Job
         </button>
       </div>
     </div>

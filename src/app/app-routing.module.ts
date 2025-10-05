@@ -9,6 +9,7 @@ import {HomeComponent} from "./pages/home/home.component";
 import {JobsForAllComponent} from "./pages/jobs-for-all/jobs-for-all.component";
 import {ApplyComponent} from "./pages/apply/apply.component";
 import {PublicComponent} from "./layouts/public/public.component";
+import {ApplicationHistoryComponent} from "./pages/application-history/application-history.component";
 export const Approutes: Routes = [
   {
 
@@ -50,6 +51,10 @@ export const Approutes: Routes = [
       {
         path: 'home',
         component: HomeComponent,
+      },
+      {
+        path: 'history',
+        component: ApplicationHistoryComponent,
       },
       // 👇 keep wildcard last
       {

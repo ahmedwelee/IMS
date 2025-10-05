@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { EmployeeRequest } from './employee-request';
 import { EmployeeResponse } from './employee-response';
@@ -50,4 +50,10 @@ export class EmployeesService {
   getManagers() {
     return this.http.get<EmployeeResponse[]>(`${this.endpoint}/managers`);
   }
+
+  updateEmployeeStatus(id: number, newStatus: boolean): Observable<EmployeeResponse> {
+    const params = new HttpParams().set('isActive', String(newStatus));
+    return this.http.patch<EmployeeResponse>(`${this.endpoint}/${id}/status`, null, { params });
+  }
+
 }

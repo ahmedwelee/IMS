@@ -8,7 +8,7 @@
             <h5 class="card-subtitle text-muted">Overview of all clients</h5>
           </div>
           <button class="btn btn-primary" (click)="openCreateModal()">
-            <i class="fas fa-plus me-2"></i>Add New Client
+            <i class="bi bi-plus me-2"></i>Add New Client
           </button>
         </div>
 
@@ -17,7 +17,7 @@
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h6 class="mb-0">
-                <i class="fas fa-filter me-2"></i>Filter Clients
+                <i class="bi bi-filter me-2"></i>Filter Clients
               </h6>
               <span class="badge bg-primary">{{filteredClients.length}} of {{clients.length}} clients</span>
             </div>
@@ -26,7 +26,7 @@
               <div class="col-md-5">
                 <label class="form-label">Search</label>
                 <div class="input-group">
-                  <span class="input-group-text"><i class="fas fa-search"></i></span>
+                  <span class="input-group-text"><i class="bi bi-search"></i></span>
                   <input type="text"
                          class="form-control"
                          placeholder="Search by name, email, address..."
@@ -65,7 +65,7 @@
                           (click)="clearFilters()"
                           [disabled]="!hasActiveFilters()"
                           title="Clear all filters">
-                    <i class="fas fa-times"></i>clear
+                    <i class="bi bi-times"></i>clear
                   </button>
                 </div>
               </div>
@@ -138,8 +138,8 @@
               </td>
               <td>
                 <div>
-                  <div><i class="fas fa-phone me-2 text-muted"></i>{{client.phoneNumber}}</div>
-                  <div><i class="fas fa-map-marker-alt me-2 text-muted"></i>{{client.address || 'No address'}}</div>
+                  <div><i class="bi bi-phone me-2 text-muted"></i>{{client.phoneNumber}}</div>
+                  <div><i class="bi bi-map-marker-alt me-2 text-muted"></i>{{client.address || 'No address'}}</div>
                 </div>
               </td>
               <td>
@@ -151,13 +151,13 @@
                           (click)="viewClientJobs(client.id)"
                           style="cursor: pointer;"
                           [title]="'View ' + getJobsCountDisplay(client.jobsCount) + ' jobs for ' + client.name">
-                      <i class="fas fa-briefcase me-1"></i>
+                      <i class="bi bi-briefcase me-1"></i>
                       {{ getJobsCountDisplay(client.jobsCount) }} Jobs
                     </span>
                 </div>
                 <ng-template #noJobs>
                   <span class="text-muted">
-                    <i class="fas fa-briefcase me-1"></i>
+                    <i class="bi bi-briefcase me-1"></i>
                     No jobs
                   </span>
                 </ng-template>
@@ -169,15 +169,15 @@
                 <div class="btn-group" role="group">
                   <button type="button" class="btn btn-outline-primary btn-sm"
                           (click)="openClientDetailsModal(client)">
-                    <i class="fas fa-eye"></i> View
+                    <i class="bi bi-eye"></i> View
                   </button>
                   <button type="button" class="btn btn-outline-warning btn-sm ms-1"
                           (click)="openEditModal(client)">
-                    <i class="fas fa-edit"></i> Edit
+                    <i class="bi bi-edit"></i> Edit
                   </button>
                   <button type="button" class="btn btn-outline-danger btn-sm ms-1"
                           (click)="openDeleteClientModal(client)">
-                    <i class="fas fa-trash"></i> Delete
+                    <i class="bi bi-trash"></i> Delete
                   </button>
                 </div>
               </td>
@@ -185,7 +185,7 @@
             <tr *ngIf="clients.length === 0">
               <td colspan="7" class="text-center py-4">
                 <div class="text-muted">
-                  <i class="fas fa-users fa-2x mb-3"></i>
+                  <i class="bi bi-users bi-2x mb-3"></i>
                   <p>No clients found. Click "Add New Client" to create one.</p>
                 </div>
               </td>
@@ -205,7 +205,7 @@
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
         <h5 class="modal-title">
-          <i class="fas fa-user-tie me-2"></i>
+          <i class="bi bi-user-tie me-2"></i>
           Client Details
         </h5>
         <button type="button" class="btn-close btn-close-white" (click)="closeClientDetailsModal()"></button>
@@ -231,7 +231,7 @@
                 <button class="btn btn-outline-primary btn-sm"
                         *ngIf="hasJobs(selectedClient?.jobsCount)"
                         (click)="onViewClientJobs(selectedClient?.id)">
-                  <i class="fas fa-briefcase me-1"></i>
+                  <i class="bi bi-briefcase me-1"></i>
                   View Jobs ({{ getJobsCountDisplay(selectedClient?.jobsCount) }})
                 </button>
               </div>
@@ -242,7 +242,7 @@
         <div class="row">
           <div class="col-md-6">
             <h6 class="text-primary border-bottom pb-2">
-              <i class="fas fa-info-circle me-2"></i>Basic Information
+              <i class="bi bi-info-circle me-2"></i>Basic Information
             </h6>
 
             <div class="mb-3">
@@ -262,7 +262,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Email Address:</label>
               <p class="mb-2">
-                <i class="fas fa-envelope text-muted me-1"></i>
+                <i class="bi bi-envelope text-muted me-1"></i>
                 <a [href]="'mailto:' + selectedClient?.email" class="text-decoration-none">
                   {{selectedClient?.email}}
                 </a>
@@ -272,7 +272,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Phone Number:</label>
               <p class="mb-2">
-                <i class="fas fa-phone text-muted me-1"></i>
+                <i class="bi bi-phone text-muted me-1"></i>
                 <a [href]="'tel:' + selectedClient?.phoneNumber" class="text-decoration-none">
                   {{selectedClient?.phoneNumber}}
                 </a>
@@ -282,7 +282,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Address:</label>
               <p class="mb-2">
-                <i class="fas fa-map-marker-alt text-muted me-1"></i>
+                <i class="bi bi-map-marker-alt text-muted me-1"></i>
                 {{selectedClient?.address || 'Not provided'}}
               </p>
             </div>
@@ -290,13 +290,13 @@
 
           <div class="col-md-6">
             <h6 class="text-success border-bottom pb-2">
-              <i class="fas fa-users-cog me-2"></i>Assignment Information
+              <i class="bi bi-users-cog me-2"></i>Assignment Information
             </h6>
 
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Business Manager:</label>
               <p class="mb-2">
-                <i class="fas fa-user-tie text-muted me-1"></i>
+                <i class="bi bi-user-tie text-muted me-1"></i>
                 {{getEmployeeName(selectedClient?.employeeId)}}
               </p>
             </div>
@@ -312,7 +312,7 @@
                 <span *ngIf="hasJobs(selectedClient?.jobsCount); else noJobsDetail">
                   <button class="btn btn-outline-secondary btn-sm"
                           (click)="onViewClientJobs(selectedClient?.id)">
-                    <i class="fas fa-briefcase me-1"></i>
+                    <i class="bi bi-briefcase me-1"></i>
                     {{ getJobsCountDisplay(selectedClient?.jobsCount) }} Jobs
                   </button>
                 </span>
@@ -325,7 +325,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Client Since:</label>
               <p class="mb-2">
-                <i class="fas fa-calendar-alt text-muted me-1"></i>
+                <i class="bi bi-calendar-alt text-muted me-1"></i>
                 {{selectedClient?.createdAt | date:'medium'}}
               </p>
             </div>
@@ -333,7 +333,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Last Updated:</label>
               <p class="mb-2">
-                <i class="fas fa-clock text-muted me-1"></i>
+                <i class="bi bi-clock text-muted me-1"></i>
                 {{selectedClient?.updatedAt | date:'medium'}}
               </p>
             </div>
@@ -347,11 +347,11 @@
               <div class="d-flex flex-wrap gap-2">
                 <button class="btn btn-outline-warning btn-sm"
                         (click)="editClientFromModal(selectedClient)">
-                  <i class="fas fa-edit me-1"></i>Edit Client
+                  <i class="bi bi-edit me-1"></i>Edit Client
                 </button>
                 <button class="btn btn-outline-danger btn-sm"
                         (click)="deleteClientFromModal(selectedClient)">
-                  <i class="fas fa-trash me-1"></i>Delete Client
+                  <i class="bi bi-trash me-1"></i>Delete Client
                 </button>
               </div>
             </div>
@@ -362,7 +362,7 @@
       <div class="modal-footer bg-light">
           <div>
             <button type="button" class="btn btn-secondary" (click)="closeClientDetailsModal()">
-              <i class="fas fa-times me-1"></i>Close
+              <i class="bi bi-times me-1"></i>Close
             </button>
           </div>
       </div>
@@ -465,7 +465,7 @@
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
         <h5 class="modal-title">
-          <i class="fas fa-exclamation-triangle me-2"></i>
+          <i class="bi bi-exclamation-triangle me-2"></i>
           Confirm Client Deletion
         </h5>
         <button type="button" class="btn-close btn-close-white" (click)="closeDeleteClientModal()"></button>
@@ -483,17 +483,17 @@
             </p>
           </div>
           <p class="text-danger">
-            <i class="fas fa-exclamation-circle me-1"></i>
+            <i class="bi bi-exclamation-circle me-1"></i>
             This action cannot be undone. All jobs and applications associated with this client will also be removed.
           </p>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="closeDeleteClientModal()">
-          <i class="fas fa-times me-1"></i> Cancel
+          <i class="bi bi-times me-1"></i> Cancel
         </button>
         <button type="button" class="btn btn-danger" (click)="confirmDeleteClient()">
-          <i class="fas fa-trash me-1"></i> Delete Client
+          <i class="bi bi-trash me-1"></i> Delete Client
         </button>
       </div>
     </div>

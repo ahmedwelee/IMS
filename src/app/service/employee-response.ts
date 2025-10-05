@@ -11,4 +11,5 @@ export interface EmployeeResponse {
   salary: number;
   jopName?: string | null;
   clientName?: string | null;
+  isActive: boolean;
 }

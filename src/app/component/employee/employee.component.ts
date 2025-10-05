@@ -25,8 +25,7 @@ export class EmployeesComponent implements OnInit {
   selectedEmployee: EmployeeResponse | null = null;
   showModal: boolean = false;
   isEditMode: boolean = false;
-  showDeleteModal: boolean = false;
-  showEmployeeDetailsModal: boolean = false; // New property for details modal
+  showEmployeeDetailsModal: boolean = false;
 
   currentEmployee: EmployeeRequest = {
     email: '',
@@ -36,11 +35,10 @@ export class EmployeesComponent implements OnInit {
     startDate: '',
     title: '',
     position: Position.CONSULTANT,
-    salary: 0
-    // jopId and clientId are optional, so we don't need to initialize them
+    salary: 0,
+    isActive: true// Default to active for new employees
   };
 
-  employeeToDelete: EmployeeResponse | null = null;
   positionOptions = Object.values(Position);
   emailError: string = '';
 
@@ -66,59 +64,68 @@ export class EmployeesComponent implements OnInit {
     });
   }
 
-  // NEW: Open employee details modal
+  // Toggle employee active status
+  toggleEmployeeStatus(employee: EmployeeResponse): void {
+    const newStatus = !employee.isActive;
+    const statusText = newStatus ? 'activate' : 'deactivate';
+
+    // Update employee status
+    this.employeeService.updateEmployeeStatus(employee.id, newStatus).subscribe({
+      next: (updatedEmployee) => {
+        // Update local array
+        const index = this.employees.findIndex(e => e.id === employee.id);
+        if (index !== -1) {
+          this.employees[index] = updatedEmployee;
+        }
+
+        this.toastService.success(`Employee ${statusText}d successfully`, 'Done!');
+      },
+      error: (error) => {
+        this.toastService.error(error.error.error || `Failed to ${statusText} employee`, 'Oups!!');
+      }
+    });
+  }
+
+  // Toggle from details modal
+  toggleEmployeeStatusFromModal(employee: EmployeeResponse): void {
+    this.toggleEmployeeStatus(employee);
+    // Update the selected employee reference
+    this.selectedEmployee = { ...employee, isActive: !employee.isActive };
+  }
+
+  // Open employee details modal
   openEmployeeDetailsModal(employee: EmployeeResponse): void {
     this.selectedEmployee = employee;
     this.showEmployeeDetailsModal = true;
-    // Add body class to prevent scrolling
     document.body.classList.add('modal-open');
   }
 
-  // NEW: Close employee details modal
+  // Close employee details modal
   closeEmployeeDetailsModal(): void {
     this.showEmployeeDetailsModal = false;
     this.selectedEmployee = null;
-    // Remove body class to restore scrolling
     document.body.classList.remove('modal-open');
   }
 
-  // NEW: Handle backdrop click for employee details modal
+  // Handle backdrop click for employee details modal
   onEmployeeModalBackdropClick(event: Event): void {
     if (event.target === event.currentTarget) {
       this.closeEmployeeDetailsModal();
     }
   }
 
-  // NEW: Edit employee from details modal
+  // Edit employee from details modal
   editEmployeeFromModal(employee: EmployeeResponse): void {
-    // Close the details modal first
     this.closeEmployeeDetailsModal();
-
-    // Then open the edit modal
     setTimeout(() => {
       this.openEditModal(employee);
     }, 100);
   }
 
-  // NEW: Delete employee from details modal
-  deleteEmployeeFromModal(employee: EmployeeResponse): void {
-    // Close the details modal first
-    this.closeEmployeeDetailsModal();
-
-    // Then open the delete confirmation modal
-    setTimeout(() => {
-      this.openDeleteModal(employee);
-    }, 100);
-  }
-
-  // NEW: View employee's job details
+  // View employee's job details
   viewEmployeeJob(employee: EmployeeResponse): void {
-    // Close employee modal
     this.closeEmployeeDetailsModal();
-
-    // Your logic to show job details
     console.log('View job for employee:', employee.jopName);
-    // Example: this.openJobDetailsModal(employee.jobId);
   }
 
   // Open create modal
@@ -132,17 +139,17 @@ export class EmployeesComponent implements OnInit {
       startDate: '',
       title: '',
       position: Position.CONSULTANT,
-      salary: 0
+      salary: 0,
+      isActive: true // New employees are active by default
     };
     this.emailError = '';
     this.showModal = true;
   }
 
-  // Open edit modal - Updated to work with details modal
+  // Open edit modal
   openEditModal(employee: EmployeeResponse): void {
     this.isEditMode = true;
 
-    // For edit, we need to split fullName into firstName and lastName
     const names = employee.fullName?.split(' ') || [];
     const firstName = names[0] || '';
     const lastName = names.slice(1).join(' ') || '';
@@ -154,8 +161,9 @@ export class EmployeesComponent implements OnInit {
       dateOfBirth: employee.dateOfBirth,
       startDate: employee.startDate,
       title: employee.title,
-      position: employee.position as Position, // Cast to Position enum
-      salary: employee.salary
+      position: employee.position as Position,
+      salary: employee.salary,
+      isActive: employee.isActive
     };
     this.selectedEmployee = employee;
     this.emailError = '';
@@ -211,38 +219,6 @@ export class EmployeesComponent implements OnInit {
     });
   }
 
-  openDeleteModal(employee: EmployeeResponse): void {
-    this.employeeToDelete = employee;
-    this.showDeleteModal = true;
-  }
-
-  // Close delete modal
-  closeDeleteModal(): void {
-    this.showDeleteModal = false;
-    this.employeeToDelete = null;
-  }
-
-  confirmDeleteEmployee(): void {
-    const employeeId = this.employeeToDelete?.id;
-    if (!employeeId) return;
-
-    this.employeeService.deleteEmployee(employeeId).subscribe({
-      next: () => {
-        this.employees = this.employees.filter(e => e.id !== employeeId);
-        this.toastService.success('deleted successfully', 'Done!')
-        if (this.selectedEmployee?.id === employeeId) {
-          this.selectedEmployee = null;
-        }
-
-        this.closeDeleteModal();
-      },
-      error: (error) => {
-        this.toastService.error(error.error.error, 'Oups!!')
-        this.closeDeleteModal();
-      }
-    });
-  }
-
   // Update employee
   updateExistingEmployee(): void {
     if (!this.selectedEmployee?.id) return;
@@ -255,12 +231,10 @@ export class EmployeesComponent implements OnInit {
       this.emailError = 'Please enter a valid email address';
       return;
     }
-   console.log(this.selectedEmployee.id)
 
     this.employeeService.updateEmployee(this.selectedEmployee.id, this.currentEmployee).subscribe({
       next: (updatedEmployee) => {
         this.toastService.success('updated successfully', 'Done!')
-        // Update the local array
         const index = this.employees.findIndex(e => e.id === updatedEmployee.id);
         if (index !== -1) {
           this.employees[index] = updatedEmployee;
@@ -274,8 +248,7 @@ export class EmployeesComponent implements OnInit {
     });
   }
 
-
-  // Calculate age from date of birth - Enhanced
+  // Calculate age from date of birth
   calculateAge(dateOfBirth: string | undefined): number {
     if (!dateOfBirth) return 0;
 
@@ -291,7 +264,7 @@ export class EmployeesComponent implements OnInit {
     return age;
   }
 
-  // Calculate tenure from start date - Enhanced
+  // Calculate tenure from start date
   calculateTenure(startDate: string | undefined): string {
     if (!startDate) return 'Unknown';
 
@@ -318,11 +291,11 @@ export class EmployeesComponent implements OnInit {
     return salary.toLocaleString('en-US');
   }
 
-  // Get position badge class - handle string or Position enum
+  // Get position badge class
   getPositionBadgeClass(position: string | Position | undefined): string {
     if (!position) return 'bg-secondary';
 
-    const pos = position.toString(); // Convert to string for comparison
+    const pos = position.toString();
 
     switch (pos) {
       case 'DIRECTOR':

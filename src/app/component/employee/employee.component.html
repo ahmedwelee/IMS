@@ -8,7 +8,7 @@
             <h5 class="card-subtitle text-muted">Overview of all employees</h5>
           </div>
           <button class="btn btn-primary" (click)="openCreateModal()">
-            <i class="fas fa-plus me-2"></i>Add New Employee
+            <i class="bi bi-plus me-2"></i>Add New Employee
           </button>
         </div>
 
@@ -23,6 +23,7 @@
               <th class="text-dark font-medium fs-4">Salary</th>
               <th class="text-dark font-medium fs-4">Age</th>
               <th class="text-dark font-medium fs-4">Tenure</th>
+              <th class="text-dark font-medium fs-4">Status</th>
               <th class="text-dark font-medium fs-4">Actions</th>
             </tr>
             </thead>
@@ -58,26 +59,35 @@
                 <span class="text-muted">{{calculateTenure(emp.startDate)}}</span>
               </td>
               <td>
+                <span class="badge" [class]="emp.isActive ? 'bg-success' : 'bg-secondary'">
+                  {{emp.isActive ? 'Active' : 'Inactive'}}
+                </span>
+              </td>
+              <td>
                 <div class="btn-group" role="group">
                   <button type="button" class="btn btn-outline-primary btn-sm"
                           (click)="openEmployeeDetailsModal(emp)">
-                    <i class="fas fa-eye"></i> View
+                    <i class="bi bi-eye"></i> View
                   </button>
                   <button type="button" class="btn btn-outline-warning btn-sm ms-1"
                           (click)="openEditModal(emp)">
-                    <i class="fas fa-edit"></i> Edit
+                    <i class="bi bi-edit"></i> Edit
                   </button>
-                  <button type="button" class="btn btn-outline-danger btn-sm ms-1"
-                          (click)="openDeleteModal(emp)">
-                    <i class="fas fa-trash"></i> Delete
-                  </button>
+                  <div class="form-check form-switch ms-2">
+                    <input class="form-check-input" type="checkbox"
+                           [id]="'employeeSwitch' + emp.id"
+                           [checked]="emp.isActive"
+                           (change)="toggleEmployeeStatus(emp)">
+                    <label class="form-check-label" [for]="'employeeSwitch' + emp.id">
+                    </label>
+                  </div>
                 </div>
               </td>
             </tr>
             <tr *ngIf="employees.length === 0">
-              <td colspan="7" class="text-center py-4">
+              <td colspan="8" class="text-center py-4">
                 <div class="text-muted">
-                  <i class="fas fa-users fa-2x mb-3"></i>
+                  <i class="bi bi-users fa-2x mb-3"></i>
                   <p>No employees found. Click "Add New Employee" to create one.</p>
                 </div>
               </td>
@@ -182,6 +192,21 @@
               </div>
             </div>
           </div>
+
+          <div class="row" *ngIf="isEditMode">
+            <div class="col-12 mb-3">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="isActive"
+                       [ngModel]="currentEmployee.isActive"
+                       (ngModelChange)="currentEmployee.isActive = $event"
+                       name="isActive">
+                <label class="form-check-label" for="isActive"  [class.bi-check]="currentEmployee.isActive" [class.bi-ban]="!currentEmployee.isActive">
+
+                  {{currentEmployee.isActive ? 'Employee is Active' : 'Employee is not active'}}
+                </label>
+              </div>
+            </div>
+          </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -196,45 +221,7 @@
   </div>
 </div>
 <div class="modal-backdrop fade show" [class.d-block]="showModal" *ngIf="showModal"></div>
-<div class="modal fade" [class.show]="showDeleteModal" [style.display]="showDeleteModal ? 'block' : 'none'"
-     *ngIf="showDeleteModal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">
-          <i class="fas fa-exclamation-triangle me-2"></i>
-          Confirm Deletion
-        </h5>
-        <button type="button" class="btn-close btn-close-white" (click)="closeDeleteModal()" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div *ngIf="employeeToDelete">
-          <p>Are you sure you want to delete the eployee position:</p>
-          <div class="alert alert-warning">
-            <h6 class="alert-heading">{{ employeeToDelete.fullName }}</h6>
-            <p class="mb-0">
-              <strong>Email:</strong> {{ employeeToDelete.email }}<br>
-              <strong>Position:</strong> {{ employeeToDelete.position }}<br>
-              <strong>Salary:</strong> ${{ formatSalary(employeeToDelete.salary) }}
-            </p>
-          </div>
-          <p class="text-danger">
-            <i class="fas fa-exclamation-circle me-1"></i>
-            This action cannot be undone. All actions for this employee will also be removed.
-          </p>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">
-          <i class="fas fa-times me-1"></i> Cancel
-        </button>
-        <button type="button" class="btn btn-danger" (click)="confirmDeleteEmployee()">
-          <i class="fas fa-trash me-1"></i> Delete Employee
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+
 <!-- Employee details -->
 <div class="modal fade" [class.show]="showEmployeeDetailsModal" [style.display]="showEmployeeDetailsModal ? 'block' : 'none'"
      *ngIf="showEmployeeDetailsModal">
@@ -242,7 +229,7 @@
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
         <h5 class="modal-title">
-          <i class="fas fa-user me-2"></i>
+          <i class="bi bi-user me-2"></i>
           Employee Details
         </h5>
         <button type="button" class="btn-close btn-close-white" (click)="closeEmployeeDetailsModal()"></button>
@@ -262,12 +249,17 @@
                 <p class="mb-0 text-muted">{{selectedEmployee.email}}</p>
               </div>
               <div class="text-end">
+                <div class="mb-2">
+                  <span class="badge" [class]="selectedEmployee.isActive ? 'bg-success' : 'bg-secondary'">
+                    {{selectedEmployee.isActive ? 'Active' : 'Inactive'}}
+                  </span>
+                </div>
                 <div class="text-muted small">
-                  <i class="fas fa-calendar me-1"></i>
+                  <i class="bi bi-calendar me-1"></i>
                   Started: {{selectedEmployee?.startDate | date:'mediumDate'}}
                 </div>
                 <div class="text-muted small mt-1">
-                  <i class="fas fa-clock me-1"></i>
+                  <i class="bi bi-clock me-1"></i>
                   Tenure: {{calculateTenure(selectedEmployee?.startDate)}}
                 </div>
               </div>
@@ -278,13 +270,13 @@
         <div class="row">
           <div class="col-md-5">
             <h6 class="text-primary border-bottom pb-2">
-              <i class="fas fa-user-circle me-2"></i>Personal Information
+              <i class="bi bi-user-circle me-2"></i>Personal Information
             </h6>
 
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Full Name:</label>
               <p class="mb-2">
-                <i class="fas fa-id-badge text-muted me-1"></i>
+                <i class="bi bi-id-badge text-muted me-1"></i>
                 {{selectedEmployee?.fullName}}
               </p>
             </div>
@@ -292,7 +284,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Email Address:</label>
               <p class="mb-2">
-                <i class="fas fa-envelope text-muted me-1"></i>
+                <i class="bi bi-envelope text-muted me-1"></i>
                 <a [href]="'mailto:' + selectedEmployee?.email" class="text-decoration-none">
                   {{selectedEmployee?.email}}
                 </a>
@@ -302,7 +294,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Date of Birth:</label>
               <p class="mb-2">
-                <i class="fas fa-birthday-cake text-muted me-1"></i>
+                <i class="bi bi-birthday-cake text-muted me-1"></i>
                 {{selectedEmployee?.dateOfBirth | date:'longDate'}}
               </p>
             </div>
@@ -310,7 +302,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Age:</label>
               <p class="mb-2">
-                <i class="fas fa-calculator text-muted me-1"></i>
+                <i class="bi bi-calculator text-muted me-1"></i>
                 {{calculateAge(selectedEmployee?.dateOfBirth)}} years
               </p>
             </div>
@@ -318,13 +310,13 @@
 
           <div class="col-md-6">
             <h6 class="text-success border-bottom pb-2">
-              <i class="fas fa-briefcase me-2"></i>Employment Information
+              <i class="bi bi-briefcase me-2"></i>Employment Information
             </h6>
 
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Start Date:</label>
               <p class="mb-2">
-                <i class="fas fa-calendar-plus text-muted me-1"></i>
+                <i class="bi bi-calendar-plus text-muted me-1"></i>
                 {{selectedEmployee?.startDate | date:'longDate'}}
               </p>
             </div>
@@ -332,7 +324,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Tenure:</label>
               <p class="mb-2">
-                <i class="fas fa-hourglass-half text-muted me-1"></i>
+                <i class="bi bi-hourglass-half text-muted me-1"></i>
                 {{calculateTenure(selectedEmployee?.startDate)}}
               </p>
             </div>
@@ -340,7 +332,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Job Title:</label>
               <p class="mb-2">
-                <i class="fas fa-user-tag text-muted me-1"></i>
+                <i class="bi bi-user-tag text-muted me-1"></i>
                 {{selectedEmployee?.title}}
               </p>
             </div>
@@ -357,7 +349,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Salary:</label>
               <p class="mb-2">
-                <i class="fas fa-dollar-sign text-muted me-1"></i>
+                <i class="bi bi-dollar-sign text-muted me-1"></i>
                 ${{formatSalary(selectedEmployee?.salary)}}
               </p>
             </div>
@@ -369,16 +361,20 @@
             <div class="d-flex flex-wrap gap-2">
               <button class="btn btn-outline-warning btn-sm"
                       (click)="editEmployeeFromModal(selectedEmployee)">
-                <i class="fas fa-edit me-1"></i>Edit Employee
+                <i class="bi bi-edit me-1"></i>Edit Employee
               </button>
-              <button class="btn btn-outline-danger btn-sm"
-                      (click)="deleteEmployeeFromModal(selectedEmployee)">
-                <i class="fas fa-trash me-1"></i>Delete Employee
+              <button type="button"
+                      class="btn btn-sm"
+                      [class.btn-outline-success]="!selectedEmployee.isActive"
+                      [class.btn-outline-secondary]="selectedEmployee.isActive"
+                      (click)="toggleEmployeeStatusFromModal(selectedEmployee)">
+                <i class="fas" [class.fa-check]="!selectedEmployee.isActive" [class.fa-ban]="selectedEmployee.isActive"></i>
+                {{selectedEmployee.isActive ? 'Deactivate' : 'Activate'}}
               </button>
               <button class="btn btn-outline-info btn-sm"
                       *ngIf="selectedEmployee?.jopName"
                       (click)="viewEmployeeJob(selectedEmployee)">
-                <i class="fas fa-eye me-1"></i>View Job Details
+                <i class="bi bi-eye me-1"></i>View Job Details
               </button>
             </div>
           </div>
@@ -388,7 +384,7 @@
       <div class="modal-footer bg-light">
         <div>
           <button type="button" class="btn btn-secondary" (click)="closeEmployeeDetailsModal()">
-            <i class="fas fa-times me-1"></i>Close
+            <i class="bi bi-times me-1"></i>Close
           </button>
         </div>
       </div>

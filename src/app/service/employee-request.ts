@@ -10,4 +10,5 @@ export interface EmployeeRequest {
   salary: number;
   jopId?: number | null;
   clientId?: number | null;
+  isActive: boolean;
 }

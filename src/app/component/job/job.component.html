@@ -62,7 +62,7 @@
             <h5 class="card-subtitle text-muted">Overview of all job positions</h5>
           </div>
           <button class="btn btn-primary" (click)="openCreateModal()">
-            <i class="fas fa-plus me-2"></i>Post New Job
+            <i class="bi bi-plus me-2"></i>Post New Job
           </button>
         </div>
 
@@ -72,7 +72,7 @@
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h6 class="mb-0">
-                <i class="fas fa-filter me-2"></i>Filter Jobs
+                <i class="bi bi-filter me-2"></i>Filter Jobs
               </h6>
               <span class="badge bg-primary">{{filteredJobs.length}} of {{jobs.length}} jobs</span>
             </div>
@@ -81,7 +81,7 @@
               <div class="col-md-4">
                 <label class="form-label">Search</label>
                 <div class="input-group">
-                  <span class="input-group-text"><i class="fas fa-search"></i></span>
+                  <span class="input-group-text"><i class="bi bi-search"></i></span>
                   <input type="text"
                          class="form-control"
                          placeholder="Search by title, description, location..."
@@ -130,7 +130,7 @@
                   <button class="btn btn-outline-danger btn-sm ms-1"
                           (click)="clearFilters()"
                           [disabled]="!hasActiveFilters()">
-                    <i class="fas fa-times me-1"></i>Clear
+                    <i class="bi bi-times me-1"></i>Clear
                   </button>
                 </div>
               </div>
@@ -225,15 +225,15 @@
                 <div class="btn-group" role="group">
                   <button type="button" class="btn btn-outline-primary btn-sm"
                           (click)="openJobDetailsModal(job)">
-                    <i class="fas fa-eye"></i> View
+                    <i class="bi bi-eye"></i> View
                   </button>
                   <button type="button" class="btn btn-outline-warning btn-sm ms-1"
                           (click)="openEditModal(job)">
-                    <i class="fas fa-edit"></i> Edit
+                    <i class="bi bi-edit"></i> Edit
                   </button>
                   <button type="button" class="btn btn-outline-danger btn-sm ms-1"
                           (click)="openDeleteModal(job)">
-                    <i class="fas fa-trash"></i> Delete
+                    <i class="bi bi-trash"></i> Delete
                   </button>
                 </div>
               </td>
@@ -241,7 +241,7 @@
             <tr *ngIf="jobs.length === 0">
               <td colspan="8" class="text-center py-4">
                 <div class="text-muted">
-                  <i class="fas fa-briefcase fa-2x mb-3"></i>
+                  <i class="bi bi-briefcas bi-2x mb-3"></i>
                   <p>No jobs found. Click "Post New Job" to create one.</p>
                 </div>
               </td>
@@ -380,7 +380,7 @@
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
         <h5 class="modal-title">
-          <i class="fas fa-exclamation-triangle me-2"></i>
+          <i class="bi bi-exclamation-triangle me-2"></i>
           Confirm Deletion
         </h5>
         <button type="button" class="btn-close btn-close-white" (click)="closeDeleteModal()" aria-label="Close"></button>
@@ -397,17 +397,17 @@
             </p>
           </div>
           <p class="text-danger">
-            <i class="fas fa-exclamation-circle me-1"></i>
+            <i class="bi bi-exclamation-circle me-1"></i>
             This action cannot be undone. All applications for this job will also be removed.
           </p>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">
-          <i class="fas fa-times me-1"></i> Cancel
+          <i class="bi bi-times me-1"></i> Cancel
         </button>
         <button type="button" class="btn btn-danger" (click)="confirmDeleteJob()">
-          <i class="fas fa-trash me-1"></i> Delete Job
+          <i class="bi bi-trash me-1"></i> Delete Job
         </button>
       </div>
     </div>
@@ -420,7 +420,7 @@
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
         <h5 class="modal-title">
-          <i class="fas fa-briefcase me-2"></i>
+          <i class="bi bi-briefcase me-2"></i>
           Job Details
         </h5>
         <button type="button" class="btn-close btn-close-white" (click)="closeJobDetailsModal()"></button>
@@ -433,7 +433,7 @@
             <div class="d-flex align-items-center p-3 bg-light rounded">
               <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
                    style="width: 60px; height: 60px;">
-                <i class="fas fa-briefcase text-white fs-3"></i>
+                <i class="bi bi-briefcase text-white fs-3"></i>
               </div>
               <div class="flex-grow-1">
                 <h4 class="mb-1">{{selectedJob?.jopName}}</h4>
@@ -446,11 +446,11 @@
               </div>
               <div class="text-end">
                 <div class="text-muted small">
-                  <i class="fas fa-calendar me-1"></i>
+                  <i class="bi bi-calendar me-1"></i>
                   Posted: {{selectedJob?.postedDate | date:'mediumDate'}}
                 </div>
                 <div class="text-success small mt-1">
-                  <i class="fas fa-dollar-sign me-1"></i>
+                  <i class="bi bi-dollar-sign me-1"></i>
                   ${{formatSalary(selectedJob?.salary)}}
                 </div>
               </div>
@@ -461,13 +461,13 @@
         <div class="row">
           <div class="col-md-6">
             <h6 class="text-primary border-bottom pb-2">
-              <i class="fas fa-info-circle me-2"></i>Job Information
+              <i class="bi bi-info-circle me-2"></i>Job Information
             </h6>
 
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Job Title:</label>
               <p class="mb-2">
-                <i class="fas fa-tag text-muted me-1"></i>
+                <i class="bi bi-tag text-muted me-1"></i>
                 {{selectedJob?.jopName}}
               </p>
             </div>
@@ -475,7 +475,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Description:</label>
               <p class="mb-2">
-                <i class="fas fa-align-left text-muted me-1"></i>
+                <i class="bi bi-align-left text-muted me-1"></i>
                 {{selectedJob?.description}}
               </p>
             </div>
@@ -492,7 +492,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Location:</label>
               <p class="mb-2">
-                <i class="fas fa-map-marker-alt text-muted me-1"></i>
+                <i class="bi bi-map-marker-alt text-muted me-1"></i>
                 {{selectedJob?.location}}
               </p>
             </div>
@@ -500,7 +500,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Salary:</label>
               <p class="mb-2">
-                <i class="fas fa-dollar-sign text-muted me-1"></i>
+                <i class="bi bi-dollar-sign text-muted me-1"></i>
                 ${{formatSalary(selectedJob?.salary)}}
               </p>
             </div>
@@ -508,7 +508,7 @@
 
           <div class="col-md-6">
             <h6 class="text-success border-bottom pb-2">
-              <i class="fas fa-chart-line me-2"></i>Status & Activity
+              <i class="bi bi-chart-line me-2"></i>Status & Activity
             </h6>
 
             <div class="mb-3">
@@ -523,7 +523,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Posted Date:</label>
               <p class="mb-2">
-                <i class="fas fa-calendar-plus text-muted me-1"></i>
+                <i class="bi bi-calendar-plus text-muted me-1"></i>
                 {{selectedJob?.postedDate | date:'longDate'}}
               </p>
             </div>
@@ -533,7 +533,7 @@
               <p class="mb-2">
                 <button class="btn btn-link p-0 text-decoration-none"
                         (click)="viewApplications(selectedJob.id)">
-                  <i class="fas fa-file-alt text-muted me-1"></i>
+                  <i class="bi bi-file-alt text-muted me-1"></i>
                   <span class="badge bg-info">{{selectedJob?.applicationsCount}}</span>
                   <span class="ms-1">View Applications</span>
                 </button>
@@ -543,7 +543,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Assigned Client:</label>
               <p class="mb-2">
-                <i class="fas fa-user-tie text-muted me-1"></i>
+                <i class="bi bi-user-tie text-muted me-1"></i>
                 <span *ngIf="selectedJob?.clientName; else noClient">
                   {{selectedJob?.clientName}}
                 </span>
@@ -556,7 +556,7 @@
             <div class="mb-3">
               <label class="form-label fw-bold text-muted">Project Manager:</label>
               <p class="mb-2">
-                <i class="fas fa-user-cog text-muted me-1"></i>
+                <i class="bi bi-user-cog text-muted me-1"></i>
                 <span *ngIf="selectedJob?.managerName; else noManager">
                   {{selectedJob?.managerName}}
                 </span>
@@ -574,16 +574,16 @@
             <div class="d-flex flex-wrap gap-2">
               <button class="btn btn-outline-primary btn-sm"
                       (click)="viewApplications(selectedJob.id)">
-                <i class="fas fa-file-alt me-1"></i>
+                <i class="bi bi-file-alt me-1"></i>
                 View Applications {{selectedJob?.applicationsCount}}
               </button>
               <button class="btn btn-outline-warning btn-sm"
                       (click)="editJobFromModal(selectedJob)">
-                <i class="fas fa-edit me-1"></i>Edit Job
+                <i class="bi bi-edit me-1"></i>Edit Job
               </button>
               <button class="btn btn-outline-danger btn-sm"
                       (click)="deleteJobFromModal(selectedJob)">
-                <i class="fas fa-trash me-1"></i>Delete Job
+                <i class="bi bi-trash me-1"></i>Delete Job
               </button>
             </div>
           </div>
@@ -593,7 +593,7 @@
       <div class="modal-footer bg-light">
         <div>
           <button type="button" class="btn btn-secondary" (click)="closeJobDetailsModal()">
-            <i class="fas fa-times me-1"></i>Close
+            <i class="bi bi-times me-1"></i>Close
           </button>
         </div>
       </div>
