@@ -314,7 +314,58 @@ export class ApplicationsComponent implements OnInit {
     }
   }
 
-  // Download CV file - cvPath is a full URL
+  // Download/View CV file
+  viewCV(applicationId: number): void {
+    if (!applicationId) {
+      this.toastService.warning('Invalid application ID', 'Warning');
+      return;
+    }
+
+    this.toastService.info('Loading CV...', 'Please wait');
+
+    this.applicationService.getApplicationCv(applicationId).subscribe({
+      next: (blob: Blob) => {
+        // Create a blob URL and open it in a new tab
+        const blobUrl = window.URL.createObjectURL(blob);
+        const newWindow = window.open(blobUrl, '_blank');
+
+        if (!newWindow) {
+          // If popup was blocked, download the file instead
+          this.downloadCvFile(blob, applicationId);
+          this.toastService.warning('Popup blocked. CV downloaded instead.', 'Info');
+        } else {
+          this.toastService.success('CV opened in new tab', 'Success');
+
+          // Clean up the blob URL after a delay
+          setTimeout(() => {
+            window.URL.revokeObjectURL(blobUrl);
+          }, 100);
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching CV:', error);
+        if (error.status === 404) {
+          this.toastService.error('CV file not found for this application', 'Not Found');
+        } else {
+          this.toastService.error('Failed to load CV. Please try again.', 'Error');
+        }
+      }
+    });
+  }
+
+  // Helper method to download CV file if viewing fails
+  private downloadCvFile(blob: Blob, applicationId: number): void {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `cv_application_${applicationId}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }
+
+  // Legacy method for backward compatibility (if cvPath is a direct URL)
   downloadCV(cvPath: string): void {
     if (!cvPath) {
       this.toastService.warning('No CV file available for this application', 'Warning');
@@ -322,9 +373,13 @@ export class ApplicationsComponent implements OnInit {
     }
 
     try {
-      // Open CV URL in new tab
-      window.open(cvPath, '_blank');
-      this.toastService.info('Opening CV...', 'Info');
+      // If cvPath is a full URL, open it directly
+      if (cvPath.startsWith('http://') || cvPath.startsWith('https://')) {
+        window.open(cvPath, '_blank');
+        this.toastService.info('Opening CV...', 'Info');
+      } else {
+        this.toastService.warning('Invalid CV path', 'Warning');
+      }
     } catch (error) {
       console.error('Error opening CV:', error);
       this.toastService.error('Failed to open CV', 'Error');

@@ -8,6 +8,7 @@ import {ApplicationRequest} from "../../service/application-request";
 import {ApplicationResponse} from "../../service/application-response";
 import {NgForOf, NgIf} from "@angular/common";
 import {CandidateService} from "../../service/candidate.service";
+import {ToastrService} from "ngx-toastr";
 
 
 @Component({
@@ -29,7 +30,7 @@ export class ApplyComponent implements OnInit {
   jobDetails: any = null;
   isLoading = false;
   isSubmitting = false;
-  cvUrl: string = '';
+  selectedCvFile: File | null = null;
   userProfile: any = null;
   isLoggedIn = false;
 
@@ -40,7 +41,8 @@ export class ApplyComponent implements OnInit {
     private applicationService: ApplicationService,
     private candidateService: CandidateService,
     private jobService: JobService,
-    private keycloakService: KeycloakService
+    private keycloakService: KeycloakService,
+    private toastrService: ToastrService
   ) {
     this.applyForm = this.createForm();
   }
@@ -71,6 +73,7 @@ export class ApplyComponent implements OnInit {
       }
     } catch (error) {
       console.error('Error initializing auth:', error);
+      this.toastrService.error('Failed to initialize authentication', 'Error');
     }
   }
 
@@ -92,7 +95,7 @@ export class ApplyComponent implements OnInit {
       nationality: ['', [Validators.required]],
       gender: ['', [Validators.required]],
       dateOfBirth: ['', [Validators.required]],
-      cvUrl: ['', [Validators.required, Validators.pattern(/https?:\/\/.+/)]]
+      cvFile: ['', [Validators.required]]
     });
   }
 
@@ -107,34 +110,64 @@ export class ApplyComponent implements OnInit {
       error: (error) => {
         console.error('Error loading job details:', error);
         this.isLoading = false;
-        alert('Job not found or error loading job details');
+        this.toastrService.error('Job not found or error loading job details', 'Error');
         this.router.navigate(['/jobs']);
       }
     });
   }
 
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+
+      // Validate file type
+      const allowedTypes = ['application/pdf', 'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+      if (!allowedTypes.includes(file.type)) {
+        this.toastrService.error('Please upload a PDF or Word document', 'Invalid File Type');
+        input.value = '';
+        this.selectedCvFile = null;
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        this.toastrService.error('File size must be less than 5MB', 'File Too Large');
+        input.value = '';
+        this.selectedCvFile = null;
+        return;
+      }
+
+      this.selectedCvFile = file;
+      this.applyForm.patchValue({ cvFile: file.name });
+      this.toastrService.success(`File "${file.name}" selected successfully`, 'Success');
+    }
+  }
+
   onSubmit(): void {
     if (!this.applyForm.valid) {
       this.markFormGroupTouched();
-      alert('Please fill all required fields correctly.');
+      this.toastrService.warning('Please fill all required fields correctly', 'Validation Error');
       return;
     }
 
-    if (!this.applyForm.value.cvUrl) {
-      alert('Please provide a valid CV URL');
+    if (!this.selectedCvFile) {
+      this.toastrService.warning('Please select a CV file', 'Missing CV');
       return;
     }
 
     this.isSubmitting = true;
-
     this.createApplication();
   }
 
-  async createApplication(): Promise<void>  {
+  async createApplication(): Promise<void> {
     const formData = this.applyForm.value;
     const currentDate = new Date().toISOString();
     const userId = await this.getUserIdAsync();
-    console.log(this.userProfile.id);
+
     const applicationRequest: ApplicationRequest = {
       appliedDate: currentDate,
       updatedDate: currentDate,
@@ -148,28 +181,55 @@ export class ApplyComponent implements OnInit {
       nationality: formData.nationality,
       gender: formData.gender,
       dateOfBirth: formData.dateOfBirth,
-      cvPath: formData.cvUrl  // Using the URL directly
+      cvPath: ''  // Will be updated after file upload
     };
 
     this.applicationService.createApplication(applicationRequest).subscribe({
       next: (response: ApplicationResponse) => {
-        this.isSubmitting = false;
-        alert('Application submitted successfully!');
-        this.router.navigate(['/all-jobs'], {
-          queryParams: { applied: 'success', jobId: this.jobId }
-        });
+        // Upload CV file after application is created
+        if (this.selectedCvFile && response.id) {
+          this.uploadCvFile(response.id);
+        } else {
+          this.isSubmitting = false;
+          this.toastrService.success('Application submitted successfully!', 'Success');
+          this.router.navigate(['/all-jobs'], {
+            queryParams: { applied: 'success', jobId: this.jobId }
+          });
+        }
       },
       error: (error) => {
         console.error('Error submitting application:', error);
         this.isSubmitting = false;
 
         if (error.status === 409) {
-          alert('You have already applied for this job.');
+          this.toastrService.warning('You have already applied for this job', 'Duplicate Application');
         } else if (error.status === 404) {
-          alert('Job not found. It may have been removed.');
+          this.toastrService.error('Job not found. It may have been removed', 'Job Not Found');
         } else {
-          alert('Error submitting application. Please try again.');
+          this.toastrService.error('Error submitting application. Please try again', 'Submission Failed');
         }
+      }
+    });
+  }
+
+  uploadCvFile(applicationId: number): void {
+    if (!this.selectedCvFile) {
+      this.isSubmitting = false;
+      return;
+    }
+
+    this.applicationService.uploadApplicationCv(applicationId, this.selectedCvFile).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.toastrService.success('Application and CV submitted successfully!', 'Success');
+        this.router.navigate(['/all-jobs'], {
+          queryParams: { applied: 'success', jobId: this.jobId }
+        });
+      },
+      error: (error) => {
+        console.error('Error uploading CV:', error);
+        this.isSubmitting = false;
+        this.toastrService.error('Application created but CV upload failed. Please contact support', 'Upload Error');
       }
     });
   }
@@ -178,14 +238,14 @@ export class ApplyComponent implements OnInit {
     if (this.userProfile && this.userProfile.email) {
       try {
         const candidate = await this.candidateService.getCandidateByEmail(this.userProfile.email).toPromise();
-        return candidate?.id ?? 0 ;
+        return candidate?.id ?? 0;
       } catch (err) {
         console.error('Error fetching user by email:', err);
+        this.toastrService.error('Error fetching user profile', 'Error');
       }
     }
     return 0;
   }
-
 
   // Form validation helper methods
   markFormGroupTouched(): void {
@@ -211,7 +271,6 @@ export class ApplyComponent implements OnInit {
         return `Minimum length is ${control.errors['minlength'].requiredLength}`;
       }
       if (control.errors['pattern']) {
-        if (controlName === 'cvUrl') return 'Please enter a valid URL (http:// or https://)';
         return 'Invalid format';
       }
     }
@@ -256,24 +315,14 @@ export class ApplyComponent implements OnInit {
 
   // Navigation methods
   cancel(): void {
-    if (confirm('Are you sure you want to cancel? Your application progress will be lost.')) {
+    const confirmed = confirm('Are you sure you want to cancel? Your application progress will be lost.');
+    if (confirmed) {
       this.router.navigate(['/jobs']);
     }
   }
 
   goToJob(): void {
     this.router.navigate(['/jobs', this.jobId]);
-  }
-
-  // Helper method to suggest CV hosting services
-  getCVHostingSuggestions(): string[] {
-    return [
-      'Google Drive: Upload your CV and share the link',
-      'Dropbox: Upload and create a shareable link',
-      'OneDrive: Microsoft\'s cloud storage service',
-      'LinkedIn: Use your LinkedIn profile URL',
-      'Personal website or portfolio'
-    ];
   }
 
   // Format date for display
@@ -299,5 +348,9 @@ export class ApplyComponent implements OnInit {
     }
 
     return age;
+  }
+
+  getSelectedFileName(): string {
+    return this.selectedCvFile ? this.selectedCvFile.name : 'No file selected';
   }
 }

@@ -24,7 +24,7 @@
           <a class="nav-link" href="contact">Contact</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" routerLink="/history">History</a>
+          <a class="nav-link" *ngIf="isLoggedIn" routerLink="/history">History</a>
         </li>
       </ul>
       <div class="navbar-nav">

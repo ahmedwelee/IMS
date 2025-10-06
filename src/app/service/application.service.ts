@@ -68,14 +68,24 @@ export class ApplicationService {
     });
   }
 
-  uploadCV(formData: FormData): Observable<any> {
-    return this.http.post<any>(`${this.endpoint}/files/upload/cv`, formData);
+  uploadApplicationCv(applicationId: number, file: File): Observable<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<void>(
+      `${this.endpoint}/${applicationId}/cv`,
+      formData
+    );
   }
 
-  downloadCV(filePath: string): Observable<Blob> {
-    return this.http.get(`${this.endpoint}/files/download/cv/${filePath}`, {
-      responseType: 'blob'
-    });
+  getApplicationCv(applicationId: number): Observable<Blob> {
+    return this.http.get(
+      `${this.endpoint}/${applicationId}/cv`,
+      {
+        responseType: 'blob',
+        observe: 'body'
+      }
+    );
   }
 
 
