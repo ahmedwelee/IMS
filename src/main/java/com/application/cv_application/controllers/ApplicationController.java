@@ -3,9 +3,13 @@ package com.application.cv_application.controllers;
 import com.application.cv_application.requests.ApplicationRequest;
 import com.application.cv_application.response.ApplicationResponse;
 import com.application.cv_application.services.ApplicationService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -57,9 +61,27 @@ public class ApplicationController {
         return ResponseEntity.ok(service.searchApplications(query));
     }
 
+    @GetMapping("/{applicationId}/cv")
+    public ResponseEntity<Resource> getApplicationCv(@PathVariable Integer applicationId) {
+        Resource cv = service.getApplicationCv(applicationId);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + cv.getFilename() + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(cv);
+    }
+
     @PostMapping
     public ApplicationResponse create(@RequestBody ApplicationRequest request) {
         return service.createApplication(request);
+    }
+
+    @PostMapping(value = "/{applicationId}/cv", consumes = "multipart/form-data")
+    public ResponseEntity<?> uploadApplicationCv(
+            @PathVariable Integer applicationId,
+            @RequestPart("file") MultipartFile file
+    ) {
+        service.uploadApplicationCv(applicationId, file);
+        return ResponseEntity.accepted().build();
     }
 
     @PutMapping("/{id}")

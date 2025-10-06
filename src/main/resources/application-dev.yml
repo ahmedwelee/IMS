@@ -35,9 +35,8 @@ spring:
           issuer-uri: "http://localhost:8080/realms/Internal_management_system"
 
 
-application:
-  file:
-    uploads:
-      photos-output-path: ./uploads
+file:
+  upload-dir: ./uploads/cv
+
 server:
   port: 8088
