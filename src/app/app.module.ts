@@ -32,6 +32,9 @@ import {HttpTokenInterceptor} from "./service/http-token.interceptor";
 import { PublicComponent } from './layouts/public/public.component';
 import { HeaderComponent } from './pages/header/header.component';
 import {CandidateService} from "./service/candidate.service";
+import { LoadingSpinnerComponent } from './shared/loading-spinner/loading-spinner.component';
+import {LoadingInterceptor} from "./service/loading-interceptor.service";
+import {LoadingService} from "./service/loading.service";
 
 
 export function kcFactory(kcService: KeycloakService) {
@@ -45,6 +48,7 @@ export function kcFactory(kcService: KeycloakService) {
     SpinnerComponent,
     PublicComponent,
     HeaderComponent,
+    LoadingSpinnerComponent,
   ],
   imports: [
     CommonModule,
@@ -75,10 +79,12 @@ export function kcFactory(kcService: KeycloakService) {
     JobService,
     ApplicationService,
     CandidateService,
+    LoadingService,
     {
       provide: LocationStrategy,
       useClass: PathLocationStrategy
     },
+    { provide: HTTP_INTERCEPTORS, useClass: LoadingInterceptor, multi: true },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: HttpTokenInterceptor,

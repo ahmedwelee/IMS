@@ -242,4 +242,53 @@ export class ApplicationHistoryComponent implements OnInit {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   }
+
+  viewCV(applicationId: number): void {
+    if (!applicationId) {
+      this.toastService.warning('Invalid application ID', 'Warning');
+      return;
+    }
+
+    this.toastService.info('Loading CV...', 'Please wait');
+
+    this.applicationService.getApplicationCv(applicationId).subscribe({
+      next: (blob: Blob) => {
+        // Create a blob URL and open it in a new tab
+        const blobUrl = window.URL.createObjectURL(blob);
+        const newWindow = window.open(blobUrl, '_blank');
+
+        if (!newWindow) {
+          // If popup was blocked, download the file instead
+          this.downloadCvFile(blob, applicationId);
+          this.toastService.warning('Popup blocked. CV downloaded instead.', 'Info');
+        } else {
+          this.toastService.success('CV opened in new tab', 'Success');
+
+          // Clean up the blob URL after a delay
+          setTimeout(() => {
+            window.URL.revokeObjectURL(blobUrl);
+          }, 100);
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching CV:', error);
+        if (error.status === 404) {
+          this.toastService.error('CV file not found for this application', 'Not Found');
+        } else {
+          this.toastService.error('Failed to load CV. Please try again.', 'Error');
+        }
+      }
+    });
+  }
+
+  private downloadCvFile(blob: Blob, applicationId: number): void {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `cv_application_${applicationId}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }
 }

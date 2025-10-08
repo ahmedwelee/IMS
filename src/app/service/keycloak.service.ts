@@ -31,32 +31,39 @@ export class KeycloakService {
 
   async init() {
     const authenticated = await this.keycloak.init({
-      onLoad: 'check-sso', // can be 'login-required' if you want force login
+      onLoad: 'check-sso',
       pkceMethod: 'S256'
     });
 
     if (authenticated) {
-      // Load user profile
       this._profile = (await this.keycloak.loadUserProfile()) as UserProfile;
       (this._profile as any).token = this.keycloak.token || '';
 
-      // ✅ Check/register user in backend
       this.http.get("http://localhost:8088/users/check").subscribe();
 
-      // Get roles
       const token = this.keycloak.tokenParsed as any;
       const roles: string[] = token?.realm_access?.roles || [];
 
-      // ✅ Navigate according to role
-      if (roles.includes('candidate')) {
-        this.router.navigate(['/home']);
-      } else if (roles.includes('Director') || roles.includes('Manager')) {
-        this.router.navigate(['/dashboard']);
+      // ✅ Get last visited route
+      const lastRoute = localStorage.getItem('lastRoute');
+
+      if (lastRoute && lastRoute !== '/' && lastRoute !== '') {
+        // Restore to the same page after reload
+        this.router.navigateByUrl(lastRoute);
+        console.log('Restoring to last route:', lastRoute);
       } else {
-        this.router.navigate(['/home']); // fallback
+        // First login → redirect by role
+        if (roles.includes('candidate')) {
+          this.router.navigate(['/home']);
+        } else if (roles.includes('Director') || roles.includes('Manager')) {
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.router.navigate(['/home']);
+        }
       }
     }
   }
+
 
   login() {
     return this.keycloak.login(); // navigation handled in init()

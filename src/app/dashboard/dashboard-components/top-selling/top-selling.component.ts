@@ -50,6 +50,7 @@ export class TopSellingComponent implements OnInit {
   }
 
     loadTopClients(): void {
+      this.isLoading = true;
       this.clientsService.getTopClients(5).subscribe({
         next: (clients: any[]) => {
           // Backend already provides sorted + limited data
