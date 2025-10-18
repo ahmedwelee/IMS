@@ -27,6 +27,14 @@ export const ROUTES: RouteInfo[] = [
     submenu: []
   },
   {
+    path: '/component/candidates',
+    title: 'candidate',
+    icon: 'bi bi-people',
+    class: '',
+    extralink: false,
+    submenu: []
+  },
+  {
     path: '/component/application',
     title: 'applications',
     icon: 'bi bi-bag',

@@ -5,7 +5,7 @@ import {NgIf} from "@angular/common";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 // @ts-ignore
 import {KeycloakProfile} from "keycloak-js";
-import {Router} from "@angular/router";
+import {Router, RouterLink} from "@angular/router";
 
 declare var $: any;
 
@@ -29,7 +29,7 @@ interface UserProfile {
 @Component({
   selector: 'app-navigation',
   standalone: true,
-  imports: [NgbDropdownModule, NgIf, FormsModule, ReactiveFormsModule],
+  imports: [NgbDropdownModule, NgIf, FormsModule, ReactiveFormsModule, RouterLink],
   templateUrl: './navigation.component.html'
 })
 export class NavigationComponent implements AfterViewInit {

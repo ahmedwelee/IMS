@@ -1,0 +1,408 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h4 class="card-title">Candidates Management</h4>
+            <h5 class="card-subtitle text-muted">Overview of all candidates</h5>
+          </div>
+          <button class="btn btn-primary" (click)="openCreateModal()">
+            <i class="bi bi-plus me-2"></i>Add New Candidate
+          </button>
+        </div>
+
+        <!-- Candidates Table -->
+        <div class="table-responsive">
+          <table class="table align-middle table-hover">
+            <thead class="table-light">
+            <tr>
+              <th class="text-dark font-medium fs-4">Candidate</th>
+              <th class="text-dark font-medium fs-4">Phone</th>
+              <th class="text-dark font-medium fs-4">Nationality</th>
+              <th class="text-dark font-medium fs-4">Gender</th>
+              <th class="text-dark font-medium fs-4">Age</th>
+              <th class="text-dark font-medium fs-4">Status</th>
+              <th class="text-dark font-medium fs-4">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let candidate of candidates">
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                       style="width: 40px; height: 40px;">
+                    <span class="text-white fw-bold">{{candidate.fullName?.charAt(0) | uppercase}}</span>
+                  </div>
+                  <div class="ms-3">
+                    <h6 class="mb-0 font-medium">{{candidate.fullName}}</h6>
+                    <small class="text-muted">{{candidate.address}}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="text-muted">
+                  <i class="bi bi-phone me-1"></i>{{candidate.phoneNumber}}
+                </span>
+              </td>
+              <td>
+                <span class="badge bg-info">{{candidate.nationality}}</span>
+              </td>
+              <td>
+                <span class="text-muted">
+                  <i class="fas" [class.bi-mars]="candidate.gender === 'MALE'"
+                     [class.bi-venus]="candidate.gender === 'FEMALE'"
+                     [class.text-primary]="candidate.gender === 'MALE'"
+                     [class.text-danger]="candidate.gender === 'FEMALE'"></i>
+                  {{candidate.gender}}
+                </span>
+              </td>
+              <td>
+                <span class="text-muted">{{calculateAge(candidate.dateOfBirth)}} years</span>
+              </td>
+              <td>
+                <span class="badge" [class]="candidate.isActive ? 'bg-success' : 'bg-secondary'">
+                  {{candidate.isActive ? 'Active' : 'Inactive'}}
+                </span>
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <button type="button" class="btn btn-outline-primary btn-sm"
+                          (click)="openCandidateDetailsModal(candidate)">
+                    <i class="bi bi-eye"></i> View
+                  </button>
+                  <button type="button" class="btn btn-outline-warning btn-sm"
+                          (click)="openEditModal(candidate)">
+                    <i class="bi bi-edit"></i> Edit
+                  </button>
+                  <div class="form-check form-switch ms-2">
+                    <input class="form-check-input" type="checkbox"
+                           [id]="'candidateSwitch' + candidate.id"
+                           [checked]="candidate.isActive"
+                           (change)="toggleCandidateStatus(candidate)">
+                    <label class="form-check-label" [for]="'candidateSwitch' + candidate.id">
+                      <i class="bi" [class.bi-check-circle-fill]="candidate.isActive"
+                         [class.bi-x-circle-fill]="!candidate.isActive"
+                         [class.text-success]="candidate.isActive"
+                         [class.text-secondary]="!candidate.isActive"></i>
+                    </label>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="candidates.length === 0">
+              <td colspan="7" class="text-center py-4">
+                <div class="text-muted">
+                  <i class="bi bi-users bi-2x mb-3"></i>
+                  <p>No candidates found. Click "Add New Candidate" to create one.</p>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'"
+     *ngIf="showModal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{isEditMode ? 'Edit Candidate' : 'Create New Candidate'}}</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form #candidateForm="ngForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="firstName" class="form-label">First Name *</label>
+              <input type="text" class="form-control" id="firstName"
+                     [ngModel]="currentCandidate.firstName"
+                     (ngModelChange)="currentCandidate.firstName = $event"
+                     name="firstName" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="lastName" class="form-label">Last Name *</label>
+              <input type="text" class="form-control" id="lastName"
+                     [ngModel]="currentCandidate.lastName"
+                     (ngModelChange)="currentCandidate.lastName = $event"
+                     name="lastName" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="phoneNumber" class="form-label">Phone Number *</label>
+              <input type="tel" class="form-control" id="phoneNumber"
+                     [ngModel]="currentCandidate.phoneNumber"
+                     (ngModelChange)="currentCandidate.phoneNumber = $event"
+                     name="phoneNumber" required
+                     placeholder="+212 6XX-XXXXXX">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="dateOfBirth" class="form-label">Date of Birth *</label>
+              <input type="date" class="form-control" id="dateOfBirth"
+                     [ngModel]="currentCandidate.dateOfBirth"
+                     (ngModelChange)="currentCandidate.dateOfBirth = $event"
+                     name="dateOfBirth" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label for="address" class="form-label">Address *</label>
+              <input type="text" class="form-control" id="address"
+                     [ngModel]="currentCandidate.address"
+                     (ngModelChange)="currentCandidate.address = $event"
+                     name="address" required
+                     placeholder="Street, City, Country">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="nationality" class="form-label">Nationality *</label>
+              <input type="text" class="form-control" id="nationality"
+                     [ngModel]="currentCandidate.nationality"
+                     (ngModelChange)="currentCandidate.nationality = $event"
+                     name="nationality" required
+                     placeholder="e.g., Moroccan, French">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="gender" class="form-label">Gender *</label>
+              <select class="form-select" id="gender"
+                      [ngModel]="currentCandidate.gender"
+                      (ngModelChange)="currentCandidate.gender = $event"
+                      name="gender" required>
+                <option value="">Select Gender</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label for="cvPath" class="form-label">CV Path (Optional)</label>
+              <input type="text" class="form-control" id="cvPath"
+                     [ngModel]="currentCandidate.cvPath"
+                     (ngModelChange)="currentCandidate.cvPath = $event"
+                     name="cvPath"
+                     placeholder="Path to candidate's CV">
+            </div>
+          </div>
+
+          <div class="row" *ngIf="isEditMode">
+            <div class="col-12 mb-3">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="isActive"
+                       [ngModel]="currentCandidate.isActive"
+                       (ngModelChange)="currentCandidate.isActive = $event"
+                       name="isActive">
+                <label class="form-check-label" for="isActive">
+                  <i class="bi me-1"
+                     [class.bi-check-circle-fill]="currentCandidate.isActive"
+                     [class.bi-x-circle-fill]="!currentCandidate.isActive"
+                     [class.text-success]="currentCandidate.isActive"
+                     [class.text-secondary]="!currentCandidate.isActive"></i>
+                  {{currentCandidate.isActive ? 'Candidate is Active' : 'Candidate is not active'}}
+                </label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary"
+                (click)="isEditMode ? updateExistingCandidate() : createNewCandidate()"
+                [disabled]="!candidateForm.form.valid">
+          {{isEditMode ? 'Update Candidate' : 'Create Candidate'}}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" [class.d-block]="showModal" *ngIf="showModal"></div>
+
+<!-- Candidate Details Modal -->
+<div class="modal fade" [class.show]="showCandidateDetailsModal" [style.display]="showCandidateDetailsModal ? 'block' : 'none'"
+     *ngIf="showCandidateDetailsModal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-user me-2"></i>
+          Candidate Details
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeCandidateDetailsModal()"></button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedCandidate">
+        <!-- Candidate Header Info -->
+        <div class="row mb-3">
+          <div class="col-12">
+            <div class="d-flex align-items-center p-3 bg-light rounded">
+              <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                   style="width: 50px; height: 50px;">
+                <span class="text-white fw-bold fs-3">{{selectedCandidate.fullName?.charAt(0) | uppercase}}</span>
+              </div>
+              <div class="flex-grow-1">
+                <h4 class="mb-1">{{selectedCandidate.fullName}}</h4>
+                <p class="mb-0 text-muted">
+                  <i class="bi bi-map-marker-alt me-1"></i>{{selectedCandidate.address}}
+                </p>
+              </div>
+              <div class="text-end">
+                <div class="mb-2">
+                  <span class="badge" [class]="selectedCandidate.isActive ? 'bg-success' : 'bg-secondary'">
+                    {{selectedCandidate.isActive ? 'Active' : 'Inactive'}}
+                  </span>
+                </div>
+                <div class="text-muted small">
+                  <i class="bi bi-birthday-cake me-1"></i>
+                  {{selectedCandidate.dateOfBirth | date:'mediumDate'}}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="text-primary border-bottom pb-2">
+              <i class="bi bi-user-circle me-2"></i>Personal Information
+            </h6>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Full Name:</label>
+              <p class="mb-2">
+                <i class="bi bi-id-badge text-muted me-1"></i>
+                {{selectedCandidate.fullName}}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Phone Number:</label>
+              <p class="mb-2">
+                <i class="bi bi-phone text-muted me-1"></i>
+                <a [href]="'tel:' + selectedCandidate.phoneNumber" class="text-decoration-none">
+                  {{selectedCandidate.phoneNumber}}
+                </a>
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Date of Birth:</label>
+              <p class="mb-2">
+                <i class="bi bi-birthday-cake text-muted me-1"></i>
+                {{selectedCandidate.dateOfBirth | date:'longDate'}}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Age:</label>
+              <p class="mb-2">
+                <i class="bi bi-calculator text-muted me-1"></i>
+                {{calculateAge(selectedCandidate.dateOfBirth)}} years
+              </p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <h6 class="text-success border-bottom pb-2">
+              <i class="bi bi-info-circle me-2"></i>Additional Information
+            </h6>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Address:</label>
+              <p class="mb-2">
+                <i class="bi bi-map-marker-alt text-muted me-1"></i>
+                {{selectedCandidate.address}}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Nationality:</label>
+              <p class="mb-2">
+                <i class="bi bi-flag text-muted me-1"></i>
+                <span class="badge bg-info">{{selectedCandidate.nationality}}</span>
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Gender:</label>
+              <p class="mb-2">
+                <i class="fas" [class.bi-mars]="selectedCandidate.gender === 'MALE'"
+                   [class.bi-venus]="selectedCandidate.gender === 'FEMALE'"
+                   [class.text-primary]="selectedCandidate.gender === 'MALE'"
+                   [class.text-danger]="selectedCandidate.gender === 'FEMALE'"></i>
+                {{selectedCandidate.gender}}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold text-muted">Status:</label>
+              <p class="mb-2">
+                <i class="bi bi-circle text-muted me-1"></i>
+                <span class="badge" [class]="selectedCandidate.isActive ? 'bg-success' : 'bg-secondary'">
+                  {{selectedCandidate.isActive ? 'Active Candidate' : 'Inactive Candidate'}}
+                </span>
+              </p>
+            </div>
+
+            <!--<div class="mb-3" *ngIf="selectedCandidate.cvPath">
+              <label class="form-label fw-bold text-muted">CV:</label>
+              <p class="mb-2">
+                <i class="bi bi-file-pdf text-muted me-1"></i>
+                <a [href]="selectedCandidate.cvPath" target="_blank" class="text-decoration-none">
+                  View CV
+                </a>
+              </p>
+            </div>-->
+          </div>
+        </div>
+
+        <!-- Quick Actions Section -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <button class="btn btn-outline-warning btn-sm"
+                      (click)="editCandidateFromModal(selectedCandidate)">
+                <i class="bi bi-edit me-1"></i>Edit Candidate
+              </button>
+              <div class="form-check form-switch ms-2">
+                <input class="form-check-input" type="checkbox"
+                       [id]="'detailsSwitch' + selectedCandidate.id"
+                       [checked]="selectedCandidate.isActive"
+                       (change)="toggleCandidateStatusFromModal(selectedCandidate)">
+                <label class="form-check-label" [for]="'detailsSwitch' + selectedCandidate.id">
+                  <i class="bi me-1"
+                     [class.bi-check-circle-fill]="selectedCandidate.isActive"
+                     [class.bi-x-circle-fill]="!selectedCandidate.isActive"
+                     [class.text-success]="selectedCandidate.isActive"
+                     [class.text-secondary]="!selectedCandidate.isActive"></i>
+                  {{selectedCandidate.isActive ? 'Candidate is Active' : 'Candidate is not active'}}
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer bg-light">
+        <div>
+          <button type="button" class="btn btn-secondary" (click)="closeCandidateDetailsModal()">
+            <i class="bi bi-times me-1"></i>Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" [class.d-block]="showCandidateDetailsModal" *ngIf="showCandidateDetailsModal"></div>

@@ -1,8 +1,6 @@
 import {
   Component,
-  Input,
   OnDestroy,
-  Inject,
   ViewEncapsulation
 } from '@angular/core';
 import {
@@ -12,7 +10,8 @@ import {
   NavigationCancel,
   NavigationError
 } from '@angular/router';
-import { DOCUMENT } from '@angular/common';
+import {LoadingService} from "../service/loading.service";
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-spinner',
@@ -25,27 +24,31 @@ import { DOCUMENT } from '@angular/common';
   encapsulation: ViewEncapsulation.None
 })
 export class SpinnerComponent implements OnDestroy {
-  public isSpinnerVisible = true;
+  public isSpinnerVisible = false;
+  private subscriptions: Subscription = new Subscription();
 
-  @Input() public backgroundColor = 'rgba(0, 115, 170, 0.69)';
+  constructor(private loadingService: LoadingService, private router: Router) {
+    // Subscribe to HTTP loading
+    this.subscriptions.add(
+      this.loadingService.loading$.subscribe(isLoading => {
+        this.isSpinnerVisible = isLoading;
+      })
+    );
 
-  constructor(private router: Router, @Inject(DOCUMENT) private document: Document) {
-    this.router.events.subscribe(
-      event => {
+    // Subscribe to router events
+    this.subscriptions.add(
+      this.router.events.subscribe(event => {
         if (event instanceof NavigationStart) {
-          this.isSpinnerVisible = true;
-        } 
-        else if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
-          this.isSpinnerVisible = false;
+          this.loadingService.show();
+        } else if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
+          this.loadingService.hide();
         }
-      },      
-      () => {
-        this.isSpinnerVisible = false;
-      }
+      })
     );
   }
 
   ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
     this.isSpinnerVisible = false;
   }
 }

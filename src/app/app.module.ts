@@ -32,7 +32,6 @@ import {HttpTokenInterceptor} from "./service/http-token.interceptor";
 import { PublicComponent } from './layouts/public/public.component';
 import { HeaderComponent } from './pages/header/header.component';
 import {CandidateService} from "./service/candidate.service";
-import { LoadingSpinnerComponent } from './shared/loading-spinner/loading-spinner.component';
 import {LoadingInterceptor} from "./service/loading-interceptor.service";
 import {LoadingService} from "./service/loading.service";
 
@@ -48,7 +47,6 @@ export function kcFactory(kcService: KeycloakService) {
     SpinnerComponent,
     PublicComponent,
     HeaderComponent,
-    LoadingSpinnerComponent,
   ],
   imports: [
     CommonModule,
