@@ -53,8 +53,19 @@ public class CandidateService {
         existing.setNationality(request.nationality());
         existing.setGender(request.gender());
         existing.setDateOfBirth(request.dateOfBirth());
+        existing.setActive(request.isActive());
 
         return mapper.toResponse(candidateRepository.save(existing));
+    }
+
+    public CandidateResponse updateCandidateStatus(Integer id, boolean isActive) {
+        Candidate candidate = candidateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Candidate not found with id: " + id));
+
+        candidate.setActive(isActive);
+        candidateRepository.save(candidate);
+
+        return mapper.toResponse(candidate);
     }
 
     public void deleteCandidate(Integer id) {

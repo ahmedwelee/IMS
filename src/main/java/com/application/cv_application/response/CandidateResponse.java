@@ -20,5 +20,6 @@ public class CandidateResponse {
     private String nationality;
     private String gender;
     private LocalDate dateOfBirth;
+    private Boolean isActive;
 }
 

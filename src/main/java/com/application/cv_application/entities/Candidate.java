@@ -29,6 +29,7 @@ public class Candidate {
     @Column(unique = true)
     private String email;
     private String password;
+    private boolean isActive = true;
 
     @OneToMany(mappedBy = "candidate")
     private List<Application> applications;

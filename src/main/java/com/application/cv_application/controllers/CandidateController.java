@@ -44,6 +44,15 @@ public class CandidateController {
         return service.updateCandidate(id, request);
     }
 
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<CandidateResponse> updateCandidateStatus(
+            @PathVariable Integer id,
+            @RequestParam boolean isActive
+    ) {
+        return ResponseEntity.ok(service.updateCandidateStatus(id, isActive));
+    }
+
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Integer id) {
         service.deleteCandidate(id);

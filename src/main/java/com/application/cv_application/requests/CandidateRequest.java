@@ -10,6 +10,7 @@ public record CandidateRequest(
         String nationality,
         String gender,
         LocalDate dateOfBirth,
-        String cvPath
+        String cvPath,
+        Boolean isActive
 ) {}
 
