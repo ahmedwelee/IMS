@@ -30,12 +30,14 @@ public class UserController {
         }
 
         String email = jwt.getClaimAsString("email");
-        String username = jwt.getClaimAsString("preferred_username");
+        String firstName = jwt.getClaimAsString("given_name");
+        String lastName = jwt.getClaimAsString("family_name");
+
 
         List<String> roles = ((Map<String, List<String>>) jwt.getClaim("realm_access"))
                 .getOrDefault("roles", List.of());
 
-        userService.checkUser(email, username, roles);
+        userService.checkUser(email, firstName,lastName, roles);
         return ResponseEntity.ok().build();
     }
 }

@@ -21,12 +21,14 @@ public class UserService {
     private final EmployeeRepository employeeRepository;
     private final CandidateRepository candidateRepository;
 
-    public void checkUser(String email, String username, Collection<String> roles) {
+    public void checkUser(String email, String firstName,String lastName, Collection<String> roles) {
         if (roles.contains("Director") || roles.contains("Manager")) {
             employeeRepository.findByEmail(email)
                     .orElseGet(() -> {
                         Employee emp = new Employee();
                         emp.setEmail(email);
+                        emp.setFirstName(firstName);
+                        emp.setLastName(lastName);
                         emp.setPosition(roles.contains("Director") ? Position.DIRECTOR : Position.MANAGER);
                         return employeeRepository.save(emp);
                     });
@@ -35,6 +37,8 @@ public class UserService {
                     .orElseGet(() -> {
                         Candidate cand = new Candidate();
                         cand.setEmail(email);
+                        cand.setFirstName(firstName);
+                        cand.setLastName(lastName);
                         return candidateRepository.save(cand);
                     });
         }

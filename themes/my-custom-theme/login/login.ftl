@@ -46,6 +46,10 @@
 
             <div class="social-login">
                 <button type="button" class="social-btn" onclick="location.href='${url.loginAction}?provider=google'">
+                    <svg viewBox="0 0 24 24" fill="#4285F4">
+                        <path d="M21.35 11.1h-9.3v2.7h5.4c-.23 1.27-1.43 3.72-5.4 3.72-3.25 0-5.9-2.68-5.9-5.98s2.65-5.98 5.9-5.98c1.86 0 3.11.79 3.82 1.47l2.6-2.5C18.47 1.9 16.05.65 12.05.65 5.78.65.7 5.73.7 12s5.08 11.35 11.35 11.35c6.55 0 10.83-4.6 10.83-11.12 0-.74-.08-1.31-.53-1.43z"/>
+                    </svg>
+
                     Google
                 </button>
 
