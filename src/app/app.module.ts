@@ -34,6 +34,7 @@ import { HeaderComponent } from './pages/header/header.component';
 import {CandidateService} from "./service/candidate.service";
 import {LoadingInterceptor} from "./service/loading-interceptor.service";
 import {LoadingService} from "./service/loading.service";
+import { NewPageComponent } from './app/component/new-page/new-page.component';
 
 
 export function kcFactory(kcService: KeycloakService) {
@@ -47,6 +48,7 @@ export function kcFactory(kcService: KeycloakService) {
     SpinnerComponent,
     PublicComponent,
     HeaderComponent,
+    NewPageComponent,
   ],
   imports: [
     CommonModule,
